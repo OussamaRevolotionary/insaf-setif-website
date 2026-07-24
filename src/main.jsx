@@ -23,6 +23,24 @@ const N8N_BASE = 'https://oussama19.app.n8n.cloud/webhook';
 const CHAT_WEBHOOK = `${N8N_BASE}/insaf-chat`;
 const CONTACT_WEBHOOK = `${N8N_BASE}/insaf-contact`;
 
+// GitHub Pages serves the built site under /insaf-setif-website/ rather than the
+// domain root. Vite exposes the configured base as BASE_URL; local `/public` assets
+// referenced by a literal leading slash need this prefix, remote URLs must not.
+const BASE_URL = import.meta.env.BASE_URL;
+function withBase(path) {
+  if (!path) return path;
+  if (/^https?:\/\//.test(path)) return path;
+  return BASE_URL + path.replace(/^\//, '');
+}
+
+// Resolve local `/photos/...` paths once against BASE_URL; remote Facebook CDN URLs pass through unchanged.
+const resolvedNewsPosts = newsPosts.map(p => ({
+  ...p,
+  image: withBase(p.image),
+  images: p.images ? p.images.map(withBase) : p.images,
+}));
+const resolvedAchievementPosts = achievementPosts.map(p => ({ ...p, image: withBase(p.image) }));
+
 /* Stable per-browser id so the chatbot's memory keeps each visitor's thread separate */
 function getChatSessionId() {
   try {
@@ -324,12 +342,12 @@ function dateFmt(d, locale = 'ar-DZ') {
   catch { return d?.slice(0, 10) || ''; }
 }
 
-function categories() { return ['All', ...Array.from(new Set(newsPosts.map(p => p.category)))]; }
+function categories() { return ['All', ...Array.from(new Set(resolvedNewsPosts.map(p => p.category)))]; }
 
-const photoCatalog = newsPosts.flatMap(p => p.images?.filter(Boolean).map(img => ({ img, cat: p.category, title: p.title })) || []);
-const aboutImage = photoCatalog.find(p => p.img)?.img || '/LOGO.jpg';
+const photoCatalog = resolvedNewsPosts.flatMap(p => p.images?.filter(Boolean).map(img => ({ img, cat: p.category, title: p.title })) || []);
+const aboutImage = photoCatalog.find(p => p.img)?.img || withBase('/LOGO.jpg');
 const galleryImages = photoCatalog.slice(0, 24);
-const featured = newsPosts.filter(p => p.image).slice(0, 6);
+const featured = resolvedNewsPosts.filter(p => p.image).slice(0, 6);
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -344,7 +362,7 @@ function Ecosystem3DSection() {
   return (
     <div className="full-bleed-3d" style={{ height: '100vh', minHeight: '650px', background: '#0f172a' }}>
       <iframe
-        src="/ecosystem_of_empowerment.html"
+        src={withBase('/ecosystem_of_empowerment.html')}
         title="3D Ecosystem of Empowerment"
         style={{ display: 'block', width: '100%', height: '100%', border: 'none' }}
         allowFullScreen
@@ -357,7 +375,7 @@ function Timeline3DSection() {
   return (
     <div className="full-bleed-3d" style={{ height: '100vh', minHeight: '650px', background: '#020617' }}>
       <iframe
-        src="/timeline_of_progress.html"
+        src={withBase('/timeline_of_progress.html')}
         title="3D Timeline of Progress"
         style={{ display: 'block', width: '100%', height: '100%', border: 'none' }}
         allowFullScreen
@@ -389,7 +407,7 @@ function SiteShell({ children }) {
 
       <header className={`siteHeader${scrolled ? ' scrolled' : ''}`}>
         <Link to="/" className="brand" onClick={() => setMobileOpen(false)}>
-          <img src="/LOGO.jpg" alt="Insaf Sétif" />
+          <img src={withBase('/LOGO.jpg')} alt="Insaf Sétif" />
           <div className="brand-text">
             <b>{t.brand}</b>
             <small>{t.strap}</small>
@@ -481,7 +499,7 @@ function Footer() {
       <div className="footerMain">
         <div>
           <div className="footerBrand">
-            <img src="/LOGO.jpg" alt="Insaf Sétif" />
+            <img src={withBase('/LOGO.jpg')} alt="Insaf Sétif" />
             <div>
               <b>{t.footerBrand}</b>
               <span>{t.footerTag}</span>
@@ -823,7 +841,7 @@ function HomePage() {
   return (
     <main>
       <section className="megaHero">
-        <video className="heroVideo" src="/Looping_Video.mp4" autoPlay loop muted playsInline preload="metadata" aria-hidden="true" />
+        <video className="heroVideo" src={withBase('/Looping_Video.mp4')} autoPlay loop muted playsInline preload="metadata" aria-hidden="true" />
         <div className="videoVeil" />
 
         <div className="megaContent">
@@ -864,7 +882,7 @@ function HomePage() {
               ))}
             </div>
           </div>
-          <img className="logoPlate" src="/LOGO.jpg" alt="Insaf Sétif" />
+          <img className="logoPlate" src={withBase('/LOGO.jpg')} alt="Insaf Sétif" />
         </div>
       </section>
 
@@ -1086,7 +1104,7 @@ function AchievementsPage() {
   return (
     <Page titleKey="navAchievements" labelKey="labelAchievements" leadKey="leadAchievements">
       <div className="achievementGrid">
-        {achievementPosts.map((p, i) => (
+        {resolvedAchievementPosts.map((p, i) => (
           <article key={p.id} className={`achievementCard card-hover-zoom reveal stagger-${(i % 3) + 1}`}>
             <div className="media">
               {p.image && <img src={p.image} alt="" loading="lazy" decoding="async" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} />}
@@ -1114,7 +1132,7 @@ function NewsPage() {
   useScrollReveal();
 
   const filtered = React.useMemo(() =>
-    newsPosts.filter(p =>
+    resolvedNewsPosts.filter(p =>
       (cat === 'All' || p.category === cat) &&
       (!q.trim() || clean(`${p.title || ''} ${p.text || ''}`).toLowerCase().includes(q.toLowerCase()))
     ), [q, cat]);
