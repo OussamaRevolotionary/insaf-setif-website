@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inssaf Setif - Timeline</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-blue: #1F9BB4;
+            --brand-navy: #2F3E9E;
+            --brand-green: #20A66A;
+            --brand-yellow: #F2C900;
+            --brand-orange: #F39A22;
+            --brand-red: #E63F4D;
+            --panel: rgba(6, 12, 26, 0.74);
+            --line: rgba(255, 255, 255, 0.12);
+            --muted: #9fb3c8;
+            --muted-2: #7c8ba1;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Inter', 'Cairo', system-ui, sans-serif;
+            /* Brand-tinted dark background matching the site's 3D sections */
+            background:
+                radial-gradient(1100px 700px at 82% 20%, rgba(31,155,180,0.16), transparent 60%),
+                radial-gradient(900px 600px at 10% 88%, rgba(47,62,158,0.22), transparent 60%),
+                linear-gradient(160deg, #091428 0%, #060d1c 55%, #040a14 100%);
+            touch-action: none;
+            color: #fff;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+        }
+        .glass-panel {
+            background: var(--panel);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border: 1px solid var(--line);
+            color: #fff;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        .brand-chip {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 5px 12px; border-radius: 999px;
+            background: linear-gradient(135deg, var(--brand-blue), var(--brand-navy));
+            font-weight: 800; font-size: 11px; letter-spacing: .03em; color: #eafaff;
+            box-shadow: 0 8px 20px rgba(31,155,180,0.35);
+        }
+        .fade-enter {
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fade-enter-active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        /* Custom UI list styling */
+        .timeline-step {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            opacity: 0.55;
+        }
+        .timeline-step.active {
+            opacity: 1;
+            transform: scale(1.05) translateX(-10px);
+        }
+        .tl-dot {
+            width: 12px; height: 12px; border-radius: 999px;
+            background: #64748b; z-index: 10; flex-shrink: 0;
+            transition: background .3s ease, box-shadow .3s ease;
+        }
+        .spinner {
+            width: 42px; height: 42px; border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.15);
+            border-top-color: var(--brand-blue);
+            animation: spin 0.9s linear infinite; margin-bottom: 14px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center transition-opacity duration-1000" style="background: rgba(4,10,20,0.92); backdrop-filter: blur(8px);">
+        <div class="spinner"></div>
+        <p class="text-sm font-['Cairo']" style="color: var(--muted);" dir="rtl">جارٍ بناء المسار…</p>
+    </div>
+
+    <!-- UI Overlay (Header) -->
+    <div class="absolute top-0 right-0 w-full p-6 z-10 pointer-events-none flex justify-end items-start">
+        <div class="glass-panel px-6 py-4 rounded-3xl pointer-events-auto text-right">
+            <span class="brand-chip">جمعية إنصاف سطيف</span>
+            <h1 class="text-2xl font-extrabold mt-3 font-['Cairo']" dir="rtl" style="color:#fff; letter-spacing:-0.01em;">مسيرة جمعية إنصاف</h1>
+            <h2 class="text-sm font-semibold" dir="ltr" style="color: var(--muted);">Timeline of Progress</h2>
+        </div>
+    </div>
+
+    <!-- Info Panel (Interactive side menu) -->
+    <div class="absolute top-1/2 left-8 -translate-y-1/2 w-80 z-10 pointer-events-auto">
+
+        <!-- Active Details Box -->
+        <div id="info-panel" class="glass-panel rounded-3xl p-6 mb-6 fade-enter" style="display: none;">
+            <div class="mt-1 text-right" dir="rtl">
+                <span id="active-year" class="text-xs font-black tracking-widest uppercase" style="color: var(--brand-orange);">2014</span>
+                <h3 id="active-title" class="text-xl font-bold text-white font-['Cairo'] mt-2">تأسيس الجمعية</h3>
+                <div id="active-divider" style="width:44px; height:4px; border-radius:999px; margin:12px 0 16px auto; background: var(--brand-green);"></div>
+                <p id="active-desc" class="text-sm leading-relaxed font-['Cairo'] font-semibold" style="color:#c7d3e0;">تأسيس جمعية إنصاف سطيف في جوان 2014 للدفاع عن حقوق الطفل والشباب.</p>
+            </div>
+            <!-- Progress Bar -->
+            <div style="width:100%; height:4px; background:rgba(255,255,255,0.12); margin-top:24px; border-radius:999px; overflow:hidden;" dir="ltr">
+                <div id="progress-bar" style="height:100%; width:0; background: var(--brand-blue);"></div>
+            </div>
+        </div>
+
+        <!-- Vertical Timeline Navigation -->
+        <div class="glass-panel rounded-3xl p-4 pr-6 flex flex-col gap-4 text-right relative" dir="rtl">
+            <div class="absolute right-4 top-6 bottom-6 w-0.5 rounded-full" style="background: rgba(255,255,255,0.14);"></div>
+
+            <div class="timeline-step active flex items-center gap-4 relative" data-index="0">
+                <div class="tl-dot"></div>
+                <span class="text-lg font-bold" style="color:#e2e8f0;">2014</span>
+            </div>
+            <div class="timeline-step flex items-center gap-4 relative" data-index="1">
+                <div class="tl-dot"></div>
+                <span class="text-lg font-bold" style="color:#e2e8f0;">2015</span>
+            </div>
+            <div class="timeline-step flex items-center gap-4 relative" data-index="2">
+                <div class="tl-dot"></div>
+                <span class="text-lg font-bold" style="color:#e2e8f0;">2017</span>
+            </div>
+            <div class="timeline-step flex items-center gap-4 relative" data-index="3">
+                <div class="tl-dot"></div>
+                <span class="text-lg font-bold" style="color:#e2e8f0;">2020</span>
+            </div>
+            <div class="timeline-step flex items-center gap-4 relative" data-index="4">
+                <div class="tl-dot"></div>
+                <span class="text-lg font-bold" style="color:#e2e8f0;">2024</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <script>
+        const container = document.getElementById('canvas-container');
+        
+        // Scene setup
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x020617, 0.015);
+
+        // Cinematic Camera setup
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 0);
+
+        // Premium Renderer
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.15;
+        container.appendChild(renderer.domElement);
+
+        // Advanced Lighting Setup
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x94a3b8, 0.8);
+        hemiLight.position.set(0, 50, 0);
+        scene.add(hemiLight);
+
+        const dirLight = new THREE.DirectionalLight(0xfffaed, 1.5);
+        dirLight.position.set(20, 40, 20);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        dirLight.shadow.bias = -0.0005;
+        scene.add(dirLight);
+
+        const backLight = new THREE.DirectionalLight(0x60a5fa, 1.2); // Cool blue backlight for contrast
+        backLight.position.set(-20, 20, -20);
+        scene.add(backLight);
+
+        // Tracking Spotlight for the active milestone
+        const spotLight = new THREE.SpotLight(0xffffff, 2);
+        spotLight.position.set(0, 20, 0);
+        spotLight.angle = Math.PI / 6;
+        spotLight.penumbra = 0.5;
+        spotLight.castShadow = true;
+        scene.add(spotLight);
+        
+        const spotTarget = new THREE.Object3D();
+        scene.add(spotTarget);
+        spotLight.target = spotTarget;
+
+        // Brand palette (matches the Insaf website design tokens)
+        const palette = {
+            blue: 0x1F9BB4,    // 2014 — Trust Blue
+            teal: 0x2F3E9E,    // 2015 — Institutional Blue
+            green: 0x20A66A,   // 2017 — Growth Green
+            orange: 0xF39A22,  // 2020 — Solidarity Orange
+            gold: 0xF2C900,    // 2024 — Hope Yellow
+            base: 0xFFFFFF,
+            glow: 0x7FD3E6
+        };
+
+        // Premium Ceramic Material
+        function createCeramic(hexColor) {
+            return new THREE.MeshPhysicalMaterial({
+                color: hexColor,
+                roughness: 0.15,
+                metalness: 0.1,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.1
+            });
+        }
+
+        const timelineData = [
+            { year: "2014", title: "تأسيس الجمعية", desc: "تأسيس جمعية إنصاف سطيف في جوان 2014 للدفاع عن حقوق الطفل والشباب.", color: palette.blue, accent: '#1F9BB4', pos: new THREE.Vector3(-15, -6, 12) },
+            { year: "2015", title: "أولى الشراكات", desc: "إبرام أولى الاتفاقيات مع مديرية الشباب والرياضة والمؤسسات التعليمية.", color: palette.teal, accent: '#2F3E9E', pos: new THREE.Vector3(-7, -2, 4) },
+            { year: "2017", title: "توسيع البرامج", desc: "توسيع نطاق البرامج لتشمل الفئات الهشة ومرافقة الشباب نحو الإدماج المهني.", color: palette.green, accent: '#20A66A', pos: new THREE.Vector3(2, 2, -4) },
+            { year: "2020", title: "الاستجابة لكوفيد", desc: "تنظيم حملات تضامنية وتوزيع مساعدات للأسر المتضررة خلال جائحة كوفيد.", color: palette.orange, accent: '#F39A22', pos: new THREE.Vector3(12, 6, -10) },
+            { year: "2024", title: "عشر سنوات من العطاء", desc: "الاحتفال بالذكرى العاشرة وإطلاق منصة رقمية لتوثيق الإنجازات.", color: palette.gold, accent: '#F2C900', pos: new THREE.Vector3(22, 12, -18) }
+        ];
+
+        const timelineGroup = new THREE.Group();
+        scene.add(timelineGroup);
+
+        const milestoneObjects = [];
+        const interactivePlataforms = [];
+
+        // Build the glowing river of time (Path)
+        const curvePoints = timelineData.map(d => d.pos);
+        const curve = new THREE.CatmullRomCurve3(curvePoints);
+        const tubeGeo = new THREE.TubeGeometry(curve, 100, 0.4, 16, false);
+        const tubeMat = new THREE.MeshPhysicalMaterial({
+            color: palette.glow, transmission: 0.8, opacity: 1, transparent: true, roughness: 0.1, emissive: palette.glow, emissiveIntensity: 0.4
+        });
+        const tubeMesh = new THREE.Mesh(tubeGeo, tubeMat);
+        timelineGroup.add(tubeMesh);
+
+        function createMilestone(data, index) {
+            const group = new THREE.Group();
+            group.position.copy(data.pos);
+            
+            // Base Platform
+            const platGeo = new THREE.CylinderGeometry(2.5, 2.2, 0.4, 32);
+            const platMat = createCeramic(palette.base);
+            const platform = new THREE.Mesh(platGeo, platMat);
+            platform.receiveShadow = true;
+            platform.castShadow = true;
+            platform.userData = { index: index };
+            interactivePlataforms.push(platform);
+            group.add(platform);
+
+            // Glowing ring under platform
+            const ringGeo = new THREE.TorusGeometry(2.8, 0.05, 16, 64);
+            const ringMat = new THREE.MeshBasicMaterial({ color: data.color, transparent: true, opacity: 0.5 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2;
+            group.add(ring);
+
+            // Unique Object per year
+            const objGroup = new THREE.Group();
+            objGroup.position.y = 1.5;
+            const mat = createCeramic(data.color);
+
+            if(index === 0) {
+                // 2014: Foundation (Sprout/Seed)
+                const baseGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+                const baseMesh = new THREE.Mesh(baseGeo, mat);
+                baseMesh.castShadow = true;
+                
+                const orbGeo = new THREE.SphereGeometry(0.6, 32, 32);
+                const orbMat = new THREE.MeshStandardMaterial({color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.5});
+                const orbMesh = new THREE.Mesh(orbGeo, orbMat);
+                orbMesh.position.y = 1;
+                
+                objGroup.add(baseMesh, orbMesh);
+            } 
+            else if (index === 1) {
+                // 2015: Partnerships (Interlocking Rings)
+                const tGeo = new THREE.TorusGeometry(0.8, 0.25, 16, 32);
+                const r1 = new THREE.Mesh(tGeo, mat);
+                r1.position.set(-0.5, 0, 0);
+                r1.castShadow = true;
+                const r2 = new THREE.Mesh(tGeo, createCeramic(palette.base));
+                r2.position.set(0.5, 0, 0);
+                r2.castShadow = true;
+                objGroup.add(r1, r2);
+            }
+            else if (index === 2) {
+                // 2017: Expansion (Ascending Pillars)
+                for(let i=0; i<3; i++) {
+                    const pGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.8 + (i*0.6), 16);
+                    const pMesh = new THREE.Mesh(pGeo, i===2 ? mat : createCeramic(palette.base));
+                    pMesh.position.set(-0.8 + (i*0.8), (0.8 + (i*0.6))/2 - 0.5, 0);
+                    pMesh.castShadow = true;
+                    objGroup.add(pMesh);
+                }
+            }
+            else if (index === 3) {
+                // 2020: Covid Solidarity (Heart/Shield - Abstracted as sphere protected by curves)
+                const centerGeo = new THREE.SphereGeometry(0.8, 32, 32);
+                const centerMesh = new THREE.Mesh(centerGeo, mat);
+                
+                const shieldGeo = new THREE.TorusGeometry(1.2, 0.15, 16, 32, Math.PI);
+                const s1 = new THREE.Mesh(shieldGeo, createCeramic(palette.base));
+                s1.rotation.set(0, Math.PI/4, Math.PI/4);
+                const s2 = new THREE.Mesh(shieldGeo, createCeramic(palette.base));
+                s2.rotation.set(0, -Math.PI/4, -Math.PI/4);
+                
+                objGroup.add(centerMesh, s1, s2);
+            }
+            else if (index === 4) {
+                // 2024: 10 Years (Floating Crystal/Star)
+                const starGeo = new THREE.OctahedronGeometry(1.2, 0);
+                const starMesh = new THREE.Mesh(starGeo, mat);
+                starMesh.castShadow = true;
+                
+                const orbitGeo = new THREE.TorusGeometry(1.8, 0.05, 16, 64);
+                const oMesh = new THREE.Mesh(orbitGeo, new THREE.MeshBasicMaterial({color: data.color}));
+                oMesh.rotation.x = Math.PI / 3;
+                
+                objGroup.add(starMesh, oMesh);
+            }
+
+            group.add(objGroup);
+            timelineGroup.add(group);
+            milestoneObjects.push({ group: group, object: objGroup, baseY: 1.5, index: index });
+        }
+
+        timelineData.forEach((data, index) => createMilestone(data, index));
+
+        let currentIndex = 0;
+        let targetCameraPos = new THREE.Vector3();
+        let targetLookAt = new THREE.Vector3();
+        let currentLookAt = new THREE.Vector3();
+        let isAnimating = false;
+        
+        const switchInterval = 7000;
+        let lastSwitchTime = Date.now();
+        let userInteracting = false;
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2(999, 999);
+
+        function updateUI(index) {
+            const data = timelineData[index];
+            const panel = document.getElementById('info-panel');
+            const hex = data.accent;
+
+            document.getElementById('active-year').textContent = data.year;
+            document.getElementById('active-title').textContent = data.title;
+            document.getElementById('active-desc').textContent = data.desc;
+
+            // Apply the milestone's brand accent via inline styles (robust — no runtime Tailwind classes)
+            document.getElementById('active-year').style.color = hex;
+            const divider = document.getElementById('active-divider');
+            if (divider) divider.style.background = hex;
+            const pb = document.getElementById('progress-bar');
+            if (pb) pb.style.background = hex;
+
+            // Trigger animation
+            panel.style.display = 'block';
+            panel.classList.remove('fade-enter-active');
+            void panel.offsetWidth;
+            panel.classList.add('fade-enter-active');
+
+            // Update Vertical Menu
+            document.querySelectorAll('.timeline-step').forEach((el, i) => {
+                const dot = el.querySelector('.tl-dot');
+                if (i === index) {
+                    el.classList.add('active');
+                    if (dot) { dot.style.background = hex; dot.style.boxShadow = `0 0 12px ${hex}80`; }
+                } else {
+                    el.classList.remove('active');
+                    if (dot) { dot.style.background = '#64748b'; dot.style.boxShadow = 'none'; }
+                }
+            });
+        }
+
+        function setActiveMilestone(index) {
+            if(index === currentIndex && isAnimating) return;
+            currentIndex = index;
+            isAnimating = true;
+            
+            const data = timelineData[index];
+            
+            // Camera Positioning (Cinematic angle relative to the milestone)
+            // Staggering the camera slightly to the side and up
+            targetCameraPos.set(data.pos.x - 8, data.pos.y + 8, data.pos.z + 12);
+            targetLookAt.copy(data.pos);
+            targetLookAt.y += 1; // Look slightly above the platform
+
+            // Move spotlight
+            spotLight.position.set(data.pos.x, data.pos.y + 15, data.pos.z + 5);
+            spotTarget.position.copy(data.pos);
+
+            updateUI(index);
+            lastSwitchTime = Date.now();
+        }
+
+        // Initialize first view
+        setActiveMilestone(0);
+        camera.position.copy(targetCameraPos);
+        currentLookAt.copy(targetLookAt);
+        camera.lookAt(currentLookAt);
+
+        // Hide loader
+        setTimeout(() => {
+            const loader = document.getElementById('loading-screen');
+            loader.style.opacity = '0';
+            setTimeout(() => loader.style.display = 'none', 1000);
+        }, 1500);
+
+        // Interactions
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            userInteracting = true;
+        });
+        window.addEventListener('mouseout', () => userInteracting = false);
+
+        document.querySelectorAll('.timeline-step').forEach(el => {
+            el.addEventListener('click', () => {
+                setActiveMilestone(parseInt(el.getAttribute('data-index')));
+                userInteracting = true; // Pause auto-scroll
+            });
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsed = Date.now();
+
+            // Smooth Camera Movement
+            camera.position.lerp(targetCameraPos, 0.03);
+            currentLookAt.lerp(targetLookAt, 0.03);
+            camera.lookAt(currentLookAt);
+
+            // Animate Objects
+            milestoneObjects.forEach((m) => {
+                m.object.rotation.y += 0.005;
+                m.object.position.y = m.baseY + Math.sin(elapsed * 0.002 + m.index) * 0.15; // Hover
+                
+                // Scale up active object
+                const targetScale = (m.index === currentIndex) ? 1.4 : 1.0;
+                m.object.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.08);
+            });
+
+            // Specific internal animations
+            const activeObj = milestoneObjects[currentIndex].object;
+            if (currentIndex === 1) {
+                // Interlocking rings
+                activeObj.children[0].rotation.x += 0.01;
+                activeObj.children[1].rotation.z += 0.01;
+            } else if (currentIndex === 4) {
+                // 2024 Orbit
+                activeObj.children[1].rotation.z -= 0.02;
+            }
+
+            // Raycasting for 3D clicks
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(interactivePlataforms);
+            if (intersects.length > 0) {
+                document.body.style.cursor = 'pointer';
+                const hoveredIndex = intersects[0].object.userData.index;
+                if (hoveredIndex !== currentIndex) {
+                    setActiveMilestone(hoveredIndex);
+                }
+            } else {
+                document.body.style.cursor = 'default';
+            }
+
+            // Auto-cycle logic
+            const progressBar = document.getElementById('progress-bar');
+            if (!userInteracting) {
+                const timeSinceLastSwitch = elapsed - lastSwitchTime;
+                if(progressBar) {
+                    const percent = Math.min((timeSinceLastSwitch / switchInterval) * 100, 100);
+                    progressBar.style.width = `${percent}%`;
+                }
+                if (timeSinceLastSwitch > switchInterval) {
+                    setActiveMilestone((currentIndex + 1) % timelineData.length);
+                }
+            } else {
+                if(progressBar) progressBar.style.width = '0%';
+                lastSwitchTime = elapsed;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
