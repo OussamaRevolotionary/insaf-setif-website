@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecosystem of Empowerment - 3D Canvas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-blue: #1F9BB4;
+            --brand-navy: #2F3E9E;
+            --brand-green: #20A66A;
+            --brand-yellow: #F2C900;
+            --brand-orange: #F39A22;
+            --brand-red: #E63F4D;
+            --panel: rgba(9, 17, 33, 0.72);
+            --line: rgba(255, 255, 255, 0.12);
+            --muted: #9fb3c8;
+            --muted-2: #7c8ba1;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Inter', 'Cairo', system-ui, sans-serif;
+            /* Brand-tinted dark background so the scene reads as part of the site */
+            background:
+                radial-gradient(1200px 700px at 78% 16%, rgba(31,155,180,0.18), transparent 60%),
+                radial-gradient(900px 600px at 14% 92%, rgba(47,62,158,0.22), transparent 60%),
+                linear-gradient(160deg, #0a1730 0%, #070f1f 55%, #050b16 100%);
+            touch-action: none;
+            color: #fff;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+        }
+        /* Site-matched glass UI */
+        .glass-panel {
+            background: var(--panel);
+            backdrop-filter: blur(18px) saturate(160%);
+            -webkit-backdrop-filter: blur(18px) saturate(160%);
+            border: 1px solid var(--line);
+            color: #fff;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        .brand-chip {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 5px 12px; border-radius: 999px;
+            background: linear-gradient(135deg, var(--brand-blue), var(--brand-navy));
+            font-weight: 800; font-size: 11px; letter-spacing: .03em; color: #eafaff;
+            box-shadow: 0 8px 20px rgba(31,155,180,0.35);
+        }
+        .fade-enter {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fade-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #loading-screen { transition: opacity 1s ease-in-out; }
+        .spinner {
+            width: 42px; height: 42px; border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.15);
+            border-top-color: var(--brand-blue);
+            animation: spin 0.9s linear infinite; margin-bottom: 14px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center" style="background: rgba(5,11,22,0.92); backdrop-filter: blur(8px);">
+        <div class="spinner"></div>
+        <p class="text-sm font-['Cairo']" style="color: var(--muted);" dir="rtl">جارٍ بناء بيئة التمكين…</p>
+    </div>
+
+    <!-- UI Overlay (Header) -->
+    <div class="absolute top-0 left-0 w-full p-6 z-10 pointer-events-none flex justify-between items-start">
+        <div class="glass-panel p-5 rounded-3xl pointer-events-auto" style="max-width: 340px;">
+            <span class="brand-chip">جمعية إنصاف سطيف</span>
+            <h1 class="text-2xl font-extrabold mt-3 font-['Cairo'] text-right" dir="rtl" style="color:#fff; letter-spacing:-0.01em;">بيئة التمكين</h1>
+            <h2 class="text-sm font-semibold" style="color: var(--muted);">The Ecosystem of Empowerment</h2>
+            <p class="text-xs mt-2 font-['Cairo']" dir="rtl" style="color: var(--muted-2);">مرّر فوق المناطق للتفاعل • انقر للتفاصيل</p>
+        </div>
+    </div>
+
+    <!-- Info Panel (Hidden by default) -->
+    <div id="info-panel" class="absolute bottom-8 right-8 w-80 glass-panel rounded-3xl p-6 z-10 pointer-events-auto fade-enter" style="display: none;">
+        <div class="mt-1 text-right" dir="rtl">
+            <span id="zone-number" class="text-xs font-extrabold tracking-widest" style="color: var(--brand-orange);">01</span>
+            <h3 id="zone-title-ar" class="text-xl font-bold text-white font-['Cairo'] mt-1">الدفاع عن حقوق الطفل</h3>
+            <h4 id="zone-title-en" class="text-sm font-semibold mb-3" dir="ltr" style="color: var(--muted);">Defend Children's Rights</h4>
+            <div id="zone-divider" style="width:48px; height:4px; border-radius:999px; margin:0 0 12px auto; background: var(--brand-green);"></div>
+            <p id="zone-desc" class="text-sm leading-relaxed font-['Cairo']" style="color:#c7d3e0;">Promote children's rights through awareness, advocacy and civic mobilization.</p>
+        </div>
+        <div style="width:100%; height:4px; background:rgba(255,255,255,0.12); margin-top:20px; border-radius:999px; overflow:hidden;">
+            <div id="progress-bar" style="height:100%; width:0; background: var(--brand-blue);"></div>
+        </div>
+    </div>
+
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <script>
+        const container = document.getElementById('canvas-container');
+        
+        // Scene setup
+        const scene = new THREE.Scene();
+        scene.background = null; // Let the CSS gradient shine through
+        scene.fog = new THREE.FogExp2(0x0f172a, 0.012); // Deep slate fog matching the background
+
+        // Camera setup (Isometric feel using Orthographic or distant Perspective)
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(30, 35, 30);
+        camera.lookAt(0, 0, 0);
+
+        // Renderer setup (Enhanced for better shadows and physical materials)
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.1; // Slightly brighter exposure
+        container.appendChild(renderer.domElement);
+
+        // Ambient Light for soft overall illumination
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+
+        // Hemisphere Light for sky/ground color bounce - warmer sky, cooler ground
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x818cf8, 0.8);
+        hemiLight.position.set(0, 20, 0);
+        scene.add(hemiLight);
+
+        // Directional Light for strong shadows and warm highlights
+        const dirLight = new THREE.DirectionalLight(0xfffaed, 1.5); // Warmer, brighter sunlight
+        dirLight.position.set(20, 40, 20);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        dirLight.shadow.camera.near = 0.5;
+        dirLight.shadow.camera.far = 100;
+        dirLight.shadow.camera.left = -25;
+        dirLight.shadow.camera.right = 25;
+        dirLight.shadow.camera.top = 25;
+        dirLight.shadow.camera.bottom = -25;
+        dirLight.shadow.bias = -0.0005;
+        dirLight.shadow.radius = 4; // Softer shadow edges
+        scene.add(dirLight);
+
+        // Backlight for premium rim lighting and deep color contrast
+        const backLight = new THREE.DirectionalLight(0x818cf8, 1.0);
+        backLight.position.set(-20, 20, -20);
+        scene.add(backLight);
+
+        // Brand palette (matches the Insaf website design tokens)
+        const palette = {
+            blue: 0x1F9BB4,    // Trust Blue (primary)
+            navy: 0x2F3E9E,    // Institutional Blue
+            green: 0x20A66A,   // Growth Green
+            orange: 0xF39A22,  // Solidarity Orange
+            yellow: 0xF2C900,  // Hope Yellow
+            base: 0xFFFFFF,    // Pure white bases
+            darkBase: 0x94A3B8,
+            white: 0xFFFFFF,
+            glow: 0x1F9BB4     // Brand-blue glow
+        };
+
+        // Upgrade to highly polished "Designer Toy / Ceramic" aesthetic
+        function createClayMaterial(colorHex, isTransparent = false, opacity = 1) {
+            return new THREE.MeshPhysicalMaterial({
+                color: colorHex,
+                roughness: 0.2,       // Smoother, highly polished
+                metalness: 0.1,       // Slight metallic edge
+                clearcoat: 1.0,       // Maximum clearcoat for premium glass/ceramic reflections
+                clearcoatRoughness: 0.1,
+                transparent: isTransparent,
+                opacity: opacity,
+                flatShading: false
+            });
+        }
+
+        function createMesh(geometry, material, castShadow = true) {
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.castShadow = castShadow;
+            mesh.receiveShadow = true;
+            return mesh;
+        }
+
+        // Content Data
+        const zoneData = {
+            zone1: { num: "01", titleAr: "الدفاع عن حقوق الطفل", titleEn: "Defend Children's Rights", desc: "Promote children's rights through awareness, advocacy and civic mobilization.", accent: '#F2C900' },
+            zone2: { num: "02", titleAr: "مرافقة الشباب", titleEn: "Accompany Youth", desc: "Support young people and vulnerable groups with orientation and pathways to real inclusion.", accent: '#20A66A' },
+            zone3: { num: "03", titleAr: "تعزيز الإدماج الاجتماعي", titleEn: "Promote Social Inclusion", desc: "Contribute to initiatives that connect civil society, institutions and economic actors.", accent: '#1F9BB4' },
+            zone4: { num: "04", titleAr: "ترسيخ التضامن", titleEn: "Consolidate Solidarity", desc: "Turn equity into practical solidarity through action, crisis response and social support.", accent: '#F39A22' },
+            zone5: { num: "05", titleAr: "بناء الشراكات", titleEn: "Build Partnerships", desc: "Work with ONPPE, DJS, universities, wilaya authorities and civic partners.", accent: '#2F3E9E' }
+        };
+
+        const islandGroup = new THREE.Group();
+        scene.add(islandGroup);
+        const buildUpSequence = [];
+        const interactiveElements = [];
+        const zoneGroups = {}; 
+
+        let currentLookAt = new THREE.Vector3(0, 0, 0);
+        let targetLookAt = new THREE.Vector3(0, 0, 0);
+        let targetCameraPos = new THREE.Vector3(30, 35, 30);
+        let targetIslandRotation = 0;
+
+        const focusLight = new THREE.SpotLight(0xfff5e6, 0); // Warmer, more cinematic spotlight
+        focusLight.position.set(0, 30, 20);
+        focusLight.angle = Math.PI / 5;
+        focusLight.penumbra = 0.6; // Sharper inner cone for dramatic effect
+        focusLight.castShadow = true;
+        scene.add(focusLight);
+        
+        const focusTarget = new THREE.Object3D();
+        scene.add(focusTarget);
+        focusLight.target = focusTarget;
+
+        let hoveredZone = null;
+        const animatedObjects = {
+            knowledgeBook: null,
+            floatingLetters: [],
+            youthArch: null,
+            inclusionRings: [],
+            lotusPetals: [],
+            orb: null,
+            drone: null,
+            obeliskRings: [],
+            dataLines: []
+        };
+
+        function buildBaseIsland() {
+            const baseGroup = new THREE.Group();
+            
+            // Sleek tiered foundation
+            const baseGeo = new THREE.CylinderGeometry(15, 13, 2, 64);
+            const baseMat = createClayMaterial(palette.base);
+            const baseMesh = createMesh(baseGeo, baseMat);
+            baseMesh.position.y = -1;
+            baseGroup.add(baseMesh);
+
+            const surfaceGeo = new THREE.CylinderGeometry(15.2, 15, 0.4, 64);
+            const surfaceMat = createClayMaterial(0xF1F5F9);
+            const surfaceMesh = createMesh(surfaceGeo, surfaceMat);
+            surfaceMesh.position.y = 0.2;
+            baseGroup.add(surfaceMesh);
+
+            // Glowing orbital ring under the island
+            const ringGeo = new THREE.TorusGeometry(16, 0.05, 16, 100);
+            const ringMat = new THREE.MeshBasicMaterial({ color: palette.glow, transparent: true, opacity: 0.5 });
+            const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+            ringMesh.position.y = -1.5;
+            ringMesh.rotation.x = Math.PI / 2;
+            baseGroup.add(ringMesh);
+
+            baseGroup.scale.set(0.001, 0.001, 0.001); 
+            islandGroup.add(baseGroup);
+            buildUpSequence.push({ group: baseGroup, delay: 0 });
+        }
+
+        function buildZone1() {
+            const zoneGroup = new THREE.Group();
+            zoneGroup.position.set(-6, 0.6, 7); 
+
+            const platGeo = new THREE.CylinderGeometry(3.5, 3.5, 0.2, 32);
+            const platMesh = createMesh(platGeo, createClayMaterial(palette.yellow));
+            platMesh.position.y = 0.1;
+            platMesh.userData = { zone: 'zone1' };
+            interactiveElements.push(platMesh);
+            zoneGroup.add(platMesh);
+
+            // The Open Book of Knowledge
+            const bookGroup = new THREE.Group();
+            bookGroup.position.set(0, 0.6, 0);
+            
+            const pageGeo = new THREE.BoxGeometry(1.8, 0.15, 2);
+            const pageMat = createClayMaterial(palette.white);
+            
+            const leftPage = createMesh(pageGeo, pageMat);
+            leftPage.position.set(-0.85, 0, 0);
+            leftPage.rotation.z = Math.PI / 12;
+            
+            const rightPage = createMesh(pageGeo, pageMat);
+            rightPage.position.set(0.85, 0, 0);
+            rightPage.rotation.z = -Math.PI / 12;
+
+            bookGroup.add(leftPage, rightPage);
+            zoneGroup.add(bookGroup);
+            animatedObjects.knowledgeBook = bookGroup;
+
+            // Floating geometric "letters/ideas"
+            for(let i=0; i<3; i++) {
+                const geo = new THREE.TetrahedronGeometry(0.2);
+                const mat = createClayMaterial(palette.orange);
+                const mesh = createMesh(geo, mat, false);
+                mesh.position.set((Math.random() - 0.5) * 2, 1.5 + Math.random(), (Math.random() - 0.5) * 2);
+                zoneGroup.add(mesh);
+                animatedObjects.floatingLetters.push({ mesh, offset: Math.random() * Math.PI * 2 });
+            }
+
+            // Glowing Protection Shield
+            const shieldGeo = new THREE.SphereGeometry(1.8, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2.5);
+            const shieldMat = new THREE.MeshPhysicalMaterial({
+                color: palette.yellow, transmission: 0.9, opacity: 1, transparent: true, roughness: 0.1
+            });
+            const shieldMesh = createMesh(shieldGeo, shieldMat, false);
+            shieldMesh.position.set(0, 0, 0);
+            zoneGroup.add(shieldMesh);
+
+            zoneGroup.scale.set(0.001, 0.001, 0.001);
+            zoneGroups['zone1'] = zoneGroup; 
+            islandGroup.add(zoneGroup);
+            buildUpSequence.push({ group: zoneGroup, delay: 1000 });
+        }
+
+        function buildZone2() {
+            const zoneGroup = new THREE.Group();
+            zoneGroup.position.set(-7, 0.6, -4); 
+
+            const platGeo = new THREE.BoxGeometry(5.5, 0.2, 5.5);
+            const platMesh = createMesh(platGeo, createClayMaterial(palette.green));
+            platMesh.position.y = 0.1;
+            platMesh.userData = { zone: 'zone2' };
+            interactiveElements.push(platMesh);
+            zoneGroup.add(platMesh);
+
+            // Elegant Archway (Pathways)
+            const archGeo = new THREE.TorusGeometry(2, 0.25, 16, 32, Math.PI);
+            const archMesh = createMesh(archGeo, createClayMaterial(palette.navy));
+            archMesh.rotation.y = Math.PI / 4;
+            archMesh.position.set(0, 0.2, 0);
+            zoneGroup.add(archMesh);
+            animatedObjects.youthArch = archMesh;
+
+            // Sleek Compass underneath
+            const compassGroup = new THREE.Group();
+            compassGroup.position.set(0, 0.4, 0);
+            const baseCGeo = new THREE.CylinderGeometry(0.8, 0.8, 0.1, 32);
+            const baseCMesh = createMesh(baseCGeo, createClayMaterial(palette.white));
+            compassGroup.add(baseCMesh);
+            
+            const needleGeo = new THREE.ConeGeometry(0.15, 1.2, 4);
+            const needleMesh = createMesh(needleGeo, createClayMaterial(palette.orange));
+            needleMesh.rotation.x = Math.PI / 2;
+            needleMesh.position.y = 0.15;
+            compassGroup.add(needleMesh);
+            
+            zoneGroup.add(compassGroup);
+            animatedObjects.compass = compassGroup;
+
+            zoneGroup.scale.set(0.001, 0.001, 0.001);
+            zoneGroups['zone2'] = zoneGroup; 
+            islandGroup.add(zoneGroup);
+            buildUpSequence.push({ group: zoneGroup, delay: 1500 });
+        }
+
+        function buildZone3() {
+            const zoneGroup = new THREE.Group();
+            zoneGroup.position.set(0, 0.6, 0); 
+
+            // Clean circular plaza
+            const platGeo = new THREE.CylinderGeometry(4.5, 4.5, 0.2, 64);
+            const platMesh = createMesh(platGeo, createClayMaterial(palette.blue));
+            platMesh.position.y = 0.1;
+            platMesh.userData = { zone: 'zone3' };
+            interactiveElements.push(platMesh);
+            zoneGroup.add(platMesh);
+
+            // Interlocking Rings representing Civil Society, Institutions, Economic Actors
+            const ringGeo = new THREE.TorusGeometry(1.2, 0.2, 32, 64);
+            
+            const ring1 = createMesh(ringGeo, createClayMaterial(palette.navy));
+            ring1.position.set(0, 1.5, -0.7);
+            
+            const ring2 = createMesh(ringGeo, createClayMaterial(palette.green));
+            ring2.position.set(-0.8, 1.5, 0.5);
+            ring2.rotation.y = Math.PI / 3;
+            
+            const ring3 = createMesh(ringGeo, createClayMaterial(palette.orange));
+            ring3.position.set(0.8, 1.5, 0.5);
+            ring3.rotation.y = -Math.PI / 3;
+
+            zoneGroup.add(ring1, ring2, ring3);
+            animatedObjects.inclusionRings.push(ring1, ring2, ring3);
+
+            zoneGroup.scale.set(0.001, 0.001, 0.001);
+            zoneGroups['zone3'] = zoneGroup; 
+            islandGroup.add(zoneGroup);
+            buildUpSequence.push({ group: zoneGroup, delay: 2000 });
+        }
+
+        function buildZone4() {
+            const zoneGroup = new THREE.Group();
+            zoneGroup.position.set(6, 0.6, 6); 
+
+            const platGeo = new THREE.CylinderGeometry(4, 4, 0.2, 32);
+            const platMesh = createMesh(platGeo, createClayMaterial(palette.orange));
+            platMesh.position.y = 0.1;
+            platMesh.userData = { zone: 'zone4' };
+            interactiveElements.push(platMesh);
+            zoneGroup.add(platMesh);
+
+            // Stylized Lotus/Pedestal
+            const lotusGroup = new THREE.Group();
+            lotusGroup.position.set(0, 0.5, 0);
+            
+            const petalGeo = new THREE.ConeGeometry(0.3, 2, 16);
+            petalGeo.translate(0, 1, 0); // Move pivot to base
+            const petalMat = createClayMaterial(palette.white);
+            
+            for(let i=0; i<4; i++) {
+                const petal = createMesh(petalGeo, petalMat);
+                petal.rotation.z = Math.PI / 6;
+                petal.rotation.y = (Math.PI / 2) * i;
+                lotusGroup.add(petal);
+                animatedObjects.lotusPetals.push(petal);
+            }
+            zoneGroup.add(lotusGroup);
+
+            // Premium Glowing Orb (Equity)
+            const orbGeo = new THREE.SphereGeometry(0.8, 64, 64);
+            const orbMat = new THREE.MeshPhysicalMaterial({
+                color: palette.orange, emissive: palette.orange, emissiveIntensity: 0.4,
+                roughness: 0.1, transmission: 0.5, clearcoat: 1.0
+            });
+            const orbMesh = createMesh(orbGeo, orbMat);
+            orbMesh.position.set(0, 1.8, 0);
+            zoneGroup.add(orbMesh);
+            animatedObjects.orb = orbMesh;
+            
+            // Sleek Drone
+            const droneGroup = new THREE.Group();
+            droneGroup.position.set(2, 2, -1.5);
+            const dBody = createMesh(new THREE.CylinderGeometry(0.3, 0.3, 0.15, 16), createClayMaterial(palette.navy));
+            droneGroup.add(dBody);
+            
+            for(let i=0; i<4; i++) {
+                const rotorGeo = new THREE.CylinderGeometry(0.15, 0.15, 0.02, 16);
+                const rotor = createMesh(rotorGeo, createClayMaterial(palette.darkBase));
+                const rx = (i%2===0 ? 1 : -1) * 0.35;
+                const rz = (i<2 ? 1 : -1) * 0.35;
+                rotor.position.set(rx, 0.1, rz);
+                droneGroup.add(rotor);
+            }
+            zoneGroup.add(droneGroup);
+            animatedObjects.drone = droneGroup;
+
+            zoneGroup.scale.set(0.001, 0.001, 0.001);
+            zoneGroups['zone4'] = zoneGroup; 
+            islandGroup.add(zoneGroup);
+            buildUpSequence.push({ group: zoneGroup, delay: 500 }); 
+        }
+
+        function buildZone5() {
+            const zoneGroup = new THREE.Group();
+            zoneGroup.position.set(5, 0.6, -6); 
+
+            const platGeo = new THREE.CylinderGeometry(3.5, 4.5, 2, 32);
+            const platMesh = createMesh(platGeo, createClayMaterial(palette.navy));
+            platMesh.position.y = 1;
+            platMesh.userData = { zone: 'zone5' };
+            interactiveElements.push(platMesh);
+            zoneGroup.add(platMesh);
+
+            // Sleek Obelisk
+            const obeliskGeo = new THREE.CylinderGeometry(0.1, 0.8, 4, 4);
+            const obeliskMesh = createMesh(obeliskGeo, createClayMaterial(palette.white));
+            obeliskMesh.position.set(0, 4, 0);
+            obeliskMesh.rotation.y = Math.PI / 4;
+            zoneGroup.add(obeliskMesh);
+
+            // Orbiting Data Rings & Nodes
+            for(let i=0; i<3; i++) {
+                const ringGroup = new THREE.Group();
+                ringGroup.position.set(0, 3 + i*0.8, 0);
+                
+                const rGeo = new THREE.TorusGeometry(1.5 - i*0.3, 0.03, 8, 64);
+                const rMat = new THREE.MeshBasicMaterial({ color: palette.glow, transparent: true, opacity: 0.6 });
+                const rMesh = new THREE.Mesh(rGeo, rMat);
+                
+                const nodeGeo = new THREE.SphereGeometry(0.15, 16, 16);
+                const nodeMat = createClayMaterial(palette.yellow);
+                const nodeMesh = createMesh(nodeGeo, nodeMat);
+                nodeMesh.position.set(1.5 - i*0.3, 0, 0);
+                
+                ringGroup.add(rMesh, nodeMesh);
+                // Tilt the orbits
+                ringGroup.rotation.x = (Math.random() - 0.5) * Math.PI / 2;
+                ringGroup.rotation.z = (Math.random() - 0.5) * Math.PI / 2;
+                
+                zoneGroup.add(ringGroup);
+                animatedObjects.obeliskRings.push({ group: ringGroup, speed: (Math.random() > 0.5 ? 1 : -1) * (0.01 + Math.random()*0.02) });
+            }
+
+            zoneGroup.scale.set(0.001, 0.001, 0.001);
+            zoneGroups['zone5'] = zoneGroup; 
+            islandGroup.add(zoneGroup);
+            buildUpSequence.push({ group: zoneGroup, delay: 2500 });
+        }
+
+        buildBaseIsland();
+        buildZone4(); 
+        buildZone1(); 
+        buildZone2(); 
+        buildZone3(); 
+        buildZone5(); 
+
+        const particleGeo = new THREE.BufferGeometry();
+        const particleCount = 250;
+        const posArray = new Float32Array(particleCount * 3);
+        const speedArray = new Float32Array(particleCount);
+        for(let i = 0; i < particleCount; i++) {
+            posArray[i*3] = (Math.random() - 0.5) * 35; 
+            posArray[i*3+1] = Math.random() * 20 - 5; 
+            posArray[i*3+2] = (Math.random() - 0.5) * 35;
+            speedArray[i] = Math.random() * 0.02 + 0.01;
+        }
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particleGeo.setAttribute('speed', new THREE.BufferAttribute(speedArray, 1));
+        const particleMat = new THREE.PointsMaterial({
+            size: 0.12,
+            color: palette.glow,
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending
+        });
+        const particlesMesh = new THREE.Points(particleGeo, particleMat);
+        scene.add(particlesMesh);
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2(999, 999); 
+        
+        const zoneKeys = ['zone1', 'zone2', 'zone3', 'zone4', 'zone5'];
+        let currentZoneIndex = 0;
+        let activeZoneKey = null;
+        let lastSwitchTime = 0;
+        const switchInterval = 6000; 
+        let userInteracting = false;
+        let introFinished = false;
+        let startTime = Date.now();
+
+        function setActiveZone(zoneKey) {
+            if (activeZoneKey === zoneKey) return;
+            
+            if (activeZoneKey) {
+                const oldObj = interactiveElements.find(el => el.userData.zone === activeZoneKey);
+                // Reset emission gracefully
+                if(oldObj) oldObj.material.emissiveIntensity = 0;
+            }
+
+            activeZoneKey = zoneKey;
+
+            if (zoneKey) {
+                const newObj = interactiveElements.find(el => el.userData.zone === zoneKey);
+                if(newObj) {
+                    newObj.material.emissive = new THREE.Color(newObj.material.color);
+                    newObj.material.emissiveIntensity = 0.4; // Richer glow on the active platform
+                }
+
+                // Cinematic Camera Angles mapped to the new geometric setups
+                const focusSettings = {
+                    zone1: { rot: Math.PI / 4, cam: new THREE.Vector3(0, 10, 18), look: new THREE.Vector3(-6, 2, 7) },
+                    zone2: { rot: 2.27, cam: new THREE.Vector3(0, 10, 18), look: new THREE.Vector3(-7, 2, -4) },
+                    zone3: { rot: 0, cam: new THREE.Vector3(0, 15, 22), look: new THREE.Vector3(0, 1, 0) }, 
+                    zone4: { rot: -0.87, cam: new THREE.Vector3(0, 12, 18), look: new THREE.Vector3(6, 2, 6) },
+                    zone5: { rot: -3 * Math.PI / 4, cam: new THREE.Vector3(0, 14, 22), look: new THREE.Vector3(5, 5, -6) }
+                };
+
+                if (focusSettings[zoneKey]) {
+                    targetIslandRotation = focusSettings[zoneKey].rot;
+                    targetCameraPos.copy(focusSettings[zoneKey].cam);
+                    targetLookAt.copy(focusSettings[zoneKey].look);
+                    
+                    // Spotlight points exactly at the zone
+                    focusTarget.position.copy(focusSettings[zoneKey].look); 
+                    focusLight.intensity = 1.5; 
+                }
+
+                const data = zoneData[zoneKey];
+                const panel = document.getElementById('info-panel');
+                document.getElementById('zone-number').textContent = data.num;
+                document.getElementById('zone-title-ar').textContent = data.titleAr;
+                document.getElementById('zone-title-en').textContent = data.titleEn;
+                document.getElementById('zone-desc').textContent = data.desc;
+
+                // Apply the zone's brand accent via inline styles (robust — no runtime Tailwind class generation)
+                document.getElementById('zone-number').style.color = data.accent;
+                const divider = document.getElementById('zone-divider');
+                if (divider) divider.style.background = data.accent;
+                const progressBarEl = document.getElementById('progress-bar');
+                if (progressBarEl) progressBarEl.style.background = data.accent;
+
+                panel.style.display = 'block';
+                panel.classList.remove('fade-enter-active');
+                void panel.offsetWidth; 
+                panel.classList.add('fade-enter-active');
+                
+                currentZoneIndex = zoneKeys.indexOf(zoneKey);
+                lastSwitchTime = Date.now() - startTime; 
+            }
+        }
+
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            userInteracting = true; 
+        });
+
+        window.addEventListener('mouseout', () => {
+            userInteracting = false;
+        });
+
+        setTimeout(() => {
+            const loader = document.getElementById('loading-screen');
+            loader.style.opacity = '0';
+            setTimeout(() => loader.style.display = 'none', 1000);
+        }, 1500);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsed = Date.now() - startTime;
+
+            if (!introFinished) {
+                let allDone = true;
+                buildUpSequence.forEach(seq => {
+                    if (elapsed > seq.delay) {
+                        seq.group.scale.lerp(new THREE.Vector3(1, 1, 1), 0.05);
+                        if (seq.group.scale.x < 0.99) allDone = false;
+                    } else {
+                        allDone = false;
+                    }
+                });
+                if (allDone && elapsed > 3000) {
+                    introFinished = true;
+                    lastSwitchTime = elapsed; 
+                    setActiveZone(zoneKeys[currentZoneIndex]); 
+                }
+            }
+
+            if (introFinished) {
+                camera.position.lerp(targetCameraPos, 0.04);
+                currentLookAt.lerp(targetLookAt, 0.04);
+                camera.lookAt(currentLookAt);
+
+                let diff = targetIslandRotation - islandGroup.rotation.y;
+                diff = Math.atan2(Math.sin(diff), Math.cos(diff)); 
+                islandGroup.rotation.y += diff * 0.05;
+
+                Object.keys(zoneGroups).forEach(key => {
+                    const group = zoneGroups[key];
+                    const targetScale = (key === activeZoneKey) ? 1.4 : 1.0; 
+                    group.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.06);
+                });
+            } else {
+                islandGroup.rotation.y += 0.001; 
+            }
+            
+            islandGroup.position.y = Math.sin(elapsed * 0.001) * 0.4; 
+            
+            // Premium upward flowing particles
+            const positions = particlesMesh.geometry.attributes.position.array;
+            const speeds = particlesMesh.geometry.attributes.speed.array;
+            for(let i=0; i<particleCount; i++) {
+                positions[i*3+1] += speeds[i];
+                if(positions[i*3+1] > 15) {
+                    positions[i*3+1] = -5; // Reset to bottom
+                }
+            }
+            particlesMesh.geometry.attributes.position.needsUpdate = true;
+            particlesMesh.rotation.y = -elapsed * 0.0001; 
+
+            if (introFinished) {
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(interactiveElements);
+
+                if (intersects.length > 0) {
+                    document.body.style.cursor = 'pointer';
+                    userInteracting = true;
+                    setActiveZone(intersects[0].object.userData.zone);
+                } else {
+                    document.body.style.cursor = 'default';
+                    userInteracting = false;
+                }
+
+                const progressBar = document.getElementById('progress-bar');
+                if (!userInteracting) {
+                    const timeSinceLastSwitch = elapsed - lastSwitchTime;
+                    if(progressBar) {
+                        const percent = Math.min((timeSinceLastSwitch / switchInterval) * 100, 100);
+                        progressBar.style.width = `${percent}%`;
+                    }
+                    if (timeSinceLastSwitch > switchInterval) {
+                        currentZoneIndex = (currentZoneIndex + 1) % zoneKeys.length;
+                        setActiveZone(zoneKeys[currentZoneIndex]);
+                    }
+                } else {
+                     if(progressBar) progressBar.style.width = '0%';
+                     lastSwitchTime = elapsed; 
+                }
+            }
+
+            // Zone 1: Floating Knowledge Letters
+            animatedObjects.floatingLetters.forEach(item => {
+                item.mesh.position.y += Math.sin(elapsed * 0.003 + item.offset) * 0.005;
+                item.mesh.rotation.x += 0.01;
+                item.mesh.rotation.y += 0.015;
+            });
+
+            // Zone 2: Compass & Arch
+            if (animatedObjects.compass && activeZoneKey === 'zone2') {
+                animatedObjects.compass.rotation.y += 0.06; 
+            }
+
+            // Zone 3: Interlocking Rings
+            if (activeZoneKey === 'zone3') {
+                animatedObjects.inclusionRings.forEach((ring, i) => {
+                    ring.rotation.z += (i%2===0 ? 0.01 : -0.01);
+                });
+            }
+
+            // Zone 4: Lotus breathing & Drone
+            if (animatedObjects.orb) {
+                if (activeZoneKey === 'zone4') {
+                    animatedObjects.orb.material.emissiveIntensity = 0.6 + Math.sin(elapsed * 0.004) * 0.3;
+                    animatedObjects.lotusPetals.forEach((petal, i) => {
+                         petal.rotation.z = Math.PI / 6 + Math.sin(elapsed * 0.002) * 0.05; // Breathing petals
+                    });
+                } else {
+                    animatedObjects.orb.material.emissiveIntensity = 0.2;
+                }
+            }
+            if (animatedObjects.drone && activeZoneKey === 'zone4') {
+                // Orbit the lotus
+                const angle = elapsed * 0.001;
+                animatedObjects.drone.position.x = 2 * Math.cos(angle);
+                animatedObjects.drone.position.z = 2 * Math.sin(angle);
+                animatedObjects.drone.rotation.y = -angle; // Face forward
+                animatedObjects.drone.children.forEach((child, index) => {
+                    if (index > 0) child.rotation.y += 0.5; 
+                });
+            }
+
+            // Zone 5: Obelisk Rings
+            animatedObjects.obeliskRings.forEach(ring => {
+                ring.group.rotation.y += ring.speed;
+                if(activeZoneKey === 'zone5') {
+                     ring.group.rotation.y += ring.speed * 2; // Spin faster when active
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
