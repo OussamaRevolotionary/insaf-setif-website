@@ -107,6 +107,15 @@
 - [x] **E2.** Rebranded `timeline_of_progress.html` the same way **and fixed a real crash**: `updateUI()` queried `.rounded-full.mb-4` but the divider was `my-3` → `null.className` threw at init, halting the scene. Replaced with `#active-divider` + `.tl-dot` + inline styles. Verified: info panel now shows, milestone accents apply, dots color correctly.
 - [x] **E3.** Synced both files to `public/` (served) and rebuilt `dist/`.
 
+### Phase F — Repo + live GitHub Pages URL ✅
+- [x] **F1.** Pushed the full project to **https://github.com/OussamaRevolotionary/insaf-setif-website** (`node_modules`/`dist`/raw FB photo dump gitignored; 148MB tracked, no secrets).
+- [x] **F2.** Added `vite.config.js` (base `/` in dev, `/insaf-setif-website/` in build) + a `withBase()` helper in `main.jsx` so every hardcoded root-relative asset (logo, hero video, both 3D iframes, local news photos) resolves under the Pages subpath; remote Facebook CDN URLs pass through untouched.
+- [x] **F3.** Added `.github/workflows/deploy-pages.yml` — builds with Vite and deploys `dist/` via the official Pages Actions flow on every push to `main`.
+- [x] **F4.** Owner enabled **Settings → Pages → Source: GitHub Actions** (one-time, required before the first deploy could succeed).
+- [x] **F5.** **Live and fully verified**: real HTML/JS/CSS served correctly, LOGO.jpg + photos + both 3D pages load under the subpath, a bogus path correctly 404s (genuine static routing), HashRouter navigation works, chat widget renders, and a live contact-form submission from the production domain succeeded (sheet + emails).
+
+**Live URL:** https://oussamarevolotionary.github.io/insaf-setif-website/
+
 ## 5. Change log
 - 2026-07-23 — Audit complete; plan authored; tracking started.
 - 2026-07-23 — Phases A–D complete: chat widget + cards rewritten (real CSS), webhooks split, i18n/copyright/orbit/a11y fixes, Facebook brand SVG (lucide crash fix), focus rings, real social-proof stats. Both n8n workflows built. Prod build green.
