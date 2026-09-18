@@ -7,6 +7,9 @@ dist/
 # Raw Facebook scraper photo dump — identical to public/photos, kept out to avoid duplicating 140MB+
 Insaf Association Setif's Photos (pb.100072412446373.-2207520000)/
 
+# Scraped reference data (competitor analysis docs) — may contain 3rd-party API tokens from scraped pages
+Charitywebsites/
+
 # OS / editor cruft
 .DS_Store
 Thumbs.db
