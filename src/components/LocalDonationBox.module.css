@@ -507,6 +507,16 @@
 
 .trust svg { color: var(--green); }
 
+.trustLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--navy);
+  font-weight: 900;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 @media (max-width: 1180px) {
   .tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cardGrid { grid-template-columns: 1fr; }

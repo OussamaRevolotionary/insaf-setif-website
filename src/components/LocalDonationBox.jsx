@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import {
   BadgeCheck, Check, CircleAlert, CircleCheck, Clock, Copy, CreditCard, Globe,
   HandHeart, Landmark, LoaderCircle, Lock, QrCode, ShieldCheck, Smartphone,
@@ -418,6 +419,7 @@ export default function LocalDonationBox({ id, initialAmount, initialDesignation
           <span><BadgeCheck size={16} aria-hidden="true" /> {t.donateTrustRegistered}</span>
           <span><Lock size={16} aria-hidden="true" /> {t.donateTrustSecure}</span>
           <span><HandHeart size={16} aria-hidden="true" /> {t.donateTrustReceipt}</span>
+          <Link to="/trust" className={styles.trustLink}><ShieldCheck size={16} aria-hidden="true" /> {t.donateTrustLink}</Link>
         </footer>
       </div>
     </section>

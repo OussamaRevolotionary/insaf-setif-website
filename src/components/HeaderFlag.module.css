@@ -1,0 +1,106 @@
+/* ---------- Waving pennant beside the logo ---------- */
+.pennant {
+  --w: 30px;
+  --h: 20px;
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+  flex-shrink: 0;
+  height: 40px;
+  padding-top: 4px;
+}
+
+/* Pole with a small brass finial */
+.pole {
+  position: relative;
+  width: 2px;
+  height: 36px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #8a94a3, #d7dce3 55%, #8a94a3);
+}
+
+.pole::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff4c2, #d4a72c 60%, #9c7414);
+}
+
+.cloth {
+  display: flex;
+  width: var(--w);
+  height: var(--h);
+  margin-top: 1px;
+  filter: drop-shadow(0 2px 3px rgba(16, 24, 40, 0.18));
+}
+
+.strip {
+  flex: 1 0 0;
+  height: 100%;
+  background-image: var(--flag);
+  background-size: var(--w) var(--h);
+  /* each strip shows its own slice of the flag */
+  background-position: calc(var(--i) * var(--w) / var(--strips) * -1) 0;
+  animation: wave 2.4s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -90ms);
+  /* tiny overlap hides sub-pixel seams between strips */
+  margin-inline-end: -0.2px;
+}
+
+/* The fold shading rides along with the ripple */
+.strip::after {
+  content: '';
+  display: block;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.06));
+  animation: shade 2.4s ease-in-out infinite;
+  animation-delay: inherit;
+}
+
+@keyframes wave {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(2.2px); }
+}
+
+@keyframes shade {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+/* ---------- Tricolor band along the header's bottom edge ---------- */
+.edge {
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;
+  height: 4px;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 0 20%, rgba(255, 255, 255, 0.55) 50%, transparent 80%) no-repeat,
+    linear-gradient(90deg, #006233 0 33.333%, #ffffff 33.333% 66.666%, #d21034 66.666% 100%);
+  background-size: 35% 100%, 100% 100%;
+  background-position: -60% 0, 0 0;
+  /* hairline so the white third still reads against the white header */
+  box-shadow: inset 0 1px 0 rgba(16, 24, 40, 0.08), inset 0 -1px 0 rgba(16, 24, 40, 0.06);
+  animation: sheen 5.5s ease-in-out 1.2s infinite;
+}
+
+/* a slow light sweep, like sunlight catching a ribbon */
+@keyframes sheen {
+  0% { background-position: -60% 0, 0 0; }
+  45%, 100% { background-position: 160% 0, 0 0; }
+}
+
+@media (max-width: 480px) {
+  /* phones: the header is already tight; the tricolor band carries the identity */
+  .pennant { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .strip,
+  .strip::after,
+  .edge { animation: none; }
+}
