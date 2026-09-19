@@ -9,10 +9,21 @@ import {
   Users, BookOpen, Star, Globe, ChevronLeft, ChevronRight,
   Heart, Share2, MessageSquare, CheckCheck, AlertCircle,
   Send, Bot, User, RefreshCw, Maximize2, ExternalLink,
-  ClipboardCopy, Flame, Droplets, Leaf, Trees, Camera,
-  Image
+  Camera, Image
 } from 'lucide-react';
+import Marquee from './lib/marquee.js';
 import { achievementPosts, newsPosts, pageInfo } from './data/newsPosts';
+import { LangContext, useLang } from './lib/lang.js';
+import { withBase } from './lib/assets.js';
+import { dateFmt } from './lib/format.js';
+import { usePrefersReducedMotion } from './lib/hooks.js';
+import UrgencyBanner from './components/UrgencyBanner.jsx';
+import ActivityTicker from './components/ActivityTicker.jsx';
+import ChildrenHelpHub from './components/ChildrenHelpHub.jsx';
+import NaturePillar from './components/NaturePillar.jsx';
+import LocalDonationBox from './components/LocalDonationBox.jsx';
+import CampaignSection from './components/CampaignSection.jsx';
+import HeaderDonateButton from './components/HeaderDonateButton.jsx';
 import './styles.css';
 
 /* ============================================================
@@ -20,31 +31,10 @@ import './styles.css';
    ============================================================ */
 const contact = { ...pageInfo.contact, address: 'Sétif, Algérie' };
 
-/* International Bank Account for Donations */
-const DONATION_BANK = {
-  holder:   'Oussama Abdi',
-  account:  '42649160',
-  bank:     'Clear Junction Limited',
-  iban:     'GB16CLJU04130742649160',
-  sortCode: '041307',
-  swift:    'CLJUGB21XXX',
-  address:  '4th Floor Imperial House, 15 Kingsway, London, UK, WC2B 6UN',
-};
-
 /* n8n automation endpoints (see IMPLEMENTATION_PLAN.md · Phase C) */
 const N8N_BASE = 'https://oussama19.app.n8n.cloud/webhook';
 const CHAT_WEBHOOK = `${N8N_BASE}/insaf-chat`;
 const CONTACT_WEBHOOK = `${N8N_BASE}/insaf-contact`;
-
-// GitHub Pages serves the built site under /insaf-setif-website/ rather than the
-// domain root. Vite exposes the configured base as BASE_URL; local `/public` assets
-// referenced by a literal leading slash need this prefix, remote URLs must not.
-const BASE_URL = import.meta.env.BASE_URL;
-function withBase(path) {
-  if (!path) return path;
-  if (/^https?:\/\//.test(path)) return path;
-  return BASE_URL + path.replace(/^\//, '');
-}
 
 // Resolve local `/photos/...` paths once against BASE_URL; remote Facebook CDN URLs pass through unchanged.
 const resolvedNewsPosts = newsPosts.map(p => ({
@@ -179,47 +169,141 @@ const translations = {
     overviewText: 'جمعية إنصاف سطيف تعمل من أجل الدفاع عن حقوق الطفل، مرافقة الشباب، الإدماج الاجتماعي والتضامن المجتمعي في سطيف.',
     copyright: '© 2024 جمعية إنصاف سطيف. جميع الحقوق محفوظة.',
     notFoundTitle: '404', notFoundText: 'الصفحة غير موجودة', notFoundBtn: 'العودة للرئيسية',
-    // Next-Level additions
-    urgencyFunded: '% ممول', urgencyBtn: 'ساعد الآن',
-    impactPhotos: 'صورة موثّقة',
-    childrenHubBadge: 'مبادرة مساعدة الأطفال',
-    childrenHubTitle: 'طفل واحد. فرصة واحدة. تبرّعك يصنع الفارق.',
-    childrenHubSub: 'ندعم الأطفال الأيتام وأبناء الأسر الهشة في سطيف بالتعليم، الرعاية الصحية ومستلزمات الشتاء.',
-    childrenStoriesTitle: 'قصص من الواقع',
-    donateNow: 'تبرّع الآن',
+    // Donation platform (Phase G)
+    navDonate: 'تبرّع',
     helpChildNow: 'ساعد طفلاً الآن',
-    forestBadge: '🔥 استجابة طارئة — حرائق الغابات',
-    forestTitle: 'حين تحترق الجزائر، إنصاف تستجيب.',
-    forestSub: 'الحرائق تدمّر الغابات وتهجّر الأسر وتصدم الأطفال. كنّا في الميدان.',
-    forestBody1: 'خلال موجة الحرائق الأخيرة التي اجتاحت غابات الجزائر، سارعت جمعية إنصاف سطيف إلى التحرّك. وزّع المتطوعون مساعدات عاجلة، ودعموا الأسر المهجّرة، وأولوا اهتمامًا خاصًا للأطفال الذين عانوا من الصدمة النفسية جراء الكارثة.',
-    forestBody2: 'لأن الاستجابة للأزمات جزء أصيل من رسالتنا — المجتمع المدني لا ينام.',
-    forestStatLabel: 'أسرة تلقّت دعمًا مباشرًا',
-    forestCTA: 'اقرأ القصة كاملة',
-    natureBadge: '🌿 البيئة مسؤوليتنا المشتركة',
-    natureTitle: 'الغابة والماء والمستقبل الأخضر',
-    natureSub: 'ما نزرعه اليوم يرثه أطفال الغد. البيئة ليست ترفًا — إنها حق.',
-    natureForestTitle: 'الغابات الجزائرية',
-    natureForestText: 'رئة الجزائر الخضراء تحتاج حمايتنا. تشجير، توعية، ودفاع عن التنوع البيولوجي.',
-    natureForestStat: 'الجزائر تمتلك أكثر من 4.7 مليون هكتار من الغابات — تراث يستحق الحماية.',
-    natureWaterTitle: 'المياه النظيفة',
-    natureWaterText: 'الوصول إلى مياه نقية حق أساسي لكل طفل. إنصاف تدعو إلى تحسين الوصول في المناطق الريفية.',
-    natureWaterStat: 'المياه النظيفة تنقذ حياة — خاصة حياة الأطفال في المناطق الهشة.',
-    natureFutureTitle: 'المستقبل الأخضر',
-    natureFutureText: 'التوعية البيئية جزء من تربية الطفل. إنصاف تُدرج الوعي البيئي في برامجها المدنية.',
-    natureFutureStat: 'طفل يعرف قيمة الشجرة سيحمي الغابة غدًا.',
-    donateSectionTitle: 'ادعم عملنا',
-    donateSectionSub: 'كل تبرع يصل مباشرة إلى ميدان العمل.',
-    donateBoxTitle: 'التحويل البنكي الدولي',
-    donateNote: 'يرجى ذكر اسمك وعبارة "إنصاف سطيف" في خانة المرجع عند التحويل.',
-    donateFbBtn: 'تبرّع عبر الصفحة على فيسبوك',
+    impactPhotos: 'صورة موثّقة',
+    appealRegionLabel: 'نداء الحملة الموسمية',
+    appealDismiss: 'إخفاء النداء',
+    appeals: {
+      school:   { title: 'الدخول المدرسي', text: 'حقيبة كاملة لطفل يتيم ابتداءً من 5 000 دج.', cta: 'جهّز حقيبة' },
+      wildfire: { title: 'موسم الحرائق', text: 'صندوق التضامن يدعم الأسر المتضرّرة من حرائق الغابات.', cta: 'ادعم الصندوق' },
+      winter:   { title: 'شتاء دافئ', text: 'معطف وحذاء دافئ لطفل في مرتفعات سطيف بـ 3 500 دج.', cta: 'دفّئ طفلاً' },
+      ramadan:  { title: 'قفة رمضان', text: 'ساهم في قفة رمضان للأسر المعوزة في سطيف.', cta: 'ساهم الآن' },
+      orphans:  { title: 'كفالة الطفولة', text: 'دعمك يفتح لطفل يتيم باب المدرسة والرعاية.', cta: 'ساعد الآن' },
+    },
+    tickerLabel: 'آخر النشاطات',
+    tickerAll: 'كل الأخبار',
+    childrenHubBadge: 'حقوق الطفل وكفالة الأيتام',
+    childrenHubTitle: 'طفل واحد. فرصة واحدة. تبرّعك يصنع الفارق.',
+    childrenHubSub: 'نرافق الأطفال الأيتام وأبناء الأسر الهشّة في سطيف: مقعد في المدرسة، علاج في وقته، ودفء في الشتاء.',
+    childTiers: {
+      school: { title: 'حقيبة مدرسية كاملة', desc: 'كراريس، أدوات، محفظة ومئزر لسنة دراسية كاملة.', impact: 'طفل يدخل القسم بثقة' },
+      health: { title: 'رعاية صحية', desc: 'فحص طبي، أدوية أساسية ومتابعة لطفل طوال السنة.', impact: 'علاج في وقته، لا بعد فوات الأوان' },
+      winter: { title: 'دفء الشتاء', desc: 'معطف، حذاء دافئ وملابس شتوية لطفل في برد المرتفعات.', impact: 'شتاء أكثر أمانًا' },
+    },
+    giveAmount: 'تبرّع بـ {amount}',
+    childStoriesTitle: 'ما يصنعه عطاؤك',
+    childStories: [
+      { text: 'في أول يوم دراسي، دخلت القسم بحقيبة جديدة ومئزر نظيف، وقالت لمعلّمتها إنها ستصبح طبيبة.', who: 'س.، 8 سنوات' },
+      { text: 'بعد فحص طبي جاء في وقته، عاد إلى ملعب الحي يلعب مع أصدقائه كل مساء.', who: 'ي.، 10 سنوات' },
+      { text: 'معطف دافئ وحذاء متين جعلا طريقه الطويل إلى المدرسة في الشتاء أقل قسوة.', who: 'م.، 12 سنة' },
+    ],
+    childStoriesDisclosure: 'قصص توضيحية مركّبة، الأسماء والتفاصيل مغيّرة حمايةً لخصوصية الأطفال.',
+    carouselPrev: 'القصة السابقة', carouselNext: 'القصة التالية', carouselGoTo: 'انتقل إلى القصة',
+    childPhotoAlt: 'أطفال ومؤطرون من جمعية إنصاف في نزهة بمناسبة اليوم العالمي للطفولة',
+    childPhotoCaption: 'من نشاطات جمعية إنصاف — اليوم العالمي للطفولة، جوان 2026',
+    fireBadge: 'التضامن في مواجهة حرائق الغابات',
+    fireTitle: 'حين تشتعل غابات الجزائر، يجيب التضامن.',
+    fireIntro: 'في كل صيف تقريبًا تضرب الحرائق غابات الشمال الجزائري، فتدمّر البيوت والمحاصيل وتترك الأطفال أمام صدمة الفقدان. صندوق التضامن لجمعية إنصاف يوجّه تبرّعاتكم إلى الأسر المتضرّرة.',
+    fireListLead: 'تبرّعك للصندوق يساعد على توفير:',
+    fireActions: [
+      'حقائب طوارئ للأسر: ماء، غذاء وأغطية',
+      'أدوات مدرسية للأطفال الذين فقدوا أغراضهم',
+      'أنشطة دعم نفسي للأطفال بعد الصدمة',
+      'حملات إعادة تشجير مع المتطوعين حين تصبح الأرض آمنة',
+    ],
+    fireHonor: 'تحية تقدير لأعوان الحماية المدنية وحرّاس الغابات والمتطوعين من المواطنين الذين يقفون في الصفوف الأولى كل صيف.',
+    fireCta: 'ادعم صندوق التضامن',
+    natureBadge: 'حياة خضراء',
+    natureTitle: 'الغابة، الماء، ومستقبل أطفالنا',
+    natureSub: 'ما نزرعه اليوم يرثه أطفال الغد. نبني مع المتطوعين والمدارس ثقافة تحترم الطبيعة وتضمن الماء للجميع.',
+    natureCards: {
+      reforest:  { title: 'إعادة التشجير', text: 'أيام تشجير مع المتطوعين والتلاميذ لإعادة الحياة إلى المساحات المتضرّرة.', help: 'شارك في يوم تشجير أو موّل شتلات.' },
+      water:     { title: 'الماء في الأرياف', text: 'مناصرة حق أطفال القرى النائية في ماء شرب نظيف وآمن.', help: 'ادعم مشاريع الماء في البلديات الريفية.' },
+      education: { title: 'تربية بيئية للأطفال', text: 'ورشات تعلّم الأطفال قيمة الشجرة والماء وخطر الحرائق.', help: 'تطوّع لتأطير ورشة في مدرستك.' },
+    },
     campaignSectionTitle: 'حملاتنا الجارية',
-    campaignSectionSub: 'تابع تقدّم حملاتنا الثلاث الميدانية وكن جزءًا من الأثر.',
-    campaignChildrenLabel: 'حملة المستلزمات المدرسية للأطفال',
-    campaignForestLabel: 'صندوق إغاثة حرائق الغابات',
-    campaignWinterLabel: 'حملة الشتاء الدافئ',
+    campaignSectionSub: 'اختر حملة وتابع تقدّمها — كل مساهمة تقرّبنا من الهدف.',
+    campaigns: {
+      school:   { title: 'حقائب الدخول المدرسي', desc: 'تجهيز الأطفال الأيتام بمستلزمات السنة الدراسية.' },
+      wildfire: { title: 'صندوق التضامن مع ضحايا الحرائق', desc: 'دعم الأسر والأطفال المتضرّرين من حرائق الغابات.' },
+      winter:   { title: 'حملة الشتاء الدافئ', desc: 'ملابس شتوية لأطفال مرتفعات سطيف.' },
+    },
     campaignRaised: 'تم جمعه',
     campaignGoal: 'الهدف',
+    campaignAlmost: 'اقتربنا من الهدف — ساعدنا على إتمامه!',
     campaignDonate: 'تبرّع للحملة',
+    campaignIllustrative: 'الأرقام المعروضة توضيحية في انتظار نشر الجمعية لحصيلتها الموثّقة.',
+    donatePageLabel: 'التبرّع',
+    donatePageTitle: 'تبرّعك يصل إلى الأطفال',
+    donatePageLead: 'اختر الطريقة الأنسب لك: بطاقة الذهبية أو CIB فورًا عبر الإنترنت، بريدي موب، أو الحساب البريدي الجاري.',
+    donateBoxTitle: 'قدّم تبرّعك',
+    donateBoxSub: 'طرق دفع جزائرية آمنة، في دقيقة واحدة.',
+    donateTestMode: 'وضع تجريبي — لا يُقتطع أي مبلغ حقيقي',
+    donateMethodsLabel: 'طرق التبرّع',
+    donateTabs: {
+      card:          { label: 'الذهبية / CIB', hint: 'دفع فوري عبر الإنترنت', title: 'بطاقة الذهبية أو CIB' },
+      baridimob:     { label: 'بريدي موب', hint: 'رمز QR أو RIP', title: 'التحويل عبر بريدي موب / بريدي باي' },
+      ccp:           { label: 'الحساب البريدي CCP', hint: 'في أي مكتب بريد', title: 'الدفع في الحساب البريدي الجاري' },
+      international: { label: 'تحويل دولي', hint: 'من خارج الجزائر', title: 'التحويل البنكي الدولي' },
+    },
+    donateAmountLegend: 'اختر المبلغ',
+    donateCustomLabel: 'أو أدخل مبلغًا آخر',
+    donateCustomPlaceholder: 'مثلاً 2500',
+    donateDesignationLabel: 'وجّه تبرّعك إلى',
+    designations: {
+      general:  { label: 'حيث الحاجة أكبر' },
+      school:   { label: 'الحقائب المدرسية', unitLabel: 'حقيبة مدرسية' },
+      health:   { label: 'الرعاية الصحية للأطفال', unitLabel: 'رعاية صحية سنوية لطفل' },
+      winter:   { label: 'الشتاء الدافئ', unitLabel: 'طقم شتوي لطفل' },
+      wildfire: { label: 'صندوق التضامن مع ضحايا الحرائق' },
+      ramadan:  { label: 'قفة رمضان' },
+    },
+    donateCardLegend: 'نوع البطاقة',
+    donateMethods: { edahabia: 'الذهبية (بريد الجزائر)', cib: 'CIB (بطاقة بنكية)' },
+    donateYourGift: 'تبرّعك',
+    donateEnterAmount: 'أدخل مبلغًا بين 100 و500 000 دج.',
+    impactGeneral: 'يُوجَّه إلى برامج الطفولة والتضامن حيث الحاجة أكبر.',
+    impactCovers: 'يغطي: {n} × {item}',
+    impactTopUp: '{pct}% من {item} — أضف {missing} لإكمال المبلغ.',
+    donateNameLabel: 'الاسم',
+    donateEmailLabel: 'البريد الإلكتروني',
+    optional: 'اختياري',
+    donatePay: 'تبرّع بـ {amount} بأمان',
+    donateRedirecting: 'جارٍ تحويلك إلى صفحة الدفع الآمنة…',
+    donateErrAmount: 'يرجى اختيار مبلغ بين {min} و{max}.',
+    donateErrEmail: 'البريد الإلكتروني غير صحيح.',
+    donateErrGeneric: 'تعذّر فتح صفحة الدفع. حاول مجددًا أو اختر طريقة أخرى.',
+    donateSecureNote: 'تتم معالجة الدفع عبر Chargily Pay — بيانات بطاقتك لا تمرّ عبر موقعنا.',
+    donateQrAlt: 'رمز QR للتبرّع عبر بريدي موب',
+    donateQrPending: 'سيُنشر رمز QR الرسمي قريبًا',
+    baridiSteps: [
+      'افتح تطبيق بريدي موب.',
+      'اختر «تحويل» ثم امسح رمز QR أو ألصق رقم RIP.',
+      'اكتب «إنصاف» في خانة المرجع ثم أكّد العملية.',
+    ],
+    ccpSteps: [
+      'توجّه إلى أي مكتب بريد أو استعمل تطبيق بريدي موب.',
+      'املأ وصل دفع (versement) باسم جمعية إنصاف سطيف.',
+      'احتفظ بوصل الدفع.',
+    ],
+    ccpAccountLabel: 'رقم الحساب',
+    ccpKeyLabel: 'المفتاح',
+    donatePending: 'قريبًا',
+    donateCopy: 'نسخ',
+    donateCopied: 'تم النسخ',
+    intlHolder: 'صاحب الحساب',
+    intlBank: 'البنك',
+    intlSortCode: 'Sort code',
+    donateNote: 'يرجى ذكر اسمك وعبارة "Insaf Setif" في خانة المرجع عند التحويل.',
+    donateTrustRegistered: 'جمعية مدنية — سطيف، منذ 2014',
+    donateTrustSecure: 'دفع مشفّر عبر Chargily Pay',
+    donateTrustReceipt: 'لطلب وصل أو لأي استفسار: تواصل معنا',
+    donateStatus: {
+      success: { title: 'شكرًا لك! تم استلام تبرّعك.', text: 'عطاؤك سيصل إلى الأطفال. شكرًا لأنك جزء من أثر جمعية إنصاف.' },
+      failure: { title: 'لم تكتمل عملية الدفع.', text: 'لم يُقتطع أي مبلغ. يمكنك المحاولة من جديد أو اختيار طريقة أخرى أدناه.' },
+    },
   },
   fr: {
     brand: 'Association Insaf Sétif', strap: 'Protection, insertion, solidarité',
@@ -253,47 +337,141 @@ const translations = {
     overviewText: 'Association Insaf Sétif œuvre pour les droits de l\'enfant, l\'accompagnement des jeunes, la réinsertion sociale et la solidarité.',
     copyright: '© 2024 Association Insaf Sétif. Tous droits réservés.',
     notFoundTitle: '404', notFoundText: 'Page introuvable', notFoundBtn: 'Retour à l\'accueil',
-    // Next-Level additions
-    urgencyFunded: '% financé', urgencyBtn: 'Aider maintenant',
-    impactPhotos: 'photos documentées',
-    childrenHubBadge: 'Initiative Aide aux Enfants',
-    childrenHubTitle: 'Un enfant. Une chance. Votre don fait la différence.',
-    childrenHubSub: 'Nous soutenons les orphelins et enfants vulnérables à Sétif avec éducation, soins médicaux et vêtements d\'hiver.',
-    childrenStoriesTitle: 'Histoires vraies',
-    donateNow: 'Donner maintenant',
+    // Donation platform (Phase G)
+    navDonate: 'Faire un don',
     helpChildNow: 'Aider un enfant maintenant',
-    forestBadge: '🔥 Réponse d\'urgence — Incendies de forêt',
-    forestTitle: 'Quand l\'Algérie brûle, Insaf répond.',
-    forestSub: 'Les incendies dévastent les forêts, déplacent des familles et traumatisent des enfants. Nous étions sur le terrain.',
-    forestBody1: 'Lors des récents incendies qui ont ravagé les forêts algériennes, l\'Association Insaf Sétif a mobilisé ses bénévoles pour distribuer une aide d\'urgence, soutenir les familles déplacées et accompagner les enfants traumatisés par la catastrophe.',
-    forestBody2: 'Parce que la réponse aux crises fait partie intégrante de notre mission — la société civile ne dort pas.',
-    forestStatLabel: 'familles soutenues directement',
-    forestCTA: 'Lire l\'histoire complète',
-    natureBadge: '🌿 L\'environnement, notre responsabilité',
-    natureTitle: 'La forêt, l\'eau et l\'avenir vert',
-    natureSub: 'Ce que nous plantons aujourd\'hui, les enfants de demain en héritent. L\'environnement n\'est pas un luxe — c\'est un droit.',
-    natureForestTitle: 'Les forêts algériennes',
-    natureForestText: 'Le poumon vert de l\'Algérie a besoin de notre protection. Reboisement, sensibilisation et défense de la biodiversité.',
-    natureForestStat: 'L\'Algérie possède plus de 4,7 millions d\'hectares de forêts — un patrimoine qui mérite protection.',
-    natureWaterTitle: 'L\'eau propre',
-    natureWaterText: 'L\'accès à l\'eau potable est un droit fondamental pour chaque enfant. Insaf plaide pour l\'amélioration de l\'accès dans les zones rurales.',
-    natureWaterStat: 'L\'eau propre sauve des vies — surtout celles des enfants dans les zones vulnérables.',
-    natureFutureTitle: 'L\'avenir vert',
-    natureFutureText: 'La sensibilisation environnementale fait partie de l\'éducation civique. Insaf intègre la conscience écologique dans ses programmes.',
-    natureFutureStat: 'Un enfant qui connaît la valeur d\'un arbre protégera la forêt demain.',
-    donateSectionTitle: 'Soutenez notre action',
-    donateSectionSub: 'Chaque don arrive directement sur le terrain.',
-    donateBoxTitle: 'Virement bancaire international',
-    donateNote: 'Merci d\'indiquer votre nom et "Insaf Sétif" dans la référence du virement.',
-    donateFbBtn: 'Donner via Facebook',
+    impactPhotos: 'photos documentées',
+    appealRegionLabel: 'Appel de la campagne saisonnière',
+    appealDismiss: 'Masquer l’appel',
+    appeals: {
+      school:   { title: 'Rentrée scolaire', text: 'Un cartable complet pour un orphelin dès 5 000 DA.', cta: 'Équiper un enfant' },
+      wildfire: { title: 'Saison des incendies', text: 'Le fonds de solidarité soutient les familles touchées par les feux de forêt.', cta: 'Soutenir le fonds' },
+      winter:   { title: 'Hiver chaud', text: 'Manteau et chaussures chaudes pour un enfant des hauts plateaux : 3 500 DA.', cta: 'Réchauffer un enfant' },
+      ramadan:  { title: 'Couffin du Ramadan', text: 'Participez au couffin du Ramadan pour les familles démunies de Sétif.', cta: 'Participer' },
+      orphans:  { title: 'Soutien à l’enfance', text: 'Votre aide ouvre à un orphelin les portes de l’école et des soins.', cta: 'Aider maintenant' },
+    },
+    tickerLabel: 'Activités récentes',
+    tickerAll: 'Toutes les actualités',
+    childrenHubBadge: 'Droits de l’enfant & soutien aux orphelins',
+    childrenHubTitle: 'Un enfant. Une chance. Votre don fait la différence.',
+    childrenHubSub: 'Nous accompagnons les orphelins et les enfants de familles vulnérables à Sétif : une place à l’école, des soins à temps et de la chaleur en hiver.',
+    childTiers: {
+      school: { title: 'Cartable complet', desc: 'Cahiers, fournitures, cartable et tablier pour toute une année scolaire.', impact: 'Un enfant qui entre en classe avec confiance' },
+      health: { title: 'Soins de santé', desc: 'Consultation, médicaments essentiels et suivi pour un enfant pendant un an.', impact: 'Des soins à temps, pas trop tard' },
+      winter: { title: 'Chaleur d’hiver', desc: 'Manteau, chaussures chaudes et vêtements d’hiver face au froid des hauts plateaux.', impact: 'Un hiver plus sûr' },
+    },
+    giveAmount: 'Donner {amount}',
+    childStoriesTitle: 'Ce que votre don rend possible',
+    childStories: [
+      { text: 'Le jour de la rentrée, elle est entrée en classe avec un cartable neuf et un tablier propre, et a dit à sa maîtresse qu’elle serait médecin.', who: 'S., 8 ans' },
+      { text: 'Après une consultation faite à temps, il a retrouvé chaque soir le terrain du quartier et ses amis.', who: 'Y., 10 ans' },
+      { text: 'Un manteau chaud et de bonnes chaussures ont rendu moins rude son long trajet vers l’école en hiver.', who: 'M., 12 ans' },
+    ],
+    childStoriesDisclosure: 'Récits illustratifs composites : prénoms et détails modifiés pour protéger la vie privée des enfants.',
+    carouselPrev: 'Récit précédent', carouselNext: 'Récit suivant', carouselGoTo: 'Aller au récit',
+    childPhotoAlt: 'Enfants et encadrants de l’association Insaf lors d’une sortie pour la Journée mondiale de l’enfance',
+    childPhotoCaption: 'Activité de l’association Insaf — Journée mondiale de l’enfance, juin 2026',
+    fireBadge: 'Solidarité face aux feux de forêt',
+    fireTitle: 'Quand les forêts d’Algérie brûlent, la solidarité répond.',
+    fireIntro: 'Presque chaque été, les incendies frappent les forêts du nord de l’Algérie, détruisant maisons et récoltes et laissant des enfants face au choc de la perte. Le fonds de solidarité d’Insaf oriente vos dons vers les familles touchées.',
+    fireListLead: 'Votre don au fonds aide à fournir :',
+    fireActions: [
+      'Des kits d’urgence pour les familles : eau, nourriture et couvertures',
+      'Des fournitures scolaires pour les enfants qui ont tout perdu',
+      'Des activités de soutien psychologique pour les enfants après le traumatisme',
+      'Des campagnes de reboisement avec des bénévoles, une fois le terrain sécurisé',
+    ],
+    fireHonor: 'Hommage aux agents de la Protection civile, aux gardes forestiers et aux citoyens bénévoles qui sont en première ligne chaque été.',
+    fireCta: 'Soutenir le fonds de solidarité',
+    natureBadge: 'Vie verte',
+    natureTitle: 'La forêt, l’eau et l’avenir de nos enfants',
+    natureSub: 'Ce que nous plantons aujourd’hui, les enfants de demain en héritent. Avec des bénévoles et des écoles, nous cultivons le respect de la nature et l’accès à l’eau pour tous.',
+    natureCards: {
+      reforest:  { title: 'Reboisement', text: 'Des journées de plantation avec des bénévoles et des élèves pour redonner vie aux zones touchées.', help: 'Participez à une plantation ou financez des plants.' },
+      water:     { title: 'L’eau dans les campagnes', text: 'Plaider pour l’accès des enfants des villages isolés à une eau potable sûre.', help: 'Soutenez les projets d’eau dans les communes rurales.' },
+      education: { title: 'Éducation à l’environnement', text: 'Des ateliers qui apprennent aux enfants la valeur de l’arbre et de l’eau, et le danger des incendies.', help: 'Encadrez un atelier dans votre école.' },
+    },
     campaignSectionTitle: 'Nos campagnes en cours',
-    campaignSectionSub: 'Suivez la progression de nos trois campagnes de terrain et faites partie de l\'impact.',
-    campaignChildrenLabel: 'Campagne fournitures scolaires pour enfants',
-    campaignForestLabel: 'Fonds d\'aide aux victimes des incendies',
-    campaignWinterLabel: 'Campagne hiver chaud',
-    campaignRaised: 'Collecté',
+    campaignSectionSub: 'Choisissez une campagne et suivez sa progression — chaque contribution nous rapproche de l’objectif.',
+    campaigns: {
+      school:   { title: 'Cartables de la rentrée', desc: 'Équiper les orphelins pour l’année scolaire.' },
+      wildfire: { title: 'Fonds de solidarité incendies', desc: 'Soutenir les familles et les enfants touchés par les feux de forêt.' },
+      winter:   { title: 'Campagne hiver chaud', desc: 'Des vêtements d’hiver pour les enfants des hauts plateaux de Sétif.' },
+    },
+    campaignRaised: 'collectés',
     campaignGoal: 'Objectif',
+    campaignAlmost: 'Presque atteint — aidez-nous à finir !',
     campaignDonate: 'Contribuer',
+    campaignIllustrative: 'Chiffres illustratifs, en attendant la publication du bilan vérifié de l’association.',
+    donatePageLabel: 'Faire un don',
+    donatePageTitle: 'Votre don arrive jusqu’aux enfants',
+    donatePageLead: 'Choisissez le moyen qui vous convient : carte Edahabia ou CIB en ligne, BaridiMob ou compte CCP.',
+    donateBoxTitle: 'Faire un don',
+    donateBoxSub: 'Des moyens de paiement algériens sécurisés, en une minute.',
+    donateTestMode: 'Mode test — aucun montant réel n’est débité',
+    donateMethodsLabel: 'Moyens de don',
+    donateTabs: {
+      card:          { label: 'Edahabia / CIB', hint: 'Paiement en ligne immédiat', title: 'Carte Edahabia ou CIB' },
+      baridimob:     { label: 'BaridiMob', hint: 'QR code ou RIP', title: 'Virement via BaridiMob / BaridiPay' },
+      ccp:           { label: 'Compte CCP', hint: 'Dans tout bureau de poste', title: 'Versement sur le compte CCP' },
+      international: { label: 'Virement international', hint: 'Depuis l’étranger', title: 'Virement bancaire international' },
+    },
+    donateAmountLegend: 'Choisissez un montant',
+    donateCustomLabel: 'Ou saisissez un autre montant',
+    donateCustomPlaceholder: 'ex. 2500',
+    donateDesignationLabel: 'Affecter mon don à',
+    designations: {
+      general:  { label: 'Là où le besoin est le plus grand' },
+      school:   { label: 'Cartables scolaires', unitLabel: 'cartable complet' },
+      health:   { label: 'Soins de santé des enfants', unitLabel: 'suivi médical annuel' },
+      winter:   { label: 'Hiver chaud', unitLabel: 'kit d’hiver pour un enfant' },
+      wildfire: { label: 'Fonds de solidarité incendies' },
+      ramadan:  { label: 'Couffin du Ramadan' },
+    },
+    donateCardLegend: 'Type de carte',
+    donateMethods: { edahabia: 'Edahabia (Algérie Poste)', cib: 'CIB (carte bancaire)' },
+    donateYourGift: 'Votre don',
+    donateEnterAmount: 'Saisissez un montant entre 100 et 500 000 DA.',
+    impactGeneral: 'Affecté aux programmes enfance et solidarité, là où le besoin est le plus grand.',
+    impactCovers: 'Couvre : {n} × {item}',
+    impactTopUp: '{pct} % d’un {item} — ajoutez {missing} pour le compléter.',
+    donateNameLabel: 'Nom',
+    donateEmailLabel: 'E-mail',
+    optional: 'facultatif',
+    donatePay: 'Donner {amount} en toute sécurité',
+    donateRedirecting: 'Redirection vers le paiement sécurisé…',
+    donateErrAmount: 'Choisissez un montant entre {min} et {max}.',
+    donateErrEmail: 'Adresse e-mail invalide.',
+    donateErrGeneric: 'Impossible d’ouvrir la page de paiement. Réessayez ou choisissez un autre moyen.',
+    donateSecureNote: 'Paiement traité par Chargily Pay — les données de votre carte ne transitent pas par notre site.',
+    donateQrAlt: 'QR code pour donner via BaridiMob',
+    donateQrPending: 'Le QR code officiel sera publié bientôt',
+    baridiSteps: [
+      'Ouvrez l’application BaridiMob.',
+      'Choisissez « Virement », puis scannez le QR code ou collez le RIP.',
+      'Indiquez « Insaf » en référence et validez.',
+    ],
+    ccpSteps: [
+      'Rendez-vous dans un bureau de poste ou utilisez BaridiMob.',
+      'Remplissez un bordereau de versement au nom de l’association Insaf Sétif.',
+      'Conservez votre reçu de versement.',
+    ],
+    ccpAccountLabel: 'N° de compte',
+    ccpKeyLabel: 'Clé',
+    donatePending: 'Bientôt',
+    donateCopy: 'Copier',
+    donateCopied: 'Copié',
+    intlHolder: 'Titulaire',
+    intlBank: 'Banque',
+    intlSortCode: 'Sort code',
+    donateNote: 'Merci d’indiquer votre nom et « Insaf Setif » dans la référence du virement.',
+    donateTrustRegistered: 'Association civile — Sétif, depuis 2014',
+    donateTrustSecure: 'Paiement chiffré via Chargily Pay',
+    donateTrustReceipt: 'Un reçu ou une question ? Contactez-nous',
+    donateStatus: {
+      success: { title: 'Merci ! Votre don a bien été reçu.', text: 'Votre générosité ira aux enfants. Merci de faire partie de l’impact d’Insaf.' },
+      failure: { title: 'Le paiement n’a pas abouti.', text: 'Aucun montant n’a été débité. Vous pouvez réessayer ou choisir un autre moyen ci-dessous.' },
+    },
   },
   en: {
     brand: 'Association Insaf Sétif', strap: 'Child protection, inclusion, solidarity',
@@ -327,55 +505,147 @@ const translations = {
     overviewText: 'Association Insaf Sétif works for child rights, youth accompaniment, social reintegration and community solidarity in Sétif.',
     copyright: '© 2024 Association Insaf Sétif. All rights reserved.',
     notFoundTitle: '404', notFoundText: 'Page not found', notFoundBtn: 'Back to home',
-    // Next-Level additions
-    urgencyFunded: '% funded', urgencyBtn: 'Help Now',
+    // Donation platform (Phase G)
+    navDonate: 'Donate',
+    helpChildNow: 'Help a child now',
     impactPhotos: 'documented photos',
-    childrenHubBadge: 'Children Help Initiative',
-    childrenHubTitle: 'One Child. One Chance. Your Donation Makes the Difference.',
-    childrenHubSub: 'We support orphans and children from vulnerable families in Sétif with education, healthcare, and winter essentials.',
-    childrenStoriesTitle: 'Real Impact Stories',
-    donateNow: 'Donate Now',
-    helpChildNow: 'Help a Child Now',
-    forestBadge: '🔥 Emergency Response — Forest Fires',
-    forestTitle: 'When Algeria Burns, Insaf Answers.',
-    forestSub: 'Fires devastate forests, displace families, and traumatize children. We were on the ground.',
-    forestBody1: 'During the recent wave of wildfires that swept Algeria\'s forests, Association Insaf Sétif mobilized immediately. Volunteers distributed emergency aid, supported displaced families, and paid special attention to children traumatized by the disaster.',
-    forestBody2: 'Because responding to crises is a core part of our mission — civil society never sleeps.',
-    forestStatLabel: 'families supported directly',
-    forestCTA: 'Read the full story',
-    natureBadge: '🌿 The Environment Is Our Shared Responsibility',
-    natureTitle: 'Forests, Clean Water, and a Green Future',
-    natureSub: 'What we plant today, tomorrow\'s children inherit. The environment is not a luxury — it is a right.',
-    natureForestTitle: 'Algerian Forests',
-    natureForestText: 'Algeria\'s green lungs need our protection. Reforestation, awareness, and defense of biodiversity.',
-    natureForestStat: 'Algeria has over 4.7 million hectares of forests — a heritage worth protecting.',
-    natureWaterTitle: 'Clean Water',
-    natureWaterText: 'Access to clean water is a fundamental right for every child. Insaf advocates for improved access in rural areas.',
-    natureWaterStat: 'Clean water saves lives — especially those of children in vulnerable areas.',
-    natureFutureTitle: 'A Green Future',
-    natureFutureText: 'Environmental awareness is part of civic education. Insaf integrates ecological consciousness into its community programs.',
-    natureFutureStat: 'A child who knows the value of a tree will protect the forest tomorrow.',
-    donateSectionTitle: 'Support Our Work',
-    donateSectionSub: 'Every donation reaches the field directly.',
-    donateBoxTitle: 'International Bank Transfer',
-    donateNote: 'Please include your name and "Insaf Sétif" in the payment reference.',
-    donateFbBtn: 'Donate via Facebook',
-    campaignSectionTitle: 'Our Active Campaigns',
-    campaignSectionSub: 'Track the progress of our three field campaigns and be part of the impact.',
-    campaignChildrenLabel: 'Children\'s School Supplies Campaign',
-    campaignForestLabel: 'Forest Fire Relief Fund',
-    campaignWinterLabel: 'Warm Winter Campaign',
-    campaignRaised: 'Raised',
+    appealRegionLabel: 'Seasonal campaign appeal',
+    appealDismiss: 'Dismiss appeal',
+    appeals: {
+      school:   { title: 'Back to school', text: 'A complete school kit for an orphan starts at 5,000 DA.', cta: 'Equip a child' },
+      wildfire: { title: 'Wildfire season', text: 'Our solidarity fund supports families hit by forest fires.', cta: 'Support the fund' },
+      winter:   { title: 'Warm winter', text: 'A coat and warm shoes for a child in the Sétif highlands: 3,500 DA.', cta: 'Warm a child' },
+      ramadan:  { title: 'Ramadan food baskets', text: 'Help fill Ramadan food baskets for families in need in Sétif.', cta: 'Give now' },
+      orphans:  { title: 'Support a child', text: 'Your help opens school and care to an orphaned child.', cta: 'Help now' },
+    },
+    tickerLabel: 'Recent activity',
+    tickerAll: 'All news',
+    childrenHubBadge: 'Children’s rights & orphan support',
+    childrenHubTitle: 'One child. One chance. Your gift makes the difference.',
+    childrenHubSub: 'We stand beside orphans and children from vulnerable families in Sétif: a seat in school, care on time, and warmth in winter.',
+    childTiers: {
+      school: { title: 'Complete school kit', desc: 'Notebooks, supplies, a school bag and smock for a full school year.', impact: 'A child walks into class with confidence' },
+      health: { title: 'Healthcare', desc: 'A check-up, essential medicines and follow-up for one child for a year.', impact: 'Care on time, not too late' },
+      winter: { title: 'Winter warmth', desc: 'A coat, warm shoes and winter clothes against the highland cold.', impact: 'A safer winter' },
+    },
+    giveAmount: 'Give {amount}',
+    childStoriesTitle: 'What your gift makes possible',
+    childStories: [
+      { text: 'On the first day of school she walked in with a new bag and a clean smock, and told her teacher she would become a doctor.', who: 'S., 8' },
+      { text: 'After a check-up that came in time, he was back on the neighbourhood pitch with his friends every evening.', who: 'Y., 10' },
+      { text: 'A warm coat and sturdy shoes made his long winter walk to school a little less harsh.', who: 'M., 12' },
+    ],
+    childStoriesDisclosure: 'Illustrative composite stories — names and details changed to protect children’s privacy.',
+    carouselPrev: 'Previous story', carouselNext: 'Next story', carouselGoTo: 'Go to story',
+    childPhotoAlt: 'Children and staff from Insaf on an outing for International Children’s Day',
+    childPhotoCaption: 'Insaf activity — International Children’s Day, June 2026',
+    fireBadge: 'Wildfire solidarity',
+    fireTitle: 'When Algeria’s forests burn, solidarity answers.',
+    fireIntro: 'Almost every summer, wildfires strike the forests of northern Algeria, destroying homes and harvests and leaving children in shock. Insaf’s solidarity fund channels your donations to affected families.',
+    fireListLead: 'Your gift to the fund helps provide:',
+    fireActions: [
+      'Emergency family kits: water, food and blankets',
+      'School supplies for children who lost theirs',
+      'Psychosocial activities for children after the trauma',
+      'Replanting drives with volunteers once the ground is safe',
+    ],
+    fireHonor: 'We salute the Civil Protection firefighters, forest rangers and citizen volunteers who stand on the front line every summer.',
+    fireCta: 'Support the solidarity fund',
+    natureBadge: 'Green life',
+    natureTitle: 'Forests, water and our children’s future',
+    natureSub: 'What we plant today, tomorrow’s children inherit. With volunteers and schools, we grow respect for nature and access to water for all.',
+    natureCards: {
+      reforest:  { title: 'Reforestation', text: 'Planting days with volunteers and pupils to bring damaged land back to life.', help: 'Join a planting day or fund seedlings.' },
+      water:     { title: 'Rural water', text: 'Advocating for safe drinking water for children in remote villages.', help: 'Back water projects in rural municipalities.' },
+      education: { title: 'Environmental education', text: 'Workshops that teach children the value of trees and water, and the danger of fire.', help: 'Lead a workshop at your school.' },
+    },
+    campaignSectionTitle: 'Our active campaigns',
+    campaignSectionSub: 'Pick a campaign and follow its progress — every contribution brings us closer to the goal.',
+    campaigns: {
+      school:   { title: 'Back-to-school kits', desc: 'Equipping orphans for the school year.' },
+      wildfire: { title: 'Wildfire solidarity fund', desc: 'Supporting families and children affected by forest fires.' },
+      winter:   { title: 'Warm winter campaign', desc: 'Winter clothing for children in the Sétif highlands.' },
+    },
+    campaignRaised: 'raised',
     campaignGoal: 'Goal',
+    campaignAlmost: 'Almost there — help us finish!',
     campaignDonate: 'Contribute',
+    campaignIllustrative: 'Illustrative figures, pending the association’s verified totals.',
+    donatePageLabel: 'Donate',
+    donatePageTitle: 'Your gift reaches children',
+    donatePageLead: 'Choose what suits you: Edahabia or CIB card online, BaridiMob, or a CCP postal account.',
+    donateBoxTitle: 'Make a donation',
+    donateBoxSub: 'Secure Algerian payment methods, in one minute.',
+    donateTestMode: 'Test mode — no real money is charged',
+    donateMethodsLabel: 'Ways to give',
+    donateTabs: {
+      card:          { label: 'Edahabia / CIB', hint: 'Instant online payment', title: 'Edahabia or CIB card' },
+      baridimob:     { label: 'BaridiMob', hint: 'QR code or RIP', title: 'Transfer with BaridiMob / BaridiPay' },
+      ccp:           { label: 'CCP account', hint: 'At any post office', title: 'Deposit to the CCP postal account' },
+      international: { label: 'International', hint: 'From outside Algeria', title: 'International bank transfer' },
+    },
+    donateAmountLegend: 'Choose an amount',
+    donateCustomLabel: 'Or enter another amount',
+    donateCustomPlaceholder: 'e.g. 2500',
+    donateDesignationLabel: 'Direct my gift to',
+    designations: {
+      general:  { label: 'Where the need is greatest' },
+      school:   { label: 'School kits', unitLabel: 'school kit' },
+      health:   { label: 'Children’s healthcare', unitLabel: 'year of care for a child' },
+      winter:   { label: 'Warm winter', unitLabel: 'winter kit for a child' },
+      wildfire: { label: 'Wildfire solidarity fund' },
+      ramadan:  { label: 'Ramadan food baskets' },
+    },
+    donateCardLegend: 'Card type',
+    donateMethods: { edahabia: 'Edahabia (Algérie Poste)', cib: 'CIB (bank card)' },
+    donateYourGift: 'Your gift',
+    donateEnterAmount: 'Enter an amount between 100 and 500,000 DA.',
+    impactGeneral: 'Directed to child-protection and solidarity programmes where the need is greatest.',
+    impactCovers: 'Covers {n} × {item}',
+    impactTopUp: '{pct}% of a {item} — add {missing} to complete it.',
+    donateNameLabel: 'Name',
+    donateEmailLabel: 'Email',
+    optional: 'optional',
+    donatePay: 'Donate {amount} securely',
+    donateRedirecting: 'Redirecting to secure checkout…',
+    donateErrAmount: 'Please choose an amount between {min} and {max}.',
+    donateErrEmail: 'That email address doesn’t look right.',
+    donateErrGeneric: 'We couldn’t open the payment page. Please try again or choose another method.',
+    donateSecureNote: 'Payment is processed by Chargily Pay — your card details never pass through our site.',
+    donateQrAlt: 'QR code to donate with BaridiMob',
+    donateQrPending: 'The official QR code will be published soon',
+    baridiSteps: [
+      'Open the BaridiMob app.',
+      'Choose “Transfer”, then scan the QR code or paste the RIP.',
+      'Enter “Insaf” as the reference and confirm.',
+    ],
+    ccpSteps: [
+      'Go to any post office, or use BaridiMob.',
+      'Fill in a deposit slip (versement) in the name of Association Insaf Sétif.',
+      'Keep your deposit receipt.',
+    ],
+    ccpAccountLabel: 'Account no.',
+    ccpKeyLabel: 'Key (clé)',
+    donatePending: 'Coming soon',
+    donateCopy: 'Copy',
+    donateCopied: 'Copied',
+    intlHolder: 'Account holder',
+    intlBank: 'Bank',
+    intlSortCode: 'Sort code',
+    donateNote: 'Please include your name and “Insaf Setif” in the transfer reference.',
+    donateTrustRegistered: 'Civil association — Sétif, since 2014',
+    donateTrustSecure: 'Encrypted payment via Chargily Pay',
+    donateTrustReceipt: 'Need a receipt or have a question? Contact us',
+    donateStatus: {
+      success: { title: 'Thank you! Your donation was received.', text: 'Your generosity will reach the children. Thank you for being part of Insaf’s impact.' },
+      failure: { title: 'The payment wasn’t completed.', text: 'No money was charged. You can try again or choose another method below.' },
+    },
   }
 };
 
 /* ============================================================
    CONTEXT & HOOKS
    ============================================================ */
-const LangContext = React.createContext({ t: translations.ar, lang: 'ar', setLang: () => {} });
-
 function LangProvider({ children }) {
   const [lang, setLangState] = React.useState(() => {
     if (typeof window !== 'undefined') return localStorage.getItem('insaf-lang') || 'ar';
@@ -400,8 +670,6 @@ function LangProvider({ children }) {
     </LangContext.Provider>
   );
 }
-
-function useLang() { return React.useContext(LangContext); }
 
 function useScrollReveal() {
   React.useEffect(() => {
@@ -473,17 +741,15 @@ function useBackToTop() {
 
 function clean(s = '') { return (s || '').replace(/[#_]/g, ' ').replace(/\s+/g, ' ').trim(); }
 
-function dateFmt(d, locale = 'ar-DZ') {
-  try { return new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(d)); }
-  catch { return d?.slice(0, 10) || ''; }
-}
-
 function categories() { return ['All', ...Array.from(new Set(resolvedNewsPosts.map(p => p.category)))]; }
 
 const photoCatalog = resolvedNewsPosts.flatMap(p => p.images?.filter(Boolean).map(img => ({ img, cat: p.category, title: p.title })) || []);
 const aboutImage = photoCatalog.find(p => p.img)?.img || withBase('/LOGO.jpg');
 const galleryImages = photoCatalog.slice(0, 24);
 const featured = resolvedNewsPosts.filter(p => p.image).slice(0, 6);
+const tickerPosts = resolvedNewsPosts.slice(0, 12);
+// Real Insaf activity photo: International Children's Day outing, June 2026.
+const childrenHubPhoto = { src: withBase('/photos/999625755794497.jpg') };
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -581,6 +847,7 @@ function SiteShell({ children }) {
               </button>
             ))}
           </div>
+          <HeaderDonateButton />
           <button className="menuBtn" onClick={() => setMobileOpen(o => !o)} aria-label="Toggle menu">
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -951,92 +1218,6 @@ function Toast({ msg, type, show }) {
 
 
 /* ============================================================
-   URGENCY BANNER (Steps 4)
-   ============================================================ */
-function UrgencyBanner() {
-  const [visible, setVisible] = React.useState(
-    () => !sessionStorage.getItem('insaf-banner-closed')
-  );
-  const { t, lang } = useLang();
-
-  const month = new Date().getMonth(); // 0-indexed
-  let campaign;
-  if (month >= 9 || month <= 1) {
-    campaign = {
-      pct: 68,
-      label: lang === 'ar'
-        ? '🧥 حملة شتاء دافئ للأطفال — جمع المستلزمات جارٍ'
-        : lang === 'fr'
-        ? '🧥 Campagne hiver chaud pour enfants — collecte en cours'
-        : '🧥 Warm Winter Campaign for Children — Collection ongoing',
-    };
-  } else if (month >= 6 && month <= 8) {
-    campaign = {
-      pct: 45,
-      label: lang === 'ar'
-        ? '🔥 استجابة طارئة لحرائق الغابات — نحتاج دعمك الآن'
-        : lang === 'fr'
-        ? '🔥 Réponse d\'urgence incendies — Votre aide est urgente'
-        : '🔥 Forest Fire Emergency Response — We need you now',
-    };
-  } else {
-    campaign = {
-      pct: 55,
-      label: lang === 'ar'
-        ? '❤️ دعم الأطفال الأيتام — حملة مستمرة'
-        : lang === 'fr'
-        ? '❤️ Soutien aux orphelins — campagne en cours'
-        : '❤️ Orphan Children Support — campaign ongoing',
-    };
-  }
-
-  if (!visible) return null;
-
-  return (
-    <div className="urgencyBanner" role="alert" aria-label="Active campaign">
-      <span className="urgencyBanner-pulse" aria-hidden="true" />
-      <span className="urgencyBanner-label">{campaign.label}</span>
-      <div className="urgencyBanner-bar" role="progressbar" aria-valuenow={campaign.pct} aria-valuemin={0} aria-valuemax={100}>
-        <div className="urgencyBanner-fill" style={{ '--fill-pct': `${campaign.pct}%`, width: `${campaign.pct}%` }} />
-      </div>
-      <span className="urgencyBanner-pct">{campaign.pct}{t.urgencyFunded}</span>
-      <a href="#children-help" className="urgencyBanner-btn">{t.urgencyBtn}</a>
-      <button
-        className="urgencyBanner-close"
-        onClick={() => { sessionStorage.setItem('insaf-banner-closed', '1'); setVisible(false); }}
-        aria-label="Close banner"
-      >×</button>
-    </div>
-  );
-}
-
-/* ============================================================
-   ACTIVITY TICKER (Step 5)
-   ============================================================ */
-function ActivityTicker() {
-  const { lang } = useLang();
-  const items = resolvedNewsPosts.slice(0, 12);
-  const doubled = [...items, ...items];
-  const locale = lang === 'ar' ? 'ar-DZ' : lang === 'fr' ? 'fr-FR' : 'en-GB';
-  const label = lang === 'ar' ? '● نشاطات حديثة' : lang === 'fr' ? '● Activités récentes' : '● Recent activity';
-
-  return (
-    <div className="activityTicker" aria-label="Recent activity feed">
-      <span className="ticker-label">{label}</span>
-      <div className="ticker-track" aria-hidden="true">
-        {doubled.map((p, i) => (
-          <span key={i} className="ticker-item">
-            <span className="ticker-dot" />
-            {p.title || p.text?.slice(0, 60) || '…'}
-            <time>{dateFmt(p.date, locale)}</time>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ============================================================
    IMPACT CARD (Step 6 — upgraded)
    ============================================================ */
 function ImpactCard({ number, suffix = '', labelKey, icon: Icon, delay, accentColor = 'var(--blue)' }) {
@@ -1064,436 +1245,6 @@ function ImpactCard({ number, suffix = '', labelKey, icon: Icon, delay, accentCo
 }
 
 /* ============================================================
-   CHILDREN HELP HUB (Step 7)
-   ============================================================ */
-function ChildrenHelpHub() {
-  const { t, lang } = useLang();
-  const [activeStory, setActiveStory] = React.useState(0);
-
-  // Auto-advance story carousel
-  React.useEffect(() => {
-    const timer = setInterval(() => setActiveStory(s => (s + 1) % 3), 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const tiers = [
-    {
-      icon: <BookOpen size={32} />,
-      title: { ar: 'المستلزمات المدرسية', fr: 'Fournitures scolaires', en: 'School Supplies' },
-      desc: {
-        ar: 'كراريس، أقلام، حقيبة، وزي مدرسي لطفل يتيم لعام كامل.',
-        fr: 'Cahiers, crayons, sac et uniforme pour un orphelin pendant un an.',
-        en: 'Notebooks, pens, bag, and uniform for one orphan for a full year.',
-      },
-      amount: '5 000 DA',
-      color: 'var(--green)',
-    },
-    {
-      icon: <HeartHandshake size={32} />,
-      title: { ar: 'الرعاية الصحية', fr: 'Soins médicaux', en: 'Medical Care' },
-      desc: {
-        ar: 'تغطية كشف طبي، أدوية، وتطعيمات لطفل طوال السنة.',
-        fr: 'Couverture médicale, médicaments et vaccins pour un enfant.',
-        en: 'Medical checkup, medicines, and vaccinations for one child.',
-      },
-      amount: '8 000 DA',
-      color: 'var(--blue)',
-    },
-    {
-      icon: <Sparkles size={32} />,
-      title: { ar: 'ملابس الشتاء', fr: 'Vêtements d\'hiver', en: 'Winter Clothing' },
-      desc: {
-        ar: 'معطف، أحذية دافئة، وملابس شتوية كاملة لطفل محتاج.',
-        fr: 'Manteau, chaussures chaudes et vêtements d\'hiver complets.',
-        en: 'Coat, warm shoes, and full winter clothing for a child in need.',
-      },
-      amount: '3 500 DA',
-      color: 'var(--red)',
-    },
-  ];
-
-  const stories = [
-    {
-      initials: 'ط. م.',
-      age: { ar: '9 سنوات', fr: '9 ans', en: '9 years old' },
-      text: {
-        ar: 'بفضل دعمكم، تمكّن من العودة إلى المدرسة بعد انقطاع. اليوم هو متفوق في الفصل.',
-        fr: 'Grâce à votre soutien, il a pu retourner à l\'école. Aujourd\'hui, c\'est un élève brillant.',
-        en: 'Thanks to your support, he returned to school after a gap. Today, he is top of his class.',
-      },
-    },
-    {
-      initials: 'ر. ب.',
-      age: { ar: '7 سنوات', fr: '7 ans', en: '7 years old' },
-      text: {
-        ar: 'تلقّت علاجاً طبياً ضرورياً في الوقت المناسب. عائلتها تشكر المتطوعين بدموع الفرح.',
-        fr: 'Elle a reçu un traitement médical essentiel à temps. Sa famille remercie les bénévoles avec joie.',
-        en: 'She received essential medical treatment in time. Her family thanks volunteers with tears of joy.',
-      },
-    },
-    {
-      initials: 'أ. م.',
-      age: { ar: '11 سنة', fr: '11 ans', en: '11 years old' },
-      text: {
-        ar: 'استلم حقيبة مدرسية وملابس شتاء لأول مرة في حياته. ابتسامته لا تفارقه.',
-        fr: 'Il a reçu un sac scolaire et des vêtements d\'hiver pour la première fois. Son sourire ne le quitte plus.',
-        en: 'He received a school bag and winter clothes for the first time. His smile hasn\'t left since.',
-      },
-    },
-  ];
-
-  const pick = obj => lang === 'ar' ? obj.ar : lang === 'fr' ? obj.fr : obj.en;
-
-  return (
-    <section className="childrenHub pageSection" id="children-help">
-      <div className="sectionIntro reveal">
-        <span className="hub-badge">
-          <Heart size={14} /> {t.childrenHubBadge}
-        </span>
-        <h2>{t.childrenHubTitle}</h2>
-        <p>{t.childrenHubSub}</p>
-      </div>
-
-      <div className="tierGrid">
-        {tiers.map((tier, i) => (
-          <div key={i} className={`tierCard reveal stagger-${i + 1}`} style={{ '--tier-color': tier.color }}>
-            <div className="tierCard-icon">{tier.icon}</div>
-            <h3>{pick(tier.title)}</h3>
-            <p>{pick(tier.desc)}</p>
-            <div className="tierCard-amount">{tier.amount}</div>
-            <a href="#donate" className="tier-btn">{t.donateNow}</a>
-          </div>
-        ))}
-      </div>
-
-      <div className="storyCarousel reveal">
-        <h3 className="storyCarousel-title">{t.childrenStoriesTitle}</h3>
-        <div className="storySlides">
-          {stories.map((s, i) => (
-            <div key={i} className={`storySlide${i === activeStory ? ' active' : ''}`}>
-              <blockquote>
-                <p>"{pick(s.text)}"</p>
-                <footer>— {s.initials}, {pick(s.age)}</footer>
-              </blockquote>
-            </div>
-          ))}
-        </div>
-        <div className="storyDots" role="tablist">
-          {stories.map((_, i) => (
-            <button
-              key={i}
-              className={`storyDot${i === activeStory ? ' active' : ''}`}
-              onClick={() => setActiveStory(i)}
-              aria-label={`Story ${i + 1}`}
-              role="tab"
-              aria-selected={i === activeStory}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div className="hubCTA reveal">
-        <a href="#donate" className="accent-btn large">
-          <Heart size={20} />
-          {t.helpChildNow}
-        </a>
-      </div>
-    </section>
-  );
-}
-
-/* ============================================================
-   FOREST FIRE SECTION (Step 8)
-   ============================================================ */
-function ForestFireSection() {
-  const { t, lang } = useLang();
-  const forestPhotos = resolvedNewsPosts
-    .filter(p => p.image)
-    .slice(0, 4);
-
-  return (
-    <section className="forestSection pageSection">
-      <div className="forestLayout">
-        <div className="forestText reveal-left">
-          <span className="forest-badge">
-            <Flame size={14} /> {t.forestBadge}
-          </span>
-          <h2>{t.forestTitle}</h2>
-          <p>{t.forestBody1}</p>
-          <p>{t.forestBody2}</p>
-          <div className="forestStat">
-            <span className="forestStat-num">150+</span>
-            <span className="forestStat-label">{t.forestStatLabel}</span>
-          </div>
-          <a
-            href={contact.facebook}
-            target="_blank"
-            rel="noreferrer"
-            className="forestCTA-btn"
-          >
-            {t.forestCTA} <ArrowUpRight size={16} />
-          </a>
-        </div>
-
-        <div className="forestPhotoGrid reveal-right">
-          {forestPhotos.length > 0
-            ? forestPhotos.map((p, i) => (
-                <img
-                  key={i}
-                  src={p.image}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  onError={e => { e.target.style.display = 'none'; }}
-                />
-              ))
-            : [1, 2, 3, 4].map(i => (
-                <div
-                  key={i}
-                  style={{
-                    background: 'rgba(243,154,34,0.15)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    aspectRatio: '1',
-                  }}
-                >
-                  <Flame size={32} style={{ color: 'var(--orange)', opacity: 0.5 }} />
-                </div>
-              ))
-          }
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ============================================================
-   NATURE PILLAR SECTION (Step 9)
-   ============================================================ */
-function NaturePillarSection() {
-  const { t } = useLang();
-
-  const pillars = [
-    {
-      icon: <Trees size={28} />,
-      iconClass: 'green',
-      titleKey: 'natureForestTitle',
-      textKey:  'natureForestText',
-      statKey:  'natureForestStat',
-    },
-    {
-      icon: <Droplets size={28} />,
-      iconClass: 'blue',
-      titleKey: 'natureWaterTitle',
-      textKey:  'natureWaterText',
-      statKey:  'natureWaterStat',
-    },
-    {
-      icon: <Leaf size={28} />,
-      iconClass: 'yellow',
-      titleKey: 'natureFutureTitle',
-      textKey:  'natureFutureText',
-      statKey:  'natureFutureStat',
-    },
-  ];
-
-  return (
-    <section className="natureSection pageSection">
-      <div className="sectionIntro reveal">
-        <span className="nature-badge">{t.natureBadge}</span>
-        <h2>{t.natureTitle}</h2>
-        <p>{t.natureSub}</p>
-      </div>
-
-      <div className="naturePillarGrid">
-        {pillars.map((p, i) => (
-          <div key={i} className={`naturePillarCard reveal stagger-${i + 1}`}>
-            <div className={`naturePillarCard-icon ${p.iconClass}`}>{p.icon}</div>
-            <h3>{t[p.titleKey]}</h3>
-            <p>{t[p.textKey]}</p>
-            <div className="naturePillarCard-stat">{t[p.statKey]}</div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ============================================================
-   DONATE BOX (Step 10)
-   ============================================================ */
-function DonateBox() {
-  const { t, lang } = useLang();
-  const [copied, setCopied] = React.useState(null);
-
-  const copy = (val, key) => {
-    navigator.clipboard.writeText(val).then(() => {
-      setCopied(key);
-      setTimeout(() => setCopied(null), 2200);
-    });
-  };
-
-  const fields = [
-    { label: lang === 'ar' ? 'صاحب الحساب' : lang === 'fr' ? 'Titulaire' : 'Account holder', value: DONATION_BANK.holder, key: 'holder' },
-    { label: 'IBAN', value: DONATION_BANK.iban, key: 'iban' },
-    { label: 'SWIFT / BIC', value: DONATION_BANK.swift, key: 'swift' },
-    { label: lang === 'ar' ? 'البنك' : 'Banque / Bank', value: DONATION_BANK.bank, key: 'bank' },
-    { label: lang === 'ar' ? 'الكود البريدي' : 'Sort code', value: DONATION_BANK.sortCode, key: 'sort' },
-  ];
-
-  return (
-    <section className="donateSection pageSection" id="donate">
-      <div className="sectionIntro reveal">
-        <h2>{t.donateSectionTitle}</h2>
-        <p>{t.donateSectionSub}</p>
-      </div>
-
-      <div className="donateBox reveal">
-        <div className="donateBox-header">
-          <HandHeart size={28} />
-          <h2>{t.donateBoxTitle}</h2>
-        </div>
-
-        <div className="donateBox-fields">
-          {fields.map(f => (
-            <div key={f.key} className="donateField">
-              <span className="donateField-label">{f.label}</span>
-              <span className="donateField-value" dir="ltr">{f.value}</span>
-              <button
-                className={`donateField-copy${copied === f.key ? ' copied' : ''}`}
-                onClick={() => copy(f.value, f.key)}
-                aria-label={`Copy ${f.label}`}
-                title={lang === 'ar' ? 'نسخ' : lang === 'fr' ? 'Copier' : 'Copy'}
-              >
-                {copied === f.key
-                  ? <CheckCheck size={15} />
-                  : <ClipboardCopy size={15} />}
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <p className="donateBox-note">{t.donateNote}</p>
-
-        <a
-          href={contact.facebook}
-          target="_blank"
-          rel="noreferrer"
-          className="donateBox-fb"
-        >
-          <FacebookIcon size={18} />
-          {t.donateFbBtn}
-        </a>
-      </div>
-    </section>
-  );
-}
-
-/* ============================================================
-   CAMPAIGN PROGRESS SECTION (Step 11)
-   ============================================================ */
-function CampaignSection() {
-  const { t } = useLang();
-
-  const campaigns = [
-    {
-      titleKey: 'campaignChildrenLabel',
-      icon: <BookOpen size={20} />,
-      raised: 340000,
-      goal: 500000,
-      color: 'var(--green)',
-    },
-    {
-      titleKey: 'campaignForestLabel',
-      icon: <Flame size={20} />,
-      raised: 360000,
-      goal: 800000,
-      color: 'var(--orange)',
-    },
-    {
-      titleKey: 'campaignWinterLabel',
-      icon: <Sparkles size={20} />,
-      raised: 204000,
-      goal: 300000,
-      color: 'var(--blue)',
-    },
-  ];
-
-  return (
-    <section className="campaignSection pageSection">
-      <div className="sectionIntro reveal">
-        <h2>{t.campaignSectionTitle}</h2>
-        <p>{t.campaignSectionSub}</p>
-      </div>
-
-      <div className="campaignGrid">
-        {campaigns.map((c, i) => {
-          const pct = Math.min(Math.round((c.raised / c.goal) * 100), 100);
-          return (
-            <CampaignCard
-              key={i}
-              title={t[c.titleKey]}
-              icon={c.icon}
-              raised={c.raised}
-              goal={c.goal}
-              pct={pct}
-              color={c.color}
-              raisedLabel={t.campaignRaised}
-              goalLabel={t.campaignGoal}
-              ctaLabel={t.campaignDonate}
-              delay={i + 1}
-            />
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-function CampaignCard({ title, icon, raised, goal, pct, color, raisedLabel, goalLabel, ctaLabel, delay }) {
-  const ref = React.useRef(null);
-  const [animated, setAnimated] = React.useState(false);
-
-  React.useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setAnimated(true); obs.disconnect(); } },
-      { threshold: 0.4 }
-    );
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, []);
-
-  return (
-    <div
-      className={`campaignCard reveal stagger-${delay}`}
-      ref={ref}
-      style={{ '--campaign-color': color }}
-    >
-      <div className="campaignCard-top">
-        <div className="campaignCard-icon">{icon}</div>
-        <span className="campaignCard-title">{title}</span>
-        <span className="campaignCard-pct">{pct}%</span>
-      </div>
-
-      <div className="campaignBar" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-        <div
-          className="campaignBar-fill"
-          style={{ width: animated ? `${pct}%` : '0%', background: color }}
-        />
-      </div>
-
-      <div className="campaignCard-bottom">
-        <span>{raised.toLocaleString()} DA {raisedLabel}</span>
-        <span>{goalLabel}: {goal.toLocaleString()} DA</span>
-      </div>
-
-      <a href="#donate" className="campaignCard-cta">{ctaLabel} →</a>
-    </div>
-  );
-}
-
-/* ============================================================
    HOME PAGE (Step 12 — updated render order)
    ============================================================ */
 function HomePage() {
@@ -1515,9 +1266,14 @@ function HomePage() {
           <h1>{t.heroTitle}</h1>
           <p>{t.heroSub}</p>
           <div className="heroActions">
-            <a href="#children-help" className="btn primary">
+            {/* In-page scroll: under HashRouter an href="#id" would be parsed as a route. */}
+            <button
+              type="button"
+              className="btn primary"
+              onClick={() => document.getElementById('children-help')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            >
               {t.helpChildNow} <Heart size={18} />
-            </a>
+            </button>
             <Link className="btn glass" to="/news">
               {t.ctaNews} <Newspaper size={18} />
             </Link>
@@ -1550,13 +1306,13 @@ function HomePage() {
       </section>
 
       {/* 2. ACTIVITY TICKER */}
-      <ActivityTicker />
+      <ActivityTicker posts={tickerPosts} />
 
       {/* 3. IMPACT COUNTERS — upgraded to 5 */}
       <section className="impactCounters">
         <div className="impactGrid">
           <ImpactCard number={2300} suffix="+" labelKey="impactBenef"    icon={Users}          delay={1} accentColor="var(--green)"  />
-          <ImpactCard number={15}             labelKey="impactPartners"   icon={HeartHandshake} delay={2} accentColor="var(--blue)"   />
+          <ImpactCard number={partners.length} labelKey="impactPartners"  icon={HeartHandshake} delay={2} accentColor="var(--blue)"   />
           <ImpactCard number={10}   suffix="+" labelKey="impactYears"      icon={CalendarDays}   delay={3} accentColor="var(--orange)" />
           <ImpactCard number={4}              labelKey="impactPrograms"   icon={Target}         delay={4} accentColor="var(--navy)"   />
           <ImpactCard number={837}  suffix="+" labelKey="impactPhotos"    icon={Camera}         delay={5} accentColor="var(--red)"    />
@@ -1564,19 +1320,16 @@ function HomePage() {
       </section>
 
       {/* 4. CHILDREN HELP HUB */}
-      <ChildrenHelpHub />
+      <ChildrenHelpHub photo={childrenHubPhoto} />
 
-      {/* 5. FOREST FIRE RESPONSE */}
-      <ForestFireSection />
+      {/* 5. GREEN LIFE: wildfire solidarity + nature & rural water */}
+      <NaturePillar />
 
-      {/* 6. NATURE / ENVIRONMENT */}
-      <NaturePillarSection />
+      {/* 6. CAMPAIGN PROGRESS */}
+      <CampaignSection />
 
       {/* 7. DONATION BOX */}
-      <DonateBox />
-
-      {/* 8. CAMPAIGN PROGRESS BARS */}
-      <CampaignSection />
+      <LocalDonationBox id="donate" embedded />
 
       {/* 9. OVERVIEW + QUICK CARDS (existing) */}
       <section className="homeIntro pageSection">
@@ -1704,7 +1457,8 @@ function GalleryStrip() {
 
 function PartnersRow() {
   const { t, lang } = useLang();
-  const doubled = [...partners, ...partners];
+  const reducedMotion = usePrefersReducedMotion();
+  const rtl = lang === 'ar';
   return (
     <section className="partnersRow">
       <div className="sectionIntro reveal" style={{ marginBottom: '1.5rem' }}>
@@ -1712,15 +1466,16 @@ function PartnersRow() {
         <h2>{t.partnersTitle}</h2>
         <p>{t.partnersLead}</p>
       </div>
-      <div className="partnersTicker">
-        <div className="partnersTrack" aria-hidden="true">
-          {doubled.map((p, i) => (
-            <div key={i} className="partnerItem">
+      {/* Marquee's flex layout inverts under dir="rtl"; run it LTR and let items keep their own direction. */}
+      <div className="partnersTicker" dir="ltr" aria-hidden="true">
+        <Marquee direction={rtl ? 'right' : 'left'} speed={30} pauseOnHover play={!reducedMotion} autoFill>
+          {partners.map((p) => (
+            <div key={p.name} className="partnerItem" dir={rtl ? 'rtl' : 'ltr'} style={{ marginInline: '0.75rem' }}>
               <p.Icon size={16} />
-              {lang === 'ar' ? p.nameAr : p.name}
+              {rtl ? p.nameAr : p.name}
             </div>
           ))}
-        </div>
+        </Marquee>
       </div>
     </section>
   );
@@ -2066,6 +1821,39 @@ function ContactPage() {
   );
 }
 
+/* ============================================================
+   DONATE PAGE — landing for every donate CTA and the Chargily return URL
+   ============================================================ */
+function readDonationReturn(routeSearch) {
+  // Chargily returns to /?donation=…#/donate; also accept the status inside the hash route.
+  const value = new URLSearchParams(window.location.search).get('donation')
+    || new URLSearchParams(routeSearch).get('donation');
+  return value === 'success' || value === 'failure' ? value : null;
+}
+
+function DonatePage() {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const [returnStatus] = React.useState(() => readDonationReturn(location.search));
+
+  // Drop ?donation=… from the real URL so a refresh or a shared link doesn't replay the banner.
+  React.useEffect(() => {
+    if (!window.location.search) return;
+    window.history.replaceState(window.history.state, '', window.location.pathname + window.location.hash);
+  }, []);
+
+  return (
+    <Page titleKey="donatePageTitle" labelKey="donatePageLabel" leadKey="donatePageLead">
+      <LocalDonationBox
+        key={location.search}
+        initialAmount={params.get('amount')}
+        initialDesignation={params.get('campaign')}
+        returnStatus={returnStatus}
+      />
+    </Page>
+  );
+}
+
 function NotFound() {
   const { t } = useLang();
   return (
@@ -2092,6 +1880,7 @@ function App() {
             <Route path="/achievements"  element={<AchievementsPage />} />
             <Route path="/news"          element={<NewsPage />} />
             <Route path="/contact"       element={<ContactPage />} />
+            <Route path="/donate"        element={<DonatePage />} />
             <Route path="*"              element={<NotFound />} />
           </Routes>
         </SiteShell>

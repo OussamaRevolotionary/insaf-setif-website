@@ -10,6 +10,9 @@ Insaf Association Setif's Photos (pb.100072412446373.-2207520000)/
 # Scraped reference data (competitor analysis docs) — may contain 3rd-party API tokens from scraped pages
 Charitywebsites/
 
+# n8n export containing the Chargily secret key — keep local, never publish (repo is public)
+n8n-chargily-workflow.json
+
 # OS / editor cruft
 .DS_Store
 Thumbs.db
