@@ -116,7 +116,113 @@
 
 **Live URL:** https://oussamarevolotionary.github.io/insaf-setif-website/
 
+---
+
+### Phase G — Enterprise donation platform ✅ (test mode)
+Strategy and benchmark evidence: [`docs/COMPETITIVE_ANALYSIS.md`](docs/COMPETITIVE_ANALYSIS.md).
+
+**G0. Ground rules followed**
+- No new code in `src/styles.css`. It only **shrank**: about 790 lines of dead §28–§34 CSS from the previous rebuild were removed. §35 flag stripe and §36 gallery are kept.
+- Every new style lives in a `*.module.css` file.
+- The 3D pages (`public/ecosystem_of_empowerment.html`, `public/timeline_of_progress.html`) are untouched (`git diff -- public` is empty).
+- The Chargily **secret key never reaches the browser or the repo.** It lives only in the n8n HTTP node. The importable export `n8n-chargily-workflow.json` is gitignored.
+
+**G1. Dependency**
+- `react-fast-marquee@^1.6.5`.
+- The package ships CommonJS. Vite 8's dev pre-bundler hands back the exports object instead of the component, which crashed the page with "Element type is invalid". `src/lib/marquee.js` unwraps `default`, so dev and prod behave the same. **Always import Marquee from there.**
+
+**G2. File map**
+```
+src/
+├─ main.jsx                      routes (+ /donate), SiteShell, HomePage wiring, i18n (ar/fr/en "Donation platform (Phase G)" blocks)
+├─ lib/
+│  ├─ lang.js                    LangContext, useLang(), pickLang()        (moved out of main.jsx — avoids circular imports)
+│  ├─ assets.js                  BASE_URL, withBase()                      (moved out of main.jsx)
+│  ├─ format.js                  dateFmt(), localeFor(), formatDA()        ("5 000 DA" / "5 000 دج")
+│  ├─ hooks.js                   useInViewOnce() (disconnects on first hit), usePrefersReducedMotion(), safeStorage*
+│  └─ marquee.js                 CJS-interop shim for react-fast-marquee
+├─ config/
+│  ├─ donation.js                webhook URL, test-mode flag, limits, presets, designations, LOCAL_RAILS (empty on purpose), INTERNATIONAL_BANK
+│  └─ campaigns.js               campaign goals, FIGURES_ARE_ILLUSTRATIVE, getSeasonalAppeal() (Gregorian + Hijri)
+└─ components/                   each with a matching *.module.css
+   ├─ UrgencyBanner              seasonal appeal, dismissible per appeal+year
+   ├─ HeaderDonateButton         persistent Donate pill; also owns the ≤480px compact-header rules
+   ├─ ActivityTicker             Marquee of real news posts (RTL-correct, pause on hover, reduced-motion aware)
+   ├─ ChildrenHelpHub            3 giving tiers + real photo + accessible composite-story carousel
+   ├─ NaturePillar               wildfire solidarity fund + SVG regrowth scene + 3 green programs
+   ├─ CampaignSection            progress bars (scaleX, compositor-only), one observer, disconnect after first view
+   └─ LocalDonationBox           tabs: Edahabia/CIB (Chargily) · BaridiMob · CCP · International
+```
+
+**G3. Component hierarchy**
+```
+App (HashRouter + LangContext)
+└─ SiteShell
+   ├─ UrgencyBanner ─────────────► Link /donate?campaign=…&amount=…
+   ├─ header … HeaderDonateButton ► NavLink /donate
+   └─ Routes
+      ├─ /        HomePage
+      │           ├─ ActivityTicker(posts)
+      │           ├─ impact counters (partners = partners.length)
+      │           ├─ ChildrenHelpHub(photo) ► tier Links /donate?campaign=school|health|winter&amount=…
+      │           ├─ NaturePillar ─────────► /donate?campaign=wildfire&amount=3500
+      │           ├─ CampaignSection
+      │           └─ LocalDonationBox(embedded)
+      └─ /donate  DonatePage ► LocalDonationBox(initialAmount, initialDesignation, returnStatus)
+```
+
+**G4. Payment flow (Chargily Pay V2, test)**
+```
+LocalDonationBox ──POST {amount, method, campaign, lang, name?, email?, website(honeypot)}──►
+  n8n  INSAF — Chargily Checkout Bridge  (id BKjVi4aLws3dLXyS, ACTIVE)
+       Webhook /webhook/chargily-checkout
+       → Code: sanitize · allowlist campaign/method/lang · 100 ≤ amount ≤ 500 000 (integer) · email check · honeypot
+               · reference INSAF-<time36>-<crypto hex> · success/failure URLs fixed server-side (no open redirect)
+       → IF valid ─► HTTP POST https://pay.chargily.net/test/api/v2/checkouts (Bearer secret, 15 s timeout)
+                    ├─ ok    ─► 200 { checkout_url (https), reference }   Cache-Control: no-store
+                    └─ error ─► 502 { error: payment_provider_error }
+             else ─► 400 { error }
+◄── browser checks checkout_url is https on a chargily.* host, then window.location.assign()
+Chargily ──► …/?donation=success|failure#/donate ──► DonatePage shows the panel, then strips the query
+```
+
+**G5. Verification log (2026-09-19)**
+- [x] Bridge API: 7 cases (valid edahabia/ar, valid cib/fr, amount 50, amount 12.5, bad email, honeypot, hostile campaign/lang) → 200/200/400/400/400/400/200 (normalized). Chargily stored the metadata correctly.
+- [x] Browser, end to end: health tier → `/donate?campaign=health&amount=8000` → 8 000 DA and "health" preselected → Pay → **landed on `pay.chargily.dz/test/checkouts/…/pay` for 8,000.00 DA, in Arabic**.
+- [x] Return panels: success and failure both render, and the `?donation=` query is removed from the URL.
+- [x] Tabs: RTL arrow-key navigation. Pending rails show "coming soon"; International shows 5 copy buttons.
+- [x] FR/EN LTR copy and layout; AR RTL.
+- [x] No horizontal overflow at 320, 360 and 375 px (ar/fr/en), 768 and 1280.
+  - The existing header already overflowed phones by ~38 px; the new Donate pill made it worse.
+  - Fixed with ≤480px compact-header rules in `HeaderDonateButton.module.css`.
+  - The reveal-animation offsets are contained with `overflow-x: clip`.
+- [x] `npm run build` green. The 3D pages were untouched.
+
+**G6. Go-live checklist (owner / association)**
+1. **Association data.** Fill `LOCAL_RAILS` in `src/config/donation.js`:
+   - BaridiMob RIP (20 digits) and the QR image at `public/baridipay-qr.png`
+   - CCP account + clé
+
+   Also replace `INTERNATIONAL_BANK`, which is currently a **personal** account, with the association's account.
+2. **Chargily dashboard.** Rename the app from "My new app" to **Insaf Sétif**. Donors see this name on the checkout page.
+3. **Live keys**, in n8n workflow `BKjVi4aLws3dLXyS`:
+   - Create an **HTTP Bearer Auth credential** holding the live secret, and select it on *Create Chargily Checkout*. Remove the inline header.
+   - Change the URL to `https://pay.chargily.net/api/v2/checkouts`.
+   - Publish.
+4. **Site.** Set `CHARGILY_TEST_MODE = false` in `src/config/donation.js`, then push; the Pages workflow deploys it.
+5. **Real numbers.** Enter the real campaign totals in `src/config/campaigns.js`, then set `FIGURES_ARE_ILLUSTRATIVE = false`. Also confirm the "2300 beneficiaries" counter.
+6. **Payment confirmation (recommended before launch).** Point a Chargily webhook to a new n8n workflow that:
+   - verifies the `signature` header (HMAC-SHA256 with the secret)
+   - appends the paid donation to a Sheet
+   - emails the donor a receipt
+
 ## 5. Change log
 - 2026-07-23 — Audit complete; plan authored; tracking started.
 - 2026-07-23 — Phases A–D complete: chat widget + cards rewritten (real CSS), webhooks split, i18n/copyright/orbit/a11y fixes, Facebook brand SVG (lucide crash fix), focus rings, real social-proof stats. Both n8n workflows built. Prod build green.
 - 2026-07-23 (session 2) — Created live Google Sheet, activated + live-tested both workflows (chatbot EN/AR ✓, contact sheet+emails ✓); fixed contact fan-out 4× duplication → linear. Rebranded both 3D pages to site theme + fixed timeline crash. dist rebuilt.
+- 2026-09-19 — **Phase G**:
+  - Competitive audit of 9 benchmark charities (`docs/COMPETITIVE_ANALYSIS.md`).
+  - Donation platform: `LocalDonationBox` with 4 rails and the Chargily V2 bridge (n8n `BKjVi4aLws3dLXyS`, live-tested end to end in test mode), `/donate` route, header Donate button.
+  - Pillar components: children hub, green life, campaigns, seasonal banner, Marquee ticker. All CSS Modules; `styles.css` shrank.
+  - Fixed the live bug where every Donate CTA opened the 404 page (HashRouter `#anchor` links).
+  - Removed unverifiable claims; illustrative figures are now labelled.

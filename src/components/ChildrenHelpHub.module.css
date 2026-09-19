@@ -1,0 +1,292 @@
+.hub {
+  position: relative;
+  background-color: #f7fbfd;
+  /* Zellige-inspired 8-point star (khatam) — a quiet nod to Algerian geometric craft */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%231f9bb4' stroke-opacity='0.08' stroke-width='1'%3E%3Crect x='16' y='16' width='24' height='24'/%3E%3Crect x='16' y='16' width='24' height='24' transform='rotate(45 28 28)'/%3E%3C/g%3E%3C/svg%3E");
+  border-top: 1px solid var(--line);
+  /* reveal-left/right start 30px off-axis; clip so they never widen the page on small phones */
+  overflow-x: clip;
+}
+
+.intro {
+  max-width: 820px;
+  margin: 0 auto var(--space-2xl);
+  text-align: center;
+}
+
+.intro h2 {
+  font-size: var(--text-3xl);
+  margin: 0.75rem 0 0.6rem;
+}
+
+.intro p { font-size: var(--text-lg); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-pill);
+  background: rgba(230, 63, 77, 0.1);
+  color: #c8303e;
+  font-size: var(--text-xs);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+/* ---------- Giving tiers ---------- */
+.tiers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-lg);
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.tier {
+  --tier: var(--blue);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: var(--space-xl) var(--space-lg) var(--space-lg);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: transform var(--dur-base) var(--ease-spring), box-shadow var(--dur-base) var(--ease-std);
+}
+
+.tier::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 4px;
+  background: var(--tier);
+}
+
+.tier:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.tierIcon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  color: var(--tier);
+  background: color-mix(in srgb, var(--tier) 12%, transparent);
+}
+
+.tier h3 { font-size: var(--text-xl); }
+
+.tierDesc {
+  flex: 1;
+  font-size: var(--text-sm);
+}
+
+.amount {
+  font-size: clamp(1.9rem, 3.2vw, 2.4rem);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--ink);
+  font-family: 'Inter', 'Cairo', sans-serif;
+}
+
+.impact {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--tier);
+  filter: brightness(0.82);
+}
+
+.tierBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  margin-top: 0.4rem;
+  border-radius: var(--radius-pill);
+  background: var(--tier);
+  color: #fff;
+  font-weight: 900;
+  font-size: var(--text-sm);
+  transition: filter var(--dur-fast) var(--ease-std), transform var(--dur-base) var(--ease-spring);
+}
+
+.tierBtn:hover { filter: brightness(1.07); transform: translateY(-1px); }
+
+/* ---------- Photo + stories ---------- */
+.storyRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: var(--space-xl);
+  align-items: stretch;
+  max-width: 1120px;
+  margin: var(--space-3xl) auto 0;
+}
+
+.photo {
+  margin: 0;
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  min-height: 320px;
+}
+
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo figcaption {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  padding: 2.5rem 1.1rem 0.9rem;
+  background: linear-gradient(to top, rgba(7, 17, 31, 0.82), transparent);
+  color: #eef4fb;
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.carousel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-xl);
+  background: #0c1c36;
+  color: #eaf2fc;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+}
+
+.carouselTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--yellow);
+  font-size: var(--text-lg);
+}
+
+/* All slides share one grid cell: the box sizes to the tallest story, so there is no jump. */
+.slides {
+  display: grid;
+  flex: 1;
+}
+
+.slide {
+  grid-area: 1 / 1;
+  margin: 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out), visibility 500ms;
+}
+
+.slide.active {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.slide p {
+  color: #eaf2fc;
+  font-size: var(--text-lg);
+  line-height: 1.75;
+}
+
+.slide footer {
+  margin-top: 0.75rem;
+  color: rgba(234, 242, 252, 0.6);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.navBtn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-std);
+}
+
+.navBtn:hover { background: rgba(255, 255, 255, 0.1); }
+
+.dots {
+  display: flex;
+  gap: 0.45rem;
+}
+
+/* Visible dot is 8px, but the hit target stays a comfortable 24px. */
+.dot {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dot::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: background var(--dur-fast), transform var(--dur-base) var(--ease-spring);
+}
+
+.dotActive::after {
+  background: var(--yellow);
+  transform: scale(1.35);
+}
+
+.disclosure {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0;
+  color: rgba(234, 242, 252, 0.55);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.disclosure svg { flex-shrink: 0; margin-top: 2px; }
+
+.cta {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-2xl);
+}
+
+@media (max-width: 1180px) {
+  .storyRow { grid-template-columns: 1fr; }
+  .photo { min-height: 260px; max-height: 420px; }
+}
+
+@media (max-width: 760px) {
+  .tiers { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide { transition: none; }
+}

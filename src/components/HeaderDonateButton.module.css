@@ -1,0 +1,53 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 42px;
+  padding: 0.45rem 1.05rem;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(135deg, #e5484d 0%, #c62f45 100%);
+  color: #fff;
+  font-weight: 900;
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  box-shadow: 0 10px 26px rgba(198, 47, 69, 0.32);
+  transition: transform var(--dur-base) var(--ease-spring), box-shadow var(--dur-base) var(--ease-std);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 32px rgba(198, 47, 69, 0.42);
+}
+
+.active {
+  box-shadow: 0 0 0 3px rgba(198, 47, 69, 0.22), 0 10px 26px rgba(198, 47, 69, 0.32);
+}
+
+/* On narrow phones keep the icon and hide the word visually (not from screen readers). */
+@media (max-width: 480px) {
+  .btn { padding-inline: 0.7rem; }
+  .label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  /* Compact header. Adding a persistent Donate button means the header row (brand, Facebook,
+     language switch, Donate, menu) no longer fits a 375px phone, so the header tightens
+     here. Scoped to <=480px, so tablet and desktop headers are unchanged. Kept in this
+     module rather than appended to styles.css. Facebook remains reachable from the footer. */
+  /* The nav is display:none below 1180px, so two columns: brand | controls.
+     `header.` raises specificity above styles.css, which loads after this module. */
+  :global(header.siteHeader) { grid-template-columns: auto 1fr; column-gap: 0.5rem; }
+  :global(.siteHeader .headerRight) { gap: 0.4rem; justify-self: end; }
+  /* !important only because the Facebook link carries an inline display style in main.jsx. */
+  :global(.siteHeader .header-fb) { display: none !important; }
+  :global(.siteHeader .brand) { gap: 0.4rem; min-width: 0; }
+  :global(.siteHeader .brand img) { width: 44px; height: 44px; }
+  /* Let the name wrap: the grid's auto column then shrinks it to whatever width is left. */
+  :global(.siteHeader .brand b) { white-space: normal; font-size: 0.8rem; }
+  :global(.siteHeader .lang-controls button) { padding-inline: 0.5rem; }
+}

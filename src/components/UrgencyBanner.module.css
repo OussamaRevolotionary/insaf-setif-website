@@ -1,0 +1,115 @@
+.banner {
+  --appeal: var(--blue);
+  position: relative;
+  background: linear-gradient(90deg, #0a1730 0%, #10244a 100%);
+  color: #eaf2fc;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  animation: bannerIn 420ms var(--ease-out) both;
+}
+
+.banner[data-appeal='school']   { --appeal: #3ccf8e; }
+.banner[data-appeal='wildfire'] { --appeal: var(--orange); }
+.banner[data-appeal='winter']   { --appeal: #8fd0ff; }
+.banner[data-appeal='ramadan']  { --appeal: var(--yellow); }
+.banner[data-appeal='orphans']  { --appeal: #ff8f9a; }
+
+/* Algerian flag hairline: green | white | red */
+.flag {
+  display: flex;
+  height: 3px;
+}
+.flag i { flex: 1; }
+.flag i:nth-child(1) { background: #006233; }
+.flag i:nth-child(2) { background: #ffffff; }
+.flag i:nth-child(3) { background: #d21034; }
+
+.inner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 46px;
+  padding: 0.45rem var(--section-x);
+}
+
+.icon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--appeal);
+  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--appeal) 20%, transparent);
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.6rem;
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  color: inherit;
+}
+
+.text strong {
+  font-weight: 800;
+  color: #fff;
+}
+
+.sub {
+  color: rgba(226, 236, 248, 0.74);
+}
+
+.cta {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 34px;
+  padding: 0.35rem 0.95rem;
+  border-radius: var(--radius-pill);
+  background: var(--appeal);
+  color: #07142b;
+  font-size: var(--text-xs);
+  font-weight: 900;
+  white-space: nowrap;
+  transition: transform var(--dur-base) var(--ease-spring), filter var(--dur-fast) var(--ease-std);
+}
+
+.cta:hover { transform: translateY(-1px); filter: brightness(1.08); }
+
+.close {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(226, 236, 248, 0.7);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-std), color var(--dur-fast) var(--ease-std);
+}
+
+.close:hover { background: rgba(255, 255, 255, 0.09); color: #fff; }
+
+@keyframes bannerIn {
+  from { opacity: 0; transform: translateY(-100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 760px) {
+  .sub { display: none; }
+  .text { font-size: var(--text-xs); }
+  .inner { gap: 0.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banner { animation: none; }
+}
