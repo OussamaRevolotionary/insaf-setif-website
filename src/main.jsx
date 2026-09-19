@@ -24,6 +24,9 @@ import NaturePillar from './components/NaturePillar.jsx';
 import LocalDonationBox from './components/LocalDonationBox.jsx';
 import CampaignSection from './components/CampaignSection.jsx';
 import HeaderDonateButton from './components/HeaderDonateButton.jsx';
+import { FlagPennant, TricolorEdge } from './components/HeaderFlag.jsx';
+import ChildRightsPage, { ChildRightsTeaser } from './components/ChildRights.jsx';
+import TrustPage from './components/TrustPage.jsx';
 import './styles.css';
 
 /* ============================================================
@@ -80,7 +83,8 @@ function PhoneDisplay({ number, className = '' }) {
 const navItems = [
   { href: '/', ar: 'الرئيسية', fr: 'Accueil',      en: 'Home' },
   { href: '/about',        ar: 'من نحن',      fr: 'À propos',    en: 'About' },
-  { href: '/goals',        ar: 'الأهداف والبيئة', fr: 'Objectifs & 3D', en: 'Goals & 3D' },
+  { href: '/children-rights', ar: 'حقوق الطفل', fr: 'Droits de l’enfant', en: 'Children’s rights' },
+  { href: '/goals',       ar: 'الأهداف والبيئة', fr: 'Objectifs & 3D', en: 'Goals & 3D' },
   { href: '/programs',     ar: 'البرامج',     fr: 'Programmes',  en: 'Programs' },
   { href: '/achievements', ar: 'الإنجازات',   fr: 'Réalisations',en: 'Achievements' },
   { href: '/news',         ar: 'الأخبار',     fr: 'Actualités',  en: 'News' },
@@ -127,7 +131,8 @@ const goals = [
 ];
 
 const partners = [
-  { name: 'ONPPE', nameAr: 'المرصد الوطني لحماية الطفل', Icon: ShieldCheck },
+  { name: 'ONPPE', nameAr: 'الهيئة الوطنية لحماية وترقية الطفولة', Icon: ShieldCheck },
+  { name: 'Réseau NADA', nameAr: 'الشبكة الجزائرية للدفاع عن حقوق الطفل «ندى»', Icon: HeartHandshake },
   { name: 'DJS Sétif', nameAr: 'مديرية الشباب والرياضة', Icon: UsersRound },
   { name: 'Wilaya de Sétif', nameAr: 'ولاية سطيف', Icon: Building2 },
   { name: 'Université Sétif 1', nameAr: 'جامعة سطيف 1', Icon: BookOpen },
@@ -300,6 +305,16 @@ const translations = {
     donateTrustRegistered: 'جمعية مدنية — سطيف، منذ 2014',
     donateTrustSecure: 'دفع مشفّر عبر Chargily Pay',
     donateTrustReceipt: 'لطلب وصل أو لأي استفسار: تواصل معنا',
+    donateTrustLink: 'كيف نتعامل مع تبرّعك',
+    // Children's rights & trust (Phase H)
+    childRightsPageLabel: 'حقوق الطفل',
+    childRightsPageTitle: 'حقوق الطفل: أن نعرفها، وأن نحميها',
+    childRightsPageLead: 'مبادئ اتفاقية الأمم المتحدة لحقوق الطفل، والإطار القانوني الجزائري، والأرقام الخضراء لحماية الطفولة، وما تفعله إنصاف من أجل أطفال سطيف.',
+    trustPageLabel: 'الثقة والشفافية',
+    trustPageTitle: 'تبرّعك أمانة',
+    trustPageLead: 'أين تذهب التبرّعات، ومن يسيّر الجمعية، وكيف نحمي الأطفال، وكيف تتأكّد أنك تتعامل معنا نحن.',
+    footerTrust: 'الثقة والشفافية',
+    footerHelpline: 'طفل في خطر؟ اتصل مجانًا',
     donateStatus: {
       success: { title: 'شكرًا لك! تم استلام تبرّعك.', text: 'عطاؤك سيصل إلى الأطفال. شكرًا لأنك جزء من أثر جمعية إنصاف.' },
       failure: { title: 'لم تكتمل عملية الدفع.', text: 'لم يُقتطع أي مبلغ. يمكنك المحاولة من جديد أو اختيار طريقة أخرى أدناه.' },
@@ -468,6 +483,16 @@ const translations = {
     donateTrustRegistered: 'Association civile — Sétif, depuis 2014',
     donateTrustSecure: 'Paiement chiffré via Chargily Pay',
     donateTrustReceipt: 'Un reçu ou une question ? Contactez-nous',
+    donateTrustLink: 'Comment nous gérons votre don',
+    // Children's rights & trust (Phase H)
+    childRightsPageLabel: 'Droits de l’enfant',
+    childRightsPageTitle: 'Les droits de l’enfant : les connaître, les protéger',
+    childRightsPageLead: 'Les principes de la Convention des Nations unies relative aux droits de l’enfant, le cadre juridique algérien, les numéros verts de protection de l’enfance, et ce que fait Insaf pour les enfants de Sétif.',
+    trustPageLabel: 'Confiance et transparence',
+    trustPageTitle: 'Votre don nous engage',
+    trustPageLead: 'Où vont les dons, qui dirige l’association, comment nous protégeons les enfants, et comment vérifier que c’est bien nous.',
+    footerTrust: 'Confiance et transparence',
+    footerHelpline: 'Un enfant en danger ? Appel gratuit',
     donateStatus: {
       success: { title: 'Merci ! Votre don a bien été reçu.', text: 'Votre générosité ira aux enfants. Merci de faire partie de l’impact d’Insaf.' },
       failure: { title: 'Le paiement n’a pas abouti.', text: 'Aucun montant n’a été débité. Vous pouvez réessayer ou choisir un autre moyen ci-dessous.' },
@@ -636,6 +661,16 @@ const translations = {
     donateTrustRegistered: 'Civil association — Sétif, since 2014',
     donateTrustSecure: 'Encrypted payment via Chargily Pay',
     donateTrustReceipt: 'Need a receipt or have a question? Contact us',
+    donateTrustLink: 'How we handle your donation',
+    // Children's rights & trust (Phase H)
+    childRightsPageLabel: 'Children’s rights',
+    childRightsPageTitle: 'Children’s rights: know them, protect them',
+    childRightsPageLead: 'The principles of the UN Convention on the Rights of the Child, Algeria’s legal framework, the free child-protection helplines, and what Insaf does for the children of Sétif.',
+    trustPageLabel: 'Trust & transparency',
+    trustPageTitle: 'Your gift is a trust we keep',
+    trustPageLead: 'Where donations go, who runs the association, how we protect children, and how to check it’s really us.',
+    footerTrust: 'Trust & transparency',
+    footerHelpline: 'Child in danger? Free call',
     donateStatus: {
       success: { title: 'Thank you! Your donation was received.', text: 'Your generosity will reach the children. Thank you for being part of Insaf’s impact.' },
       failure: { title: 'The payment wasn’t completed.', text: 'No money was charged. You can try again or choose another method below.' },
@@ -809,8 +844,10 @@ function SiteShell({ children }) {
       </div>
 
       <header className={`siteHeader${scrolled ? ' scrolled' : ''}`}>
+        <TricolorEdge />
         <Link to="/" className="brand" onClick={() => setMobileOpen(false)}>
           <img src={withBase('/LOGO.jpg')} alt="Insaf Sétif" />
+          <FlagPennant />
           <div className="brand-text">
             <b>{t.brand}</b>
             <small>{t.strap}</small>
@@ -932,6 +969,7 @@ function Footer() {
           {navItems.map(item => (
             <Link key={item.href} to={item.href}>{navLabel(item)}</Link>
           ))}
+          <Link to="/trust">{t.footerTrust}</Link>
         </nav>
 
         <div className="footerContact">
@@ -948,6 +986,10 @@ function Footer() {
           <span className="footerContactItem">
             <MapPin size={16} /> {contact.address}
           </span>
+          {/* Child-protection helplines on every page (ONPPE 1111, NADA 3033) */}
+          <a className="footerContactItem" href="tel:1111">
+            <ShieldCheck size={16} /> {t.footerHelpline} <b dir="ltr">1111 · 3033</b>
+          </a>
         </div>
       </div>
 
@@ -1321,6 +1363,9 @@ function HomePage() {
 
       {/* 4. CHILDREN HELP HUB */}
       <ChildrenHelpHub photo={childrenHubPhoto} />
+
+      {/* 4b. CHILDREN'S RIGHTS — principles, rights, helplines (full page: /children-rights) */}
+      <ChildRightsTeaser />
 
       {/* 5. GREEN LIFE: wildfire solidarity + nature & rural water */}
       <NaturePillar />
@@ -1881,6 +1926,12 @@ function App() {
             <Route path="/news"          element={<NewsPage />} />
             <Route path="/contact"       element={<ContactPage />} />
             <Route path="/donate"        element={<DonatePage />} />
+            <Route path="/children-rights" element={
+              <Page titleKey="childRightsPageTitle" labelKey="childRightsPageLabel" leadKey="childRightsPageLead"><ChildRightsPage /></Page>
+            } />
+            <Route path="/trust"         element={
+              <Page titleKey="trustPageTitle" labelKey="trustPageLabel" leadKey="trustPageLead"><TrustPage contact={contact} FacebookIcon={FacebookIcon} /></Page>
+            } />
             <Route path="*"              element={<NotFound />} />
           </Routes>
         </SiteShell>

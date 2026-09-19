@@ -216,6 +216,45 @@ Chargily ──► …/?donation=success|failure#/donate ──► DonatePage sh
    - appends the paid donation to a Sheet
    - emails the donor a receipt
 
+### Phase H — Algerian flag header, Children's Rights hub, Trust page ✅
+The benchmark crawl (90 pages) is used as internal design inspiration, not as a client deliverable. Same rules as Phase G: CSS Modules only; `styles.css` and the 3D pages are untouched.
+
+- [x] **H1. Header flag** (`components/HeaderFlag.*`).
+  - A waving SVG flag of Algeria on a small pole next to the logo. It uses the standard construction (crescent r=150/120, star pointing to the fly).
+  - The ripple comes from 12 staggered strips; it is still under reduced motion and hidden at ≤480px.
+  - A full-width green | white | red band sits on the header's bottom edge, with a slow light sweep. The flag is never mirrored in RTL.
+- [x] **H2. Children's Rights hub.** A home section (`ChildRightsTeaser`) and a new page, `/children-rights`, which is also in the nav.
+  - The page covers:
+    - the four principles of the Convention on the Rights of the Child (arts 2, 3, 6, 12)
+    - a keyboard-accessible explorer of 8 rights (child-friendly wording plus "what Insaf does", taken only from Insaf's own posts)
+    - the helplines: ONPPE 1111 (24/7), NADA 3033, Protection civile 14, Police 1548
+    - Algeria's legal timeline (CRC signed 26 Jan 1990 and ratified 16 Apr 1993; African Charter decree 03-242 of 8 Jul 2003; Law 15-12 of 15 Jul 2015, whose Article 11 creates ONPPE)
+    - key dates (1 June, 16 June, 20 November)
+    - Insaf's Children's Rights Ambassadors Club
+    - the safeguarding promises
+    - the sources
+  - **UNICEF and OHCHR are cited as text sources only**: no logo, colours or implied partnership, because the client has no UNICEF agreement.
+  - Content lives in `src/content/childRights.js`. Every fact was checked on 2026-09-19.
+- [x] **H3. Trust & transparency page** (`/trust`, linked from the footer and the donate box). It covers:
+  - four donor promises
+  - where each fund goes, including processing fees, in-kind rules and an honest note on figures (driven by `FIGURES_ARE_ILLUSTRATIVE`)
+  - governance facts and a documents list, both pending in `config/trust.js`
+  - safeguarding
+  - official channels and a fraud warning
+  - a donor FAQ
+  - a "when something goes wrong" commitment
+- [x] **H4. Fixes.**
+  - The ONPPE partner name was wrong: it said "المرصد…" and is now «الهيئة الوطنية لحماية وترقية الطفولة». Réseau NADA was added as a partner.
+  - Footer: added the 1111 · 3033 helpline and a Trust link.
+  - The desktop header overflowed at 1181–1440px in FR/EN. The nav is now compacted in that range, and Facebook moves to the footer there.
+- [x] **H5. Verification.**
+  - No horizontal overflow at 320 / 375 / 768 / 1200 / 1366 / 1460px in ar, fr and en.
+  - Explorer keyboard navigation works in RTL.
+  - The `?right=` deep link works.
+  - No app errors in the console.
+  - `npm run build` is green.
+- **Pending (association):** registration number, board list, statutes, annual reports and safeguarding policy for `config/trust.js`.
+
 ## 5. Change log
 - 2026-07-23 — Audit complete; plan authored; tracking started.
 - 2026-07-23 — Phases A–D complete: chat widget + cards rewritten (real CSS), webhooks split, i18n/copyright/orbit/a11y fixes, Facebook brand SVG (lucide crash fix), focus rings, real social-proof stats. Both n8n workflows built. Prod build green.
@@ -226,3 +265,4 @@ Chargily ──► …/?donation=success|failure#/donate ──► DonatePage sh
   - Pillar components: children hub, green life, campaigns, seasonal banner, Marquee ticker. All CSS Modules; `styles.css` shrank.
   - Fixed the live bug where every Donate CTA opened the 404 page (HashRouter `#anchor` links).
   - Removed unverifiable claims; illustrative figures are now labelled.
+- 2026-09-19 — **Phase H**: Algerian flag header (waving pennant + tricolor edge), Children's Rights hub and `/children-rights` page, Trust & Transparency page (`/trust`), ONPPE name fix, and a laptop-width header fix.

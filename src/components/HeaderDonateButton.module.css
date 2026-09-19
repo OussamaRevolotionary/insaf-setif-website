@@ -23,6 +23,18 @@
   box-shadow: 0 0 0 3px rgba(198, 47, 69, 0.22), 0 10px 26px rgba(198, 47, 69, 0.32);
 }
 
+/* Laptop widths (1181–1440px): the full nav, now with a Donate button and a "children's
+   rights" item, is wider than the header in French/English. Tighten the nav links and move
+   Facebook to the footer only. Above 1440px the header is untouched; below 1181px the nav
+   collapses into the menu anyway. */
+@media (min-width: 1181px) and (max-width: 1440px) {
+  :global(header.siteHeader) { column-gap: 0.5rem; }
+  :global(.siteHeader nav a) { padding-inline: 0.42rem; font-size: 0.83rem; }
+  :global(.siteHeader .headerRight) { gap: 0.45rem; }
+  /* !important only because the Facebook link carries an inline display style in main.jsx. */
+  :global(.siteHeader .header-fb) { display: none !important; }
+}
+
 /* On narrow phones keep the icon and hide the word visually (not from screen readers). */
 @media (max-width: 480px) {
   .btn { padding-inline: 0.7rem; }
