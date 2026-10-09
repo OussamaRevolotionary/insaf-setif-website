@@ -13,6 +13,13 @@ Charitywebsites/
 # n8n export containing the Chargily secret key — keep local, never publish (repo is public)
 n8n-chargily-workflow.json
 
+# Raw scraper dumps contain third-party Facebook users' names and comments — never publish
+dataset_*.json
+
+# Local-only material: private research notes, data copies (removed from history 2026-10-09)
+_private/
+.claude/
+
 # OS / editor cruft
 .DS_Store
 Thumbs.db
