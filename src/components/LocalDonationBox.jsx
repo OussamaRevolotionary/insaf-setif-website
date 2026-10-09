@@ -13,10 +13,10 @@ import {
 } from '../config/donation.js';
 import styles from './LocalDonationBox.module.css';
 
+// All Algerian payments go through Chargily (it settles to the association's RIP), so the
+// manual BaridiMob / CCP transfer tabs are hidden. Their panels stay in the code for now.
 const TABS = [
   { id: 'card', Icon: CreditCard },
-  { id: 'baridimob', Icon: Smartphone },
-  { id: 'ccp', Icon: Landmark },
   { id: 'international', Icon: Globe },
 ];
 

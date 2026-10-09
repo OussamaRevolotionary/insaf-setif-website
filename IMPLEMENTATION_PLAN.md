@@ -255,6 +255,45 @@ The benchmark crawl (90 pages) is used as internal design inspiration, not as a 
   - `npm run build` is green.
 - **Pending (association):** registration number, board list, statutes, annual reports and safeguarding policy for `config/trust.js`.
 
+---
+
+## Phase I+ — Rebuild on the Stitch "Dignified Solidarity" system (plan agreed 2026-10-09)
+
+### Decisions (owner, 2026-10-09)
+| # | Topic | Decision |
+|---|---|---|
+| 1 | Brand system | **Adopt Stitch `DESIGN.md`**: emerald `#0F392B`, cream `#F9F8F5`, amber for donate only. Use `#B45309` as the base donate colour, because `#D97706` + white is 3.19:1 and fails AA |
+| 2 | Fonts | **Plus Jakarta Sans + Cairo** |
+| 3 | Stack | **Astro (static, `/ar/ /fr/ /en/`) + React islands + Tailwind v4 (DESIGN.md tokens) + shadcn/ui + TypeScript**, still hosted on GitHub Pages |
+| 4 | Imagery | **Real association photos first** (owner confirms all current photos are official). Vector line art I draw (stacked hands, giving hand, zellige) in the brand palette. Painterly raster art like the reference image only if supplied, and always labelled as illustration |
+| 5 | Faith content | Pending association approval. Default: Quran 99:7 and 2:261 in Arabic only, in Ramadan/Zakat contexts |
+| 6 | Monthly giving | Owner wants automatic billing. **Chargily V2 has no subscriptions, saved cards or recurring charges** (checked against the API index on 2026-10-09). Closest equivalent: a **monthly pledge**. n8n sends a pre-filled one-click Chargily link each month, and the payment webhook marks the pledge as paid |
+| 7 | Receipts | **Automatic HTML e-receipt** from n8n on every paid card checkout (done, see below). BaridiMob/CCP: a transfer declaration form (no image upload), treasurer approval, then the same receipt. A PDF can be added later via the PDF.co gateway |
+| 8 | 21st.dev | Pick per component. Free tier = **2 retrievals/day**, so retrieve in priority order |
+| 9 | Identity | Official name **INSAF** |
+| 10 | Photos | All current photos are official, from the association |
+
+### Done in this phase
+- **n8n `knQIlVSuCnuPDuxs` "INSAF — Chargily Payment Webhook"** (team project Futuristic Life, ACTIVE).
+  - URL: `https://oussama19.app.n8n.cloud/webhook/chargily-events`
+  - Verifies the `signature` HMAC-SHA256 header with the live **or** test secret, and returns 401 if missing or invalid.
+  - Answers 200 immediately, then de-duplicates and upserts into Data Table **"INSAF Donations Ledger"** (`ZI8Lj2csZEIpJ3X1`).
+  - For paid checkouts: emails the owner, plus a trilingual e-receipt to the donor when an email was given.
+  - Tested 2026-10-09: missing signature → 401, bad signature → 401, valid → 200 + ledger row + 2 emails, replay → no duplicate, failed checkout → logged only. The test row is flagged `livemode=false`.
+- **Still to do before real money:**
+  - switch the checkout bridge `BKjVi4aLws3dLXyS` to the live URL/key;
+  - set `CHARGILY_TEST_MODE = false`;
+  - rename the Chargily app to "INSAF";
+  - paste the webhook URL in Chargily (live **and** test mode).
+
+### Roadmap
+| Phase | Focus | Key deliverables | Risk |
+|---|---|---|---|
+| 0 | Truth & cleanup | **From the association:** agrément no. & date, RIP/QR, CCP, board, sourced statistics.<br>**Repo:** purge the scraper datasets (third-party personal data) and 624 unused photos from git history; strip the invented Stitch facts | Low |
+| 1 | Foundation | **Scaffold:** Astro + Tailwind + shadcn with the DESIGN.md tokens; RTL-tested primitives.<br>**Port:** all pages in ar/fr/en.<br>**Platform:** SEO (meta/OG/sitemap/JSON-LD/domain), WebP/AVIF images, CI gate | Medium |
+| 2 | Conversion engine | **Donating:** donation hub (tiers + custom amount + impact feedback); payment trust hub (RIP/CCP copy + QR + declaration; Chargily live); monthly pledge flow.<br>**Live data:** campaign totals from the ledger; field-intervention log; governance documents.<br>**Volunteers:** drawer by skill → n8n; Turnstile on all forms | Medium |
+| 3 | Polish | Vector illustration set, respectful Quranic accents, live counters, motion that respects reduced-motion, a decision on the 3D pages | Low |
+
 ## 5. Change log
 - 2026-07-23 — Audit complete; plan authored; tracking started.
 - 2026-07-23 — Phases A–D complete: chat widget + cards rewritten (real CSS), webhooks split, i18n/copyright/orbit/a11y fixes, Facebook brand SVG (lucide crash fix), focus rings, real social-proof stats. Both n8n workflows built. Prod build green.

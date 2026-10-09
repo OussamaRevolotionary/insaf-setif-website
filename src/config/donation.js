@@ -3,8 +3,8 @@
 export const CHARGILY_CHECKOUT_WEBHOOK = 'https://oussama19.app.n8n.cloud/webhook/chargily-checkout';
 
 // True while the n8n bridge uses Chargily TEST keys: the donate box then tells visitors
-// that no real money is charged. Flip to false when switching the bridge to live keys.
-export const CHARGILY_TEST_MODE = true;
+// that no real money is charged. The bridge went LIVE on 2026-10-09.
+export const CHARGILY_TEST_MODE = false;
 
 // Only redirect to Chargily-hosted checkout pages.
 export const CHARGILY_HOST_PATTERN = /(^|\.)chargily\.(dz|com|net|com\.dz)$/;
