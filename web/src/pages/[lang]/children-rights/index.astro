@@ -1,0 +1,286 @@
+---
+import {
+  CalendarHeart, CheckCircle2, ExternalLink, GraduationCap, HandHeart, Heart, HeartPulse, House,
+  Megaphone, PhoneCall, Puzzle, ShieldCheck, Siren, Sprout,
+} from 'lucide-react';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/PageHero.astro';
+import { childRights, RIGHT_IDS, HELPLINES, EMERGENCY_NUMBERS, RIGHTS_SOURCES } from '@/data/childRights';
+import { href, langPaths, useT, type Lang } from '@/i18n';
+
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const t = useT(lang);
+const c = childRights[lang];
+
+const RIGHT_META = {
+  education: { Icon: GraduationCap, color: '#1a7f52' },
+  health: { Icon: HeartPulse, color: '#17788c' },
+  protection: { Icon: ShieldCheck, color: '#2f3e9e' },
+  living: { Icon: House, color: '#b45309' },
+  family: { Icon: HandHeart, color: '#c0283a' },
+  play: { Icon: Puzzle, color: '#8a6700' },
+  voice: { Icon: Megaphone, color: '#6b4fd1' },
+  environment: { Icon: Sprout, color: '#0f7a46' },
+} as const;
+---
+
+<BaseLayout lang={lang} slug="children-rights/" title={t.seo.rights.title} description={t.seo.rights.description}>
+  <PageHero kicker={c.badge} title={c.title} lead={c.lead} />
+
+  <!-- Four principles -->
+  <section class="py-14 lg:py-20" aria-labelledby="principles-title">
+    <div class="container-site">
+      <h2 id="principles-title" class="text-2xl sm:text-3xl">{c.principlesTitle}</h2>
+      <p class="mt-2 text-muted">{c.principlesLead}</p>
+      <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {c.principles.map((p) => (
+          <article class="rounded-xl border border-sand bg-white p-6 shadow-float">
+            <p class="text-xs font-bold uppercase text-muted">{c.articleLabel} <span class="tabular font-sans text-2xl font-extrabold text-donate" dir="ltr">{p.article}</span></p>
+            <h3 class="mt-3 text-lg">{p.title}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-muted">{p.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Rights explorer (tabs) -->
+  <section class="border-y border-sand bg-white py-14 lg:py-20" aria-labelledby="explorer-title">
+    <div class="container-site">
+      <h2 id="explorer-title" class="text-2xl sm:text-3xl">{c.rightsTitle}</h2>
+      <p class="mt-2 text-muted">{c.rightsLead}</p>
+
+      <div class="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]" data-tabs>
+        <div class="grid grid-cols-2 gap-2 self-start" role="tablist" aria-label={c.rightsTitle}>
+          {RIGHT_IDS.map((id, i) => {
+            const { Icon, color } = RIGHT_META[id];
+            return (
+              <button
+                type="button"
+                role="tab"
+                id={`tab-${id}`}
+                data-id={id}
+                aria-controls={`panel-${id}`}
+                aria-selected={i === 0 ? 'true' : 'false'}
+                tabindex={i === 0 ? 0 : -1}
+                style={`--c:${color}`}
+                class="flex items-center gap-2.5 rounded-lg border border-sand bg-cream p-3 text-start text-sm font-semibold text-ink transition-colors hover:border-(color:--c) aria-selected:border-(color:--c) aria-selected:bg-white aria-selected:shadow-float"
+              >
+                <Icon className="size-5 shrink-0 text-(color:--c)" aria-hidden="true" />
+                <span>{c.rights[id].title}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {RIGHT_IDS.map((id, i) => {
+          const { Icon, color } = RIGHT_META[id];
+          const r = c.rights[id];
+          return (
+            <div
+              role="tabpanel"
+              id={`panel-${id}`}
+              aria-labelledby={`tab-${id}`}
+              hidden={i !== 0}
+              tabindex="0"
+              style={`--c:${color}`}
+              class="rounded-xl border-s-4 border-(color:--c) bg-cream p-6 sm:p-8"
+            >
+              <div class="flex items-center gap-4">
+                <span class="flex size-14 shrink-0 items-center justify-center rounded-xl bg-white text-(color:--c) shadow-float">
+                  <Icon className="size-7" aria-hidden="true" />
+                </span>
+                <div>
+                  <h3 class="text-2xl">{r.title}</h3>
+                  <p class="text-sm text-muted">{c.articleLabel} <span dir="auto">{r.articles}</span></p>
+                </div>
+              </div>
+              <figure class="mt-6 rounded-lg bg-white p-5">
+                <figcaption class="text-xs font-bold uppercase tracking-wide text-muted">{c.childVoice}</figcaption>
+                <blockquote class="mt-2 text-lg font-semibold leading-relaxed text-emerald-900">“{r.child}”</blockquote>
+              </figure>
+              <div class="mt-4">
+                <p class="flex items-center gap-2 font-bold text-emerald-900">
+                  <HandHeart className="size-4" aria-hidden="true" />
+                  {c.insafDoes}
+                </p>
+                <p class="mt-1 leading-relaxed text-muted">{r.insaf}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- Helplines -->
+  <section class="py-14 lg:py-20" aria-labelledby="help-title">
+    <div class="container-site">
+      <div class="rounded-2xl bg-flag-red/5 p-6 ring-1 ring-flag-red/20 sm:p-10">
+        <div class="flex items-start gap-4">
+          <span class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-flag-red text-white">
+            <Siren className="size-6" aria-hidden="true" />
+          </span>
+          <div>
+            <h2 id="help-title" class="text-2xl sm:text-3xl">{c.helpTitle}</h2>
+            <p class="mt-1 text-muted">{c.helpLead}</p>
+          </div>
+        </div>
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          {HELPLINES.map(({ id, number, tel }) => (
+            <a href={`tel:${tel}`} class="group flex items-start gap-4 rounded-xl bg-white p-5 shadow-float transition-shadow hover:shadow-lift" aria-label={`${c.callLabel} ${number} — ${c.helplines[id].name}`}>
+              <span class="tabular font-sans text-4xl font-extrabold text-flag-red" dir="ltr">{number}</span>
+              <span class="flex-1">
+                <span class="block font-bold text-emerald-900">{c.helplines[id].name}</span>
+                <span class="mt-1 block text-sm leading-relaxed text-muted">{c.helplines[id].detail}</span>
+              </span>
+              <PhoneCall className="size-5 shrink-0 text-flag-red" aria-hidden="true" />
+            </a>
+          ))}
+        </div>
+        <p class="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+          <strong>{c.emergencyLabel}</strong>
+          {EMERGENCY_NUMBERS.map(({ id, number, tel }) => (
+            <a href={`tel:${tel}`} class="font-semibold text-emerald-900 underline-offset-4 hover:underline">
+              {c.emergency[id]} <span class="tabular font-bold" dir="ltr">{number}</span>
+            </a>
+          ))}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Algeria's legal framework -->
+  <section class="border-y border-sand bg-white py-14 lg:py-20" aria-labelledby="law-title">
+    <div class="container-site">
+      <h2 id="law-title" class="text-2xl sm:text-3xl">{c.lawTitle}</h2>
+      <p class="mt-2 text-muted">{c.lawLead}</p>
+      <ol class="mt-8 space-y-6 border-s-2 border-emerald-100 ps-6">
+        {c.timeline.map((step) => (
+          <li class="relative">
+            <span class="absolute -start-[1.95rem] top-1.5 size-3.5 rounded-full border-2 border-white bg-emerald-900 ring-2 ring-emerald-100" aria-hidden="true"></span>
+            <p class="text-sm font-bold text-donate">{step.date}</p>
+            <h3 class="mt-1 text-lg">{step.title}</h3>
+            <p class="mt-1 leading-relaxed text-muted">{step.text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- Dates -->
+  <section class="py-14 lg:py-20" aria-labelledby="dates-title">
+    <div class="container-site">
+      <h2 id="dates-title" class="flex items-center gap-3 text-2xl sm:text-3xl">
+        <CalendarHeart className="size-7 text-donate" aria-hidden="true" />
+        {c.datesTitle}
+      </h2>
+      <div class="mt-8 grid gap-5 md:grid-cols-3">
+        {c.dates.map((d) => (
+          <article class="flex gap-4 rounded-xl border border-sand bg-white p-5">
+            <div class="flex w-16 shrink-0 flex-col overflow-hidden rounded-lg text-center ring-1 ring-sand" aria-hidden="true">
+              <span class="bg-emerald-900 py-0.5 text-xs font-bold text-white">{d.month}</span>
+              <span class="tabular py-1.5 font-sans text-2xl font-extrabold text-emerald-900">{d.day}</span>
+            </div>
+            <div>
+              <h3 class="text-base">{d.title} <span class="sr-only">— {d.day} {d.month}</span></h3>
+              <p class="mt-1 text-sm leading-relaxed text-muted">{d.text}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Insaf's own club -->
+  <section class="bg-emerald-900 text-white" aria-labelledby="club-title">
+    <div class="bg-zellige-light">
+      <div class="container-site py-14">
+        <p class="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-amber-accent">
+          <Heart className="size-4" aria-hidden="true" />
+          {c.ambassadorsBadge}
+        </p>
+        <h2 id="club-title" class="mt-2 text-3xl text-white">{c.ambassadorsTitle}</h2>
+        <p class="mt-3 max-w-3xl leading-relaxed text-emerald-50/85">{c.ambassadorsText}</p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href={href(lang, 'contact', '?topic=club')} class="rounded-lg bg-white px-5 py-3 font-bold text-emerald-900 hover:bg-emerald-50">{c.ctaJoin}</a>
+          <a href={href(lang, 'donate', '?designation=general')} class="inline-flex items-center gap-2 rounded-lg border border-white/40 px-5 py-3 font-bold text-white hover:bg-white/10">
+            {c.ctaSupport}
+            <Heart className="size-4" aria-hidden="true" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Safeguarding promise + sources -->
+  <section class="py-14 lg:py-20">
+    <div class="container-site grid gap-6 lg:grid-cols-2">
+      <div class="rounded-xl border border-sand bg-emerald-50 p-6 sm:p-8" aria-labelledby="promise-title">
+        <h2 id="promise-title" class="flex items-center gap-2 text-xl">
+          <ShieldCheck className="size-6" aria-hidden="true" />
+          {c.promiseTitle}
+        </h2>
+        <ul class="mt-4 space-y-3">
+          {c.promises.map((line) => (
+            <li class="flex items-start gap-2.5 text-sm leading-relaxed">
+              <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-700" aria-hidden="true" />
+              {line}
+            </li>
+          ))}
+        </ul>
+        <a href={href(lang, 'contact', '?topic=photo')} class="mt-5 inline-block font-bold text-emerald-900 underline underline-offset-4">{c.promiseCta}</a>
+      </div>
+
+      <div class="rounded-xl border border-sand bg-white p-6 sm:p-8" aria-labelledby="sources-title">
+        <h2 id="sources-title" class="text-xl">{c.sourcesTitle}</h2>
+        <ul class="mt-4 divide-y divide-sand">
+          {RIGHTS_SOURCES.map(({ id, org, url }) => (
+            <li>
+              <a href={url} target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 py-3 text-sm hover:text-emerald-900">
+                <span class="w-28 shrink-0 text-xs font-bold uppercase text-muted" dir="ltr">{org}</span>
+                <span class="flex-1">{c.sources[id]}</span>
+                <ExternalLink className="size-3.5 shrink-0 text-muted" aria-hidden="true" />
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p class="mt-4 text-xs leading-relaxed text-muted">{c.sourcesNote}</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-tabs]');
+  if (root) {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role=tab]')];
+    const select = (tab: HTMLButtonElement, focus = true) => {
+      for (const t of tabs) {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        const panel = document.getElementById(t.getAttribute('aria-controls') ?? '');
+        if (panel) panel.hidden = !on;
+      }
+      if (focus) tab.focus();
+    };
+    tabs.forEach((t) => t.addEventListener('click', () => select(t)));
+    root.querySelector('[role=tablist]')?.addEventListener('keydown', (e) => {
+      const ev = e as KeyboardEvent;
+      const i = tabs.findIndex((t) => t.getAttribute('aria-selected') === 'true');
+      const rtl = document.documentElement.dir === 'rtl';
+      // Two columns: Up/Down move a row, Left/Right follow the reading direction.
+      const step = ({ ArrowDown: 2, ArrowUp: -2, ArrowRight: rtl ? -1 : 1, ArrowLeft: rtl ? 1 : -1 } as Record<string, number>)[ev.key];
+      let next: number | null = step === undefined ? null : (i + step + tabs.length) % tabs.length;
+      if (ev.key === 'Home') next = 0;
+      if (ev.key === 'End') next = tabs.length - 1;
+      if (next === null) return;
+      ev.preventDefault();
+      select(tabs[next]);
+    });
+    const initial = tabs.find((t) => t.dataset.id === new URLSearchParams(location.search).get('right'));
+    if (initial) select(initial, false);
+  }
+</script>

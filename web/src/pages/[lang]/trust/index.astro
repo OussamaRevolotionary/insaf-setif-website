@@ -1,0 +1,198 @@
+---
+import {
+  BadgeCheck, Ban, ChevronDown, CreditCard, FileText, Flame, Gift, Globe, GraduationCap, Heart,
+  HeartPulse, Landmark, Mail, MessageCircleWarning, PackageOpen, Phone, ShieldCheck, ShoppingBasket, Snowflake,
+} from 'lucide-react';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/PageHero.astro';
+import { trust, ASSOCIATION, TRUST_DOCUMENTS, TRUST_UPDATED } from '@/data/trust';
+import { DESIGNATIONS } from '@/data/donation';
+import { CONTACT } from '@/data/site';
+import { asset, formatDate, href, langPaths, useT, type Lang } from '@/i18n';
+
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const t = useT(lang);
+const c = trust[lang];
+const siteHost = new URL(href(lang), Astro.site).host + import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const PROMISE_ICONS = { choose: Gift, prove: BadgeCheck, children: ShieldCheck, candid: MessageCircleWarning } as const;
+const FUND_ICONS = { general: Heart, school: GraduationCap, health: HeartPulse, winter: Snowflake, wildfire: Flame, ramadan: ShoppingBasket } as const;
+---
+
+<BaseLayout lang={lang} slug="trust/" title={t.seo.trust.title} description={t.seo.trust.description}>
+  <PageHero kicker={t.trustPageLabel} title={t.trustPageTitle} lead={t.trustPageLead} />
+
+  <!-- Promises -->
+  <section class="py-14 lg:py-20" aria-labelledby="promises-title">
+    <div class="container-site">
+      <h2 id="promises-title" class="text-2xl sm:text-3xl">{c.promisesTitle}</h2>
+      <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {c.promises.map((p) => {
+          const Icon = PROMISE_ICONS[p.id as keyof typeof PROMISE_ICONS];
+          return (
+            <article class="rounded-xl border border-sand bg-white p-6 shadow-float">
+              <span class="flex size-11 items-center justify-center rounded-lg bg-emerald-50 text-emerald-900"><Icon className="size-5" aria-hidden="true" /></span>
+              <h3 class="mt-4 text-lg">{p.title}</h3>
+              <p class="mt-2 text-sm leading-relaxed text-muted">{p.text}</p>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- Where the money goes -->
+  <section class="border-y border-sand bg-white py-14 lg:py-20" aria-labelledby="funds-title">
+    <div class="container-site">
+      <h2 id="funds-title" class="text-2xl sm:text-3xl">{c.fundsTitle}</h2>
+      <p class="mt-2 text-muted">{c.fundsLead}</p>
+      <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {DESIGNATIONS.map(({ id, unit }) => {
+          const Icon = FUND_ICONS[id];
+          const fund = c.funds[id];
+          return (
+            <article class="flex gap-4 rounded-xl border border-sand bg-cream p-5">
+              <span class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white text-donate shadow-float"><Icon className="size-5" aria-hidden="true" /></span>
+              <div class="flex flex-col">
+                <h3 class="text-base">{fund.title}</h3>
+                <p class="mt-1 flex-1 text-sm leading-relaxed text-muted">{fund.text}</p>
+                <a href={href(lang, 'donate', `?designation=${id}${unit ? `&amount=${unit}` : ''}`)} class="mt-3 text-sm font-bold text-donate underline-offset-4 hover:underline">{c.giveTo}</a>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      <div class="mt-8 grid gap-4 md:grid-cols-2">
+        <div class="rounded-xl bg-emerald-50 p-5">
+          <h3 class="flex items-center gap-2 text-base"><CreditCard className="size-5" aria-hidden="true" /> {c.feesTitle}</h3>
+          <p class="mt-2 text-sm leading-relaxed text-ink">{c.feesText}</p>
+        </div>
+        <div class="rounded-xl bg-emerald-50 p-5">
+          <h3 class="flex items-center gap-2 text-base"><PackageOpen className="size-5" aria-hidden="true" /> {c.inKindTitle}</h3>
+          <p class="mt-2 text-sm leading-relaxed text-ink">{c.inKindText}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Governance + documents -->
+  <section class="py-14 lg:py-20">
+    <div class="container-site grid gap-6 lg:grid-cols-2">
+      <div class="rounded-xl border border-sand bg-white p-6 sm:p-8">
+        <h2 class="flex items-center gap-2 text-xl"><Landmark className="size-6" aria-hidden="true" /> {c.governanceTitle}</h2>
+        <p class="mt-3 leading-relaxed text-muted">{c.governanceLead}</p>
+        <dl class="mt-5 divide-y divide-sand text-sm">
+          <div class="flex justify-between gap-4 py-2.5"><dt class="text-muted">{c.facts.founded}</dt><dd class="font-semibold">{c.foundedValue}</dd></div>
+          <div class="flex justify-between gap-4 py-2.5"><dt class="text-muted">{c.facts.seat}</dt><dd class="font-semibold">Sétif</dd></div>
+          <div class="flex justify-between gap-4 py-2.5">
+            <dt class="text-muted">{c.facts.registration}</dt>
+            <dd class="font-semibold">{ASSOCIATION.registration || <span class="pending">{c.pending}</span>}</dd>
+          </div>
+          <div class="flex justify-between gap-4 py-2.5">
+            <dt class="text-muted">{c.facts.board}</dt>
+            <dd class="font-semibold">{ASSOCIATION.boardPublished ? '—' : <span class="pending">{c.pending}</span>}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="rounded-xl border border-sand bg-white p-6 sm:p-8">
+        <h2 class="flex items-center gap-2 text-xl"><FileText className="size-6" aria-hidden="true" /> {c.documentsTitle}</h2>
+        <ul class="mt-5 divide-y divide-sand text-sm">
+          {TRUST_DOCUMENTS.map(({ id, url }) => (
+            <li class="flex items-center justify-between gap-4 py-2.5">
+              <span>{c.documents[id]}</span>
+              {url ? (
+                <a href={asset(url)} target="_blank" rel="noopener" class="font-bold text-emerald-900 underline">{c.open}</a>
+              ) : (
+                <span class="pending">{c.pending}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Safeguarding -->
+  <section class="bg-emerald-900 text-white" aria-labelledby="safeguarding-title">
+    <div class="bg-zellige-light">
+      <div class="container-site flex flex-col gap-5 py-12 sm:flex-row sm:items-start">
+        <span class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-amber-accent"><ShieldCheck className="size-7" aria-hidden="true" /></span>
+        <div>
+          <h2 id="safeguarding-title" class="text-2xl text-white">{c.safeguardingTitle}</h2>
+          <p class="mt-2 max-w-3xl text-emerald-50/85">{c.safeguardingText}</p>
+          <p class="mt-4"><a href="tel:1111" class="font-bold text-white underline underline-offset-4">{c.concern}</a></p>
+          <a href={href(lang, 'rights')} class="mt-3 inline-block font-semibold text-emerald-100 underline underline-offset-4 hover:text-white">{c.safeguardingLink}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Official channels + fraud warning -->
+  <section class="py-14 lg:py-20">
+    <div class="container-site grid gap-6 lg:grid-cols-2">
+      <div class="rounded-xl border border-sand bg-white p-6 sm:p-8" aria-labelledby="channels-title">
+        <h2 id="channels-title" class="flex items-center gap-2 text-xl"><BadgeCheck className="size-6" aria-hidden="true" /> {c.channelsTitle}</h2>
+        <p class="mt-3 text-muted">{c.channelsLead}</p>
+        <ul class="mt-5 space-y-3 text-sm">
+          <li class="flex flex-wrap items-center gap-2"><Globe className="size-4 text-emerald-700" aria-hidden="true" /> <span>{c.channels.site}</span> <b class="break-all" dir="ltr">{siteHost}</b></li>
+          <li class="flex flex-wrap items-center gap-2"><Globe className="size-4 text-emerald-700" aria-hidden="true" /> <span>{c.channels.facebook}</span> <a href={CONTACT.facebook} target="_blank" rel="noopener" class="font-bold text-emerald-900 underline" dir="ltr">{CONTACT.facebookHandle}</a></li>
+          <li class="flex flex-wrap items-center gap-2"><Phone className="size-4 text-emerald-700" aria-hidden="true" /> <span>{c.channels.phone}</span> <a href={`tel:${CONTACT.phone}`} class="font-bold text-emerald-900 underline" dir="ltr">{CONTACT.phoneDisplay}</a></li>
+          <li class="flex flex-wrap items-center gap-2"><Mail className="size-4 text-emerald-700" aria-hidden="true" /> <span>{c.channels.email}</span> <a href={`mailto:${CONTACT.email}`} class="font-bold text-emerald-900 underline" dir="ltr">{CONTACT.email}</a></li>
+        </ul>
+      </div>
+
+      <div class="rounded-xl border border-flag-red/30 bg-flag-red/5 p-6 sm:p-8">
+        <h2 class="flex items-center gap-2 text-xl"><Ban className="size-6 text-flag-red" aria-hidden="true" /> {c.warningsTitle}</h2>
+        <ul class="mt-4 list-disc space-y-2 ps-5 text-sm leading-relaxed marker:text-flag-red">
+          {c.warnings.map((w) => <li>{w}</li>)}
+        </ul>
+        <p class="mt-4 text-sm font-semibold">{c.verifyText}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="border-t border-sand bg-white py-14 lg:py-20" aria-labelledby="faq-title">
+    <div class="container-site max-w-4xl">
+      <h2 id="faq-title" class="text-2xl sm:text-3xl">{c.faqTitle}</h2>
+      <div class="mt-6 divide-y divide-sand rounded-xl border border-sand">
+        {c.faqs.map(({ q, a }) => (
+          <details class="group">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-semibold text-emerald-900 [&::-webkit-details-marker]:hidden">
+              <span>{q}</span>
+              <ChevronDown className="size-5 shrink-0 transition-transform group-open:rotate-180" aria-hidden="true" />
+            </summary>
+            <p class="px-5 pb-5 leading-relaxed text-muted">{a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Candor -->
+  <section class="py-14 lg:py-20" aria-labelledby="candor-title">
+    <div class="container-site max-w-4xl rounded-xl bg-amber-tint p-6 sm:p-10">
+      <h2 id="candor-title" class="text-2xl">{c.candorTitle}</h2>
+      <p class="mt-3 leading-relaxed text-ink">{c.candorText}</p>
+      <div class="mt-6 flex flex-wrap items-center justify-between gap-4">
+        <span class="text-sm text-muted">{c.updated}: <time datetime={TRUST_UPDATED}>{formatDate(TRUST_UPDATED, lang, 'long')}</time></span>
+        <a href={href(lang, 'contact')} class="rounded-lg bg-emerald-900 px-5 py-3 font-bold text-white hover:bg-emerald-800">{c.contactCta}</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .pending {
+    display: inline-block;
+    border-radius: 9999px;
+    background: var(--color-amber-tint);
+    padding: 0.1rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-donate-hover);
+  }
+</style>
