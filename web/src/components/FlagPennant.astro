@@ -1,0 +1,89 @@
+---
+// Waving Algerian flag beside the wordmark (ported from the legacy HeaderFlag).
+// Flag of Algeria, 3:2: crescent from an r=150 circle minus an r=120 circle shifted
+// toward the fly; the star points to the fly. Decorative — the brand link has its name.
+const FLAG_SVG =
+  "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 600'>" +
+  "<path fill='#fff' d='M0 0h900v600H0z'/>" +
+  "<path fill='#006233' d='M0 0h450v600H0z'/>" +
+  "<path fill='#d21034' d='m579.904 225a150 150 0 1 0 0 150 120 120 0 1 1 0-150m1.212 75-135.62-44.069 83.819 115.367v-142.596l-83.819 115.367z'/>" +
+  '</svg>';
+const FLAG_URL = `url("data:image/svg+xml,${encodeURIComponent(FLAG_SVG)}")`;
+const STRIPS = 12;
+---
+
+<span class="pennant" dir="ltr" aria-hidden="true">
+  <span class="pole"></span>
+  <span class="cloth" style={`--flag:${FLAG_URL};--strips:${STRIPS}`}>
+    {Array.from({ length: STRIPS }, (_, i) => <span class="strip" style={`--i:${i}`}></span>)}
+  </span>
+</span>
+
+<style>
+  .pennant {
+    --w: 30px;
+    --h: 20px;
+    position: relative;
+    display: inline-flex;
+    align-items: flex-start;
+    flex-shrink: 0;
+    height: 40px;
+    padding-top: 4px;
+  }
+  .pole {
+    position: relative;
+    width: 2px;
+    height: 36px;
+    border-radius: 1px;
+    background: linear-gradient(90deg, #8a94a3, #d7dce3 55%, #8a94a3);
+  }
+  .pole::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -2px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff4c2, #d4a72c 60%, #9c7414);
+  }
+  .cloth {
+    display: flex;
+    width: var(--w);
+    height: var(--h);
+    margin-top: 1px;
+    filter: drop-shadow(0 2px 3px rgba(16, 24, 40, 0.18));
+  }
+  .strip {
+    flex: 1 0 0;
+    height: 100%;
+    background-image: var(--flag);
+    background-size: var(--w) var(--h);
+    background-position: calc(var(--i) * var(--w) / var(--strips) * -1) 0;
+    animation: wave 2.4s ease-in-out infinite;
+    animation-delay: calc(var(--i) * -90ms);
+    margin-inline-end: -0.2px;
+  }
+  .strip::after {
+    content: '';
+    display: block;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.06));
+    animation: shade 2.4s ease-in-out infinite;
+    animation-delay: inherit;
+  }
+  @keyframes wave {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(2.2px); }
+  }
+  @keyframes shade {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; }
+  }
+  @media (max-width: 480px) {
+    .pennant { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .strip, .strip::after { animation: none; }
+  }
+</style>

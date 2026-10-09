@@ -1,0 +1,264 @@
+---
+import { Picture } from 'astro:assets';
+import { ArrowLeft, ArrowRight, BadgeCheck, CalendarDays, HandHeart, Lock, Mail, ReceiptText, CreditCard, Users } from 'lucide-react';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { NEWS, CATEGORY_LABELS } from '@/lib/news';
+import { HERO_PHOTO, isGraphic, photoByName } from '@/lib/photos';
+import { FACEBOOK_FOLLOWERS, FOUNDED, PARTNERS } from '@/data/site';
+import { formatDA, formatDate, href, langPaths, LANG_META, pick, useT, type Lang } from '@/i18n';
+
+export const getStaticPaths = langPaths;
+
+const lang = Astro.params.lang as Lang;
+const t = useT(lang);
+const rtl = LANG_META[lang].dir === 'rtl';
+const Arrow = rtl ? ArrowLeft : ArrowRight;
+const num = (n: number) => new Intl.NumberFormat('fr-FR').format(n).replace(/ | /g, ' ');
+
+const withPhoto = NEWS.filter((n) => n.image && !isGraphic(n.image));
+const heroImage = photoByName(HERO_PHOTO);
+const featured = withPhoto.find((n) => n.image === heroImage) ?? withPhoto[0];
+const log = withPhoto.filter((n) => n !== featured).slice(0, 6);
+
+const STATS = [
+  { value: String(FOUNDED.year), label: t.home.stats.founded },
+  { value: num(FACEBOOK_FOLLOWERS), label: t.home.stats.followers },
+  { value: num(NEWS.length), label: t.home.stats.activities },
+  { value: num(PARTNERS.length), label: t.home.stats.partners },
+];
+
+// Unit costs come from the approved donation config (legacy src/config/donation.js).
+const TIERS = [
+  { id: 'winter', amount: 3500, ...t.childTiers.winter },
+  { id: 'school', amount: 5000, suggested: true, ...t.childTiers.school },
+  { id: 'health', amount: 8000, ...t.childTiers.health },
+] as const;
+
+const TRUST_ICONS = [Lock, ReceiptText, CreditCard];
+---
+
+<BaseLayout lang={lang} slug="" title={t.seo.home.title} description={t.seo.home.description} ogImage={featured?.image ?? undefined}>
+  <!-- Hero -->
+  <section class="bg-zellige relative overflow-hidden">
+    <div class="container-site grid items-center gap-10 py-12 md:py-16 lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:py-24">
+      <div>
+        <p class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-900 sm:text-sm">
+          <BadgeCheck className="size-4 shrink-0" aria-hidden="true" />
+          {t.home.kicker}
+        </p>
+        <h1 class="mt-5 text-4xl sm:text-5xl lg:text-6xl">
+          {t.home.titleLead}
+          <span class="block text-donate">{t.home.titleAccent}</span>
+        </h1>
+        <p class="mt-5 max-w-xl text-lg leading-relaxed text-muted">{t.home.sub}</p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href={href(lang, 'donate')} class="inline-flex items-center gap-2 rounded-lg bg-donate px-6 py-3.5 font-bold text-white shadow-float transition-colors hover:bg-donate-hover">
+            <HandHeart className="size-5" aria-hidden="true" />
+            {t.home.donate}
+          </a>
+          <a href={href(lang, 'trust')} class="inline-flex items-center gap-2 rounded-lg border-2 border-emerald-900 px-6 py-3 font-bold text-emerald-900 transition-colors hover:bg-emerald-900 hover:text-white">
+            {t.home.transparency}
+            <Arrow className="size-4" aria-hidden="true" />
+          </a>
+        </div>
+        <ul class="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-muted">
+          {t.home.trust.map((item, i) => {
+            const Icon = TRUST_ICONS[i];
+            return (
+              <li class="flex items-center gap-2">
+                <Icon className="size-4 shrink-0 text-emerald-700" aria-hidden="true" />
+                {item}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      {featured?.image && (
+        <figure class="relative">
+          <Picture
+            src={featured.image}
+            formats={['avif', 'webp']}
+            widths={[480, 720, 960, 1200]}
+            sizes="(min-width: 1024px) 560px, 100vw"
+            alt={featured.headline}
+            class="aspect-[4/3] w-full rounded-xl object-cover shadow-lift"
+            loading="eager"
+            fetchpriority="high"
+          />
+          <figcaption class="absolute inset-x-3 bottom-3 rounded-lg bg-white/95 p-4 shadow-float backdrop-blur sm:inset-x-5 sm:bottom-5">
+            <span class="text-xs font-bold uppercase tracking-wide text-donate">{t.home.featuredLabel} · {formatDate(featured.date, lang)}</span>
+            <a href={href(lang, `news/${featured.id}/`)} lang={featured.textLang} dir={featured.textLang === 'ar' ? 'rtl' : 'ltr'} class="mt-1 line-clamp-2 block font-semibold text-emerald-900 hover:underline">{featured.headline}</a>
+          </figcaption>
+        </figure>
+      )}
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="bg-emerald-900 text-white" aria-labelledby="stats-title">
+    <div class="container-site py-10">
+      <h2 id="stats-title" class="sr-only">{t.home.statsTitle}</h2>
+      <dl class="grid grid-cols-2 gap-6 text-center lg:grid-cols-4">
+        {STATS.map((s) => (
+          <div class="flex flex-col-reverse gap-1">
+            <dt class="text-sm text-emerald-100">{s.label}</dt>
+            <dd class="tabular font-sans text-3xl font-extrabold text-white sm:text-4xl" dir="ltr">{s.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <!-- Giving tiers -->
+  <section class="py-16 lg:py-24" aria-labelledby="tiers-title">
+    <div class="container-site">
+      <div class="mx-auto max-w-2xl text-center">
+        <p class="text-sm font-bold uppercase tracking-wide text-donate">{t.home.tiersKicker}</p>
+        <h2 id="tiers-title" class="mt-2 text-3xl sm:text-4xl">{t.home.tiersTitle}</h2>
+        <p class="mt-3 text-muted">{t.home.tiersSub}</p>
+      </div>
+
+      <ul class="mt-10 grid gap-5 md:grid-cols-3">
+        {TIERS.map((tier) => (
+          <li
+            class:list={[
+              'relative flex flex-col rounded-xl border bg-white p-6 shadow-float',
+              'suggested' in tier ? 'border-donate ring-1 ring-donate' : 'border-sand',
+            ]}
+          >
+            {'suggested' in tier && (
+              <span class="absolute -top-3 start-6 rounded-full bg-donate px-3 py-0.5 text-xs font-bold text-white">{t.home.tierSuggested}</span>
+            )}
+            <p class="tabular font-sans text-3xl font-extrabold text-emerald-900">{formatDA(tier.amount, lang)}</p>
+            <h3 class="mt-3 text-lg">{tier.title}</h3>
+            <p class="mt-2 flex-1 text-sm leading-relaxed text-muted">{tier.desc}</p>
+            <p class="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-900">{tier.impact}</p>
+            <a
+              href={href(lang, 'donate', `?amount=${tier.amount}&designation=${tier.id}`)}
+              class:list={[
+                'mt-5 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 font-bold transition-colors',
+                'suggested' in tier ? 'bg-donate text-white hover:bg-donate-hover' : 'border-2 border-emerald-900 text-emerald-900 hover:bg-emerald-900 hover:text-white',
+              ]}
+            >
+              {t.home.tierChoose}
+              <span class="sr-only">: {tier.title}, {formatDA(tier.amount, lang)}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <form action={href(lang, 'donate')} method="get" class="mx-auto mt-8 flex max-w-xl flex-col gap-3 rounded-xl border border-sand bg-cream-dim p-5 sm:flex-row sm:items-end">
+        <label class="flex-1">
+          <span class="text-sm font-bold text-emerald-900">{t.home.customTitle}</span>
+          <span class="mt-2 flex items-center rounded-lg border border-sand bg-white focus-within:ring-2 focus-within:ring-emerald-900">
+            <input
+              name="amount"
+              type="number"
+              inputmode="numeric"
+              min="100"
+              max="500000"
+              step="50"
+              required
+              placeholder={t.donateCustomPlaceholder}
+              class="tabular w-full min-w-0 bg-transparent px-3 py-3 outline-none"
+            />
+            <span class="px-3 text-sm font-bold text-muted">{lang === 'ar' ? 'دج' : 'DA'}</span>
+          </span>
+        </label>
+        <button type="submit" class="rounded-lg bg-donate px-5 py-3 font-bold text-white transition-colors hover:bg-donate-hover">{t.home.customCta}</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Field activity log -->
+  <section class="border-y border-sand bg-white py-16 lg:py-24" aria-labelledby="log-title">
+    <div class="container-site">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div class="max-w-2xl">
+          <p class="text-sm font-bold uppercase tracking-wide text-donate">{t.home.logKicker}</p>
+          <h2 id="log-title" class="mt-2 text-3xl sm:text-4xl">{t.home.logTitle}</h2>
+          <p class="mt-3 text-muted">{t.home.logSub}</p>
+        </div>
+        <a href={href(lang, 'news')} class="inline-flex shrink-0 items-center gap-2 font-bold text-emerald-900 hover:underline">
+          {t.home.logAll}
+          <Arrow className="size-4" aria-hidden="true" />
+        </a>
+      </div>
+
+      <ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {log.map((item) => (
+          <li class="group relative flex flex-col overflow-hidden rounded-xl border border-sand bg-cream shadow-float transition-shadow hover:shadow-lift">
+            {item.image && (
+              <Picture
+                src={item.image}
+                formats={['avif', 'webp']}
+                widths={[400, 640, 800]}
+                sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
+                alt=""
+                class="aspect-[16/10] w-full object-cover"
+              />
+            )}
+            <div class="flex flex-1 flex-col p-5">
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span class="rounded-full bg-emerald-50 px-2.5 py-1 font-bold text-emerald-900">{pick(lang, CATEGORY_LABELS[item.category])}</span>
+                <span class="flex items-center gap-1 text-muted">
+                  <CalendarDays className="size-3.5" aria-hidden="true" />
+                  <time datetime={item.date.slice(0, 10)}>{formatDate(item.date, lang)}</time>
+                </span>
+              </div>
+              <h3 class="mt-3 line-clamp-3 text-base font-semibold leading-snug" lang={item.textLang} dir={item.textLang === 'ar' ? 'rtl' : 'ltr'}>
+                <a href={href(lang, `news/${item.id}/`)} class="after:absolute after:inset-0 group-hover:underline">{item.headline}</a>
+              </h3>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Governance & partners -->
+  <section class="py-16 lg:py-24" aria-labelledby="gov-title">
+    <div class="container-site grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:items-start">
+      <div>
+        <h2 id="gov-title" class="text-3xl sm:text-4xl">{t.home.transparencyTitle}</h2>
+        <p class="mt-3 text-muted">{t.home.transparencySub}</p>
+        <a href={href(lang, 'trust')} class="mt-6 inline-flex items-center gap-2 rounded-lg bg-emerald-900 px-5 py-3 font-bold text-white transition-colors hover:bg-emerald-800">
+          {t.nav.trust}
+          <Arrow className="size-4" aria-hidden="true" />
+        </a>
+      </div>
+      <div>
+        <h3 class="text-lg">{t.partnersTitle}</h3>
+        <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+          {PARTNERS.map((p) => (
+            <li class="flex items-start gap-3 rounded-lg border border-sand bg-white p-4">
+              <BadgeCheck className="mt-0.5 size-5 shrink-0 text-emerald-700" aria-hidden="true" />
+              <span class="text-sm font-semibold text-ink">{pick(lang, p)}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Volunteer -->
+  <section class="bg-emerald-900 text-white" aria-labelledby="vol-title">
+    <div class="bg-zellige-light">
+      <div class="container-site flex flex-col items-start gap-6 py-14 md:flex-row md:items-center md:justify-between">
+        <div class="max-w-2xl">
+          <p class="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-amber-accent">
+            <Users className="size-4" aria-hidden="true" />
+            {t.home.volunteerKicker}
+          </p>
+          <h2 id="vol-title" class="mt-2 text-3xl text-white sm:text-4xl">{t.home.volunteerTitle}</h2>
+          <p class="mt-3 text-emerald-50/85">{t.home.volunteerSub}</p>
+        </div>
+        <a href={href(lang, 'contact', '?topic=volunteer')} class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-white px-6 py-3.5 font-bold text-emerald-900 transition-colors hover:bg-emerald-50">
+          <Mail className="size-5" aria-hidden="true" />
+          {t.home.volunteerCta}
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

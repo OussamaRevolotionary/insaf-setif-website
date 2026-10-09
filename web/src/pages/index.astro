@@ -1,0 +1,27 @@
+---
+// Root of the site: send visitors to their language, Arabic by default.
+import { href } from '@/i18n';
+const ar = href('ar');
+const fr = href('fr');
+const en = href('en');
+---
+
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>INSAF — جمعية إنصاف لولاية سطيف</title>
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={new URL(ar, Astro.site).href} />
+    <meta http-equiv="refresh" content={`2;url=${ar}`} />
+    <script is:inline define:vars={{ ar, fr, en }}>
+      const pref = (navigator.languages || [navigator.language || '']).map((l) => l.slice(0, 2).toLowerCase());
+      const pick = pref.find((l) => l === 'ar' || l === 'fr' || l === 'en') || 'ar';
+      location.replace({ ar, fr, en }[pick] + location.search + location.hash);
+    </script>
+  </head>
+  <body>
+    <p><a href={ar}>العربية</a> · <a href={fr}>Français</a> · <a href={en}>English</a></p>
+  </body>
+</html>

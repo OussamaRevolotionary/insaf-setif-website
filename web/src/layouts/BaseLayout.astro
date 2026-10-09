@@ -1,0 +1,89 @@
+---
+import '@/styles/global.css';
+import { getImage } from 'astro:assets';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import logo from '@/assets/brand/logo.jpg';
+import { CONTACT, FOUNDED } from '@/data/site';
+import { LOCALES, LANG_META, href, useT, type Lang } from '@/i18n';
+
+interface Props {
+  lang: Lang;
+  /** Path after /<lang>/ (e.g. "donate/"), '' for home. */
+  slug: string;
+  title: string;
+  description: string;
+  /** Optimised image for social cards; defaults to the logo. */
+  ogImage?: ImageMetadata;
+  noindex?: boolean;
+}
+
+const { lang, slug, title, description, ogImage, noindex = false } = Astro.props;
+const t = useT(lang);
+const meta = LANG_META[lang];
+const site = Astro.site!;
+
+const abs = (path: string) => new URL(path, site).href;
+const canonical = abs(href(lang, slug));
+const og = await getImage({ src: ogImage ?? logo, width: 1200, format: 'jpg' });
+const logoAbs = abs((await getImage({ src: logo, width: 512, format: 'png' })).src);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'NGO',
+  '@id': abs(`${import.meta.env.BASE_URL}#org`),
+  name: t.brandFull,
+  alternateName: 'INSAF',
+  url: abs(href(lang)),
+  logo: logoAbs,
+  foundingDate: `${FOUNDED.year}-${String(FOUNDED.month).padStart(2, '0')}`,
+  email: CONTACT.email,
+  telephone: CONTACT.phone,
+  address: { '@type': 'PostalAddress', addressLocality: 'Sétif', addressCountry: 'DZ' },
+  areaServed: { '@type': 'AdministrativeArea', name: 'Sétif' },
+  sameAs: [CONTACT.facebook],
+};
+---
+
+<!doctype html>
+<html lang={lang} dir={meta.dir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="canonical" href={canonical} />
+    {LOCALES.map((l) => <link rel="alternate" hreflang={l} href={abs(href(l, slug))} />)}
+    <link rel="alternate" hreflang="x-default" href={abs(href('ar', slug))} />
+    <link rel="icon" href={logoAbs} type="image/png" />
+    <link rel="sitemap" href={abs(`${import.meta.env.BASE_URL}sitemap-index.xml`)} />
+    <meta name="theme-color" content="#0f392b" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={t.brandFull} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={abs(og.src)} />
+    <meta property="og:locale" content={meta.og} />
+    {LOCALES.filter((l) => l !== lang).map((l) => <meta property="og:locale:alternate" content={LANG_META[l].og} />)}
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <slot name="head" />
+  </head>
+  <body class="flex min-h-dvh flex-col">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-emerald-900 focus:px-4 focus:py-3 focus:font-bold focus:text-white"
+    >
+      {t.skip}
+    </a>
+    <Header lang={lang} slug={slug} />
+    <main id="main" tabindex="-1" class="flex-1 outline-none">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+  </body>
+</html>

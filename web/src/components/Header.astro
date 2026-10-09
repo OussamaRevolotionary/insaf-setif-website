@@ -1,0 +1,156 @@
+---
+import { Image } from 'astro:assets';
+import { Heart, Menu, X } from 'lucide-react';
+import FlagPennant from './FlagPennant.astro';
+import logo from '@/assets/brand/logo.jpg';
+import { LOCALES, LANG_META, href, useT, type Lang, type RouteKey } from '@/i18n';
+
+interface Props {
+  lang: Lang;
+  /** Path after /<lang>/, used to keep the visitor on the same page when switching language. */
+  slug: string;
+}
+
+const { lang, slug } = Astro.props;
+const t = useT(lang);
+
+const PRIMARY: RouteKey[] = ['about', 'rights', 'programs', 'achievements', 'news', 'contact'];
+const DRAWER: RouteKey[] = ['home', 'about', 'rights', 'goals', 'programs', 'achievements', 'news', 'trust', 'contact'];
+
+const current = Astro.url.pathname;
+const isActive = (r: RouteKey) => (r === 'home' ? current === href(lang) : current.startsWith(href(lang, r)));
+---
+
+<header class="sticky top-0 z-40 border-b border-sand/70 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+  <div class="container-site flex h-16 items-center justify-between gap-4 lg:h-20">
+    <a href={href(lang)} class="flex min-w-0 items-center gap-2.5 rounded-md" aria-label={`${t.brandName} — ${t.brandFull}`}>
+      <Image src={logo} alt="" width={44} height={44} class="size-10 shrink-0 rounded-full ring-1 ring-sand lg:size-11" loading="eager" />
+      <span class="flex min-w-0 flex-col leading-tight">
+        <span class="font-sans text-xl font-extrabold tracking-tight text-emerald-900" dir="ltr">{t.brandName}</span>
+        <span class="hidden truncate text-xs text-muted sm:block">{t.brandFull}</span>
+      </span>
+      <FlagPennant />
+    </a>
+
+    <nav class="hidden xl:block" aria-label={t.menu}>
+      <ul class="flex items-center gap-1">
+        {PRIMARY.map((r) => (
+          <li>
+            <a
+              href={href(lang, r)}
+              aria-current={isActive(r) ? 'page' : undefined}
+              class="rounded-md px-3 py-2 text-sm font-semibold text-muted transition-colors hover:bg-emerald-50 hover:text-emerald-900 aria-[current=page]:text-emerald-900 aria-[current=page]:underline aria-[current=page]:decoration-amber-accent aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8"
+            >
+              {t.nav[r]}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="flex shrink-0 items-center gap-2">
+      <div class="hidden items-center rounded-full border border-sand bg-cream p-0.5 sm:flex" role="group" aria-label={t.langLabel}>
+        {LOCALES.map((l) => (
+          <a
+            href={href(l, slug)}
+            hreflang={l}
+            lang={l}
+            aria-current={l === lang ? 'true' : undefined}
+            title={LANG_META[l].label}
+            class="min-w-9 rounded-full px-2.5 py-1 text-center text-xs font-bold text-muted transition-colors hover:text-emerald-900 aria-[current=true]:bg-emerald-900 aria-[current=true]:text-white"
+          >
+            {LANG_META[l].short}
+          </a>
+        ))}
+      </div>
+
+      <a
+        href={href(lang, 'donate')}
+        class="inline-flex items-center gap-2 rounded-lg bg-donate px-4 py-2.5 text-sm font-bold text-white shadow-float transition-colors hover:bg-donate-hover"
+      >
+        <Heart className="size-4" aria-hidden="true" fill="currentColor" />
+        <span>{t.nav.donate}</span>
+      </a>
+
+      <button
+        type="button"
+        class="inline-flex size-10 items-center justify-center rounded-lg text-emerald-900 hover:bg-emerald-50 xl:hidden"
+        aria-controls="site-drawer"
+        aria-expanded="false"
+        data-drawer-open
+      >
+        <Menu className="size-6" aria-hidden="true" />
+        <span class="sr-only">{t.menu}</span>
+      </button>
+    </div>
+  </div>
+  <span class="flag-band absolute inset-x-0 -bottom-px h-1" aria-hidden="true"></span>
+</header>
+
+<div id="site-drawer" class="fixed inset-0 z-50 hidden xl:hidden" data-drawer>
+  <div class="absolute inset-0 bg-emerald-950/50" data-drawer-close></div>
+  <div
+    class="absolute inset-y-0 end-0 flex w-[min(22rem,88vw)] flex-col overflow-y-auto bg-white shadow-lift"
+    role="dialog"
+    aria-modal="true"
+    aria-label={t.menu}
+  >
+    <div class="flex items-center justify-between border-b border-sand px-5 py-4">
+      <span class="font-bold text-emerald-900">{t.menu}</span>
+      <button type="button" class="inline-flex size-10 items-center justify-center rounded-lg hover:bg-emerald-50" data-drawer-close>
+        <X className="size-6" aria-hidden="true" />
+        <span class="sr-only">{t.closeMenu}</span>
+      </button>
+    </div>
+    <nav aria-label={t.menu} class="flex-1 px-3 py-4">
+      <ul class="space-y-1">
+        {DRAWER.map((r) => (
+          <li>
+            <a
+              href={href(lang, r)}
+              aria-current={isActive(r) ? 'page' : undefined}
+              class="block rounded-lg px-4 py-3 font-semibold text-ink hover:bg-emerald-50 aria-[current=page]:bg-emerald-50 aria-[current=page]:text-emerald-900"
+            >
+              {t.nav[r]}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <div class="border-t border-sand px-5 py-4">
+      <p class="mb-2 text-xs font-bold uppercase tracking-wide text-muted">{t.langLabel}</p>
+      <div class="grid grid-cols-3 gap-2">
+        {LOCALES.map((l) => (
+          <a
+            href={href(l, slug)}
+            hreflang={l}
+            lang={l}
+            aria-current={l === lang ? 'true' : undefined}
+            class="rounded-lg border border-sand px-2 py-2 text-center text-sm font-semibold aria-[current=true]:border-emerald-900 aria-[current=true]:bg-emerald-900 aria-[current=true]:text-white"
+          >
+            {LANG_META[l].label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const drawer = document.querySelector<HTMLElement>('[data-drawer]');
+  const opener = document.querySelector<HTMLButtonElement>('[data-drawer-open]');
+  if (drawer && opener) {
+    const setOpen = (open: boolean) => {
+      drawer.classList.toggle('hidden', !open);
+      opener.setAttribute('aria-expanded', String(open));
+      document.documentElement.style.overflow = open ? 'hidden' : '';
+      if (open) drawer.querySelector<HTMLElement>('nav a')?.focus();
+      else opener.focus();
+    };
+    opener.addEventListener('click', () => setOpen(true));
+    drawer.querySelectorAll('[data-drawer-close]').forEach((el) => el.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !drawer.classList.contains('hidden')) setOpen(false);
+    });
+  }
+</script>

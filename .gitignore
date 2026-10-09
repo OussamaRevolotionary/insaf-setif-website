@@ -3,6 +3,7 @@ node_modules/
 
 # Build output (regenerate with `npm run build`)
 dist/
+.astro/
 
 # Raw Facebook scraper photo dump — identical to public/photos, kept out to avoid duplicating 140MB+
 Insaf Association Setif's Photos (pb.100072412446373.-2207520000)/

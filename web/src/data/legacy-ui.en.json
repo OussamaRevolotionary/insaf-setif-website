@@ -1,0 +1,338 @@
+{
+  "brand": "Association Insaf Sétif",
+  "strap": "Child protection, inclusion, solidarity",
+  "heroTitle": "Equity protects children, supports youth, and creates impact in Sétif.",
+  "heroSub": "A complete digital platform featuring our mission, programs, and interactive 3D ecosystems.",
+  "ctaPartner": "Partner with us",
+  "ctaNews": "Latest news",
+  "statFounded": "Since 2014",
+  "statFoundedLabel": "Founded",
+  "statFollowers": "followers",
+  "statPosts": "posts",
+  "statPhotos": "photos",
+  "statPillars": "pillars",
+  "impactBenef": "Beneficiaries",
+  "impactPartners": "Partners",
+  "impactYears": "Years of impact",
+  "impactPrograms": "Programs",
+  "navAbout": "About",
+  "navGoals": "Goals & 3D",
+  "navPrograms": "Programs",
+  "navAchievements": "Achievements",
+  "navNews": "News",
+  "navContact": "Contact",
+  "labelAbout": "Association",
+  "labelGoals": "Vision & 3D",
+  "labelPrograms": "Programs",
+  "labelAchievements": "Impact",
+  "labelNews": "News",
+  "labelContact": "Contact",
+  "leadAbout": "Association Insaf Sétif is a civil society organization founded in June 2014, dedicated to child rights, youth accompaniment, social reintegration and solidarity.",
+  "leadGoals": "Explore our 3D interactive Ecosystem of Empowerment and core goals.",
+  "leadPrograms": "The main programs and impact pillars.",
+  "leadAchievements": "Field and institutional presence documented with image cards and clear headlines.",
+  "leadNews": "News archive formatted into clean headline cards with dynamic zoom effects.",
+  "leadContact": "Contact Association Insaf Sétif through the official channels.",
+  "footerBrand": "Association Insaf Sétif",
+  "footerTag": "Child protection • Youth empowerment • Community service",
+  "footerNav": "Quick links",
+  "footerContactTitle": "Get in touch",
+  "searchNews": "Search posts...",
+  "all": "All",
+  "readMore": "View details",
+  "showMore": "Show more",
+  "noPosts": "No matching news posts.",
+  "ctaVolunteerTitle": "Be part of the impact",
+  "ctaVolunteerText": "Join us as a volunteer or partner and help build a better future for children and youth in Sétif.",
+  "ctaVolunteerBtn": "Partner with us",
+  "ctaVolunteerBtn2": "Learn more",
+  "chatTitle": "Insaf AI Agent",
+  "chatWelcome": "Hello! I am Insaf's AI Agent. How can I assist you today?",
+  "chatName": "Name",
+  "chatEmail": "Email",
+  "chatMsg": "Type your message...",
+  "chatSend": "Send",
+  "formName": "Full name",
+  "formOrg": "Organization",
+  "formEmail": "Email address",
+  "formMsg": "Describe your message or collaboration topic",
+  "formSend": "Send request",
+  "formSuccess": "Message sent successfully!",
+  "formError": "An error occurred, please try again.",
+  "formErrName": "Name is required",
+  "formErrEmail": "Invalid email address",
+  "formErrMsg": "Message is required",
+  "contactTitle": "Official contact details",
+  "missionTitle": "Original mission",
+  "missionText": "The association carries the name \"Insaf\" to make justice, dignity and protection practical values in service of children, youth and vulnerable groups.",
+  "visionTitle": "Vision",
+  "visionText": "A local community that protects children's dignity, opens real inclusion pathways, and makes solidarity a shared responsibility.",
+  "valuesTitle": "Values",
+  "valuesItems": [
+    "Equity & Dignity",
+    "Protection & Prevention",
+    "Accompaniment & Inclusion",
+    "Volunteering & Solidarity",
+    "Institutional Partnership",
+    "Civic Responsibility"
+  ],
+  "timelineTitle": "10+ Years of Progress and Empowerment",
+  "partnersTitle": "Institutional partners",
+  "partnersLead": "We work in coordination with national institutions and local authorities.",
+  "galleryTitle": "Activity gallery",
+  "galleryLead": "Real documentation of the association's activities and engagement with target groups.",
+  "overviewLabel": "Overview",
+  "overviewTitle": "The website speaks for the association",
+  "overviewText": "Association Insaf Sétif works for child rights, youth accompaniment, social reintegration and community solidarity in Sétif.",
+  "copyright": "© 2024 Association Insaf Sétif. All rights reserved.",
+  "notFoundTitle": "404",
+  "notFoundText": "Page not found",
+  "notFoundBtn": "Back to home",
+  "navDonate": "Donate",
+  "helpChildNow": "Help a child now",
+  "impactPhotos": "documented photos",
+  "appealRegionLabel": "Seasonal campaign appeal",
+  "appealDismiss": "Dismiss appeal",
+  "appeals": {
+    "school": {
+      "title": "Back to school",
+      "text": "A complete school kit for an orphan starts at 5,000 DA.",
+      "cta": "Equip a child"
+    },
+    "wildfire": {
+      "title": "Wildfire season",
+      "text": "Our solidarity fund supports families hit by forest fires.",
+      "cta": "Support the fund"
+    },
+    "winter": {
+      "title": "Warm winter",
+      "text": "A coat and warm shoes for a child in the Sétif highlands: 3,500 DA.",
+      "cta": "Warm a child"
+    },
+    "ramadan": {
+      "title": "Ramadan food baskets",
+      "text": "Help fill Ramadan food baskets for families in need in Sétif.",
+      "cta": "Give now"
+    },
+    "orphans": {
+      "title": "Support a child",
+      "text": "Your help opens school and care to an orphaned child.",
+      "cta": "Help now"
+    }
+  },
+  "tickerLabel": "Recent activity",
+  "tickerAll": "All news",
+  "childrenHubBadge": "Children’s rights & orphan support",
+  "childrenHubTitle": "One child. One chance. Your gift makes the difference.",
+  "childrenHubSub": "We stand beside orphans and children from vulnerable families in Sétif: a seat in school, care on time, and warmth in winter.",
+  "childTiers": {
+    "school": {
+      "title": "Complete school kit",
+      "desc": "Notebooks, supplies, a school bag and smock for a full school year.",
+      "impact": "A child walks into class with confidence"
+    },
+    "health": {
+      "title": "Healthcare",
+      "desc": "A check-up, essential medicines and follow-up for one child for a year.",
+      "impact": "Care on time, not too late"
+    },
+    "winter": {
+      "title": "Winter warmth",
+      "desc": "A coat, warm shoes and winter clothes against the highland cold.",
+      "impact": "A safer winter"
+    }
+  },
+  "giveAmount": "Give {amount}",
+  "childStoriesTitle": "What your gift makes possible",
+  "childStories": [
+    {
+      "text": "On the first day of school she walked in with a new bag and a clean smock, and told her teacher she would become a doctor.",
+      "who": "S., 8"
+    },
+    {
+      "text": "After a check-up that came in time, he was back on the neighbourhood pitch with his friends every evening.",
+      "who": "Y., 10"
+    },
+    {
+      "text": "A warm coat and sturdy shoes made his long winter walk to school a little less harsh.",
+      "who": "M., 12"
+    }
+  ],
+  "childStoriesDisclosure": "Illustrative composite stories — names and details changed to protect children’s privacy.",
+  "carouselPrev": "Previous story",
+  "carouselNext": "Next story",
+  "carouselGoTo": "Go to story",
+  "childPhotoAlt": "Children and staff from Insaf on an outing for International Children’s Day",
+  "childPhotoCaption": "Insaf activity — International Children’s Day, June 2026",
+  "fireBadge": "Wildfire solidarity",
+  "fireTitle": "When Algeria’s forests burn, solidarity answers.",
+  "fireIntro": "Almost every summer, wildfires strike the forests of northern Algeria, destroying homes and harvests and leaving children in shock. Insaf’s solidarity fund channels your donations to affected families.",
+  "fireListLead": "Your gift to the fund helps provide:",
+  "fireActions": [
+    "Emergency family kits: water, food and blankets",
+    "School supplies for children who lost theirs",
+    "Psychosocial activities for children after the trauma",
+    "Replanting drives with volunteers once the ground is safe"
+  ],
+  "fireHonor": "We salute the Civil Protection firefighters, forest rangers and citizen volunteers who stand on the front line every summer.",
+  "fireCta": "Support the solidarity fund",
+  "natureBadge": "Green life",
+  "natureTitle": "Forests, water and our children’s future",
+  "natureSub": "What we plant today, tomorrow’s children inherit. With volunteers and schools, we grow respect for nature and access to water for all.",
+  "natureCards": {
+    "reforest": {
+      "title": "Reforestation",
+      "text": "Planting days with volunteers and pupils to bring damaged land back to life.",
+      "help": "Join a planting day or fund seedlings."
+    },
+    "water": {
+      "title": "Rural water",
+      "text": "Advocating for safe drinking water for children in remote villages.",
+      "help": "Back water projects in rural municipalities."
+    },
+    "education": {
+      "title": "Environmental education",
+      "text": "Workshops that teach children the value of trees and water, and the danger of fire.",
+      "help": "Lead a workshop at your school."
+    }
+  },
+  "campaignSectionTitle": "Our active campaigns",
+  "campaignSectionSub": "Pick a campaign and follow its progress — every contribution brings us closer to the goal.",
+  "campaigns": {
+    "school": {
+      "title": "Back-to-school kits",
+      "desc": "Equipping orphans for the school year."
+    },
+    "wildfire": {
+      "title": "Wildfire solidarity fund",
+      "desc": "Supporting families and children affected by forest fires."
+    },
+    "winter": {
+      "title": "Warm winter campaign",
+      "desc": "Winter clothing for children in the Sétif highlands."
+    }
+  },
+  "campaignRaised": "raised",
+  "campaignGoal": "Goal",
+  "campaignAlmost": "Almost there — help us finish!",
+  "campaignDonate": "Contribute",
+  "campaignIllustrative": "Illustrative figures, pending the association’s verified totals.",
+  "donatePageLabel": "Donate",
+  "donatePageTitle": "Your gift reaches children",
+  "donatePageLead": "Choose what suits you: Edahabia or CIB card online, BaridiMob, or a CCP postal account.",
+  "donateBoxTitle": "Make a donation",
+  "donateBoxSub": "Secure Algerian payment methods, in one minute.",
+  "donateTestMode": "Test mode — no real money is charged",
+  "donateMethodsLabel": "Ways to give",
+  "donateTabs": {
+    "card": {
+      "label": "Edahabia · BaridiMob / CIB",
+      "hint": "Instant, secure payment via Chargily",
+      "title": "Edahabia or CIB card"
+    },
+    "baridimob": {
+      "label": "BaridiMob",
+      "hint": "QR code or RIP",
+      "title": "Transfer with BaridiMob / BaridiPay"
+    },
+    "ccp": {
+      "label": "CCP account",
+      "hint": "At any post office",
+      "title": "Deposit to the CCP postal account"
+    },
+    "international": {
+      "label": "International",
+      "hint": "From outside Algeria",
+      "title": "International bank transfer"
+    }
+  },
+  "donateAmountLegend": "Choose an amount",
+  "donateCustomLabel": "Or enter another amount",
+  "donateCustomPlaceholder": "e.g. 2500",
+  "donateDesignationLabel": "Direct my gift to",
+  "designations": {
+    "general": {
+      "label": "Where the need is greatest"
+    },
+    "school": {
+      "label": "School kits",
+      "unitLabel": "school kit"
+    },
+    "health": {
+      "label": "Children’s healthcare",
+      "unitLabel": "year of care for a child"
+    },
+    "winter": {
+      "label": "Warm winter",
+      "unitLabel": "winter kit for a child"
+    },
+    "wildfire": {
+      "label": "Wildfire solidarity fund"
+    },
+    "ramadan": {
+      "label": "Ramadan food baskets"
+    }
+  },
+  "donateCardLegend": "Card type",
+  "donateMethods": {
+    "edahabia": "Edahabia — the card of your CCP / BaridiMob account",
+    "cib": "CIB (bank card)"
+  },
+  "donateYourGift": "Your gift",
+  "donateEnterAmount": "Enter an amount between 100 and 500,000 DA.",
+  "impactGeneral": "Directed to child-protection and solidarity programmes where the need is greatest.",
+  "impactCovers": "Covers {n} × {item}",
+  "impactTopUp": "{pct}% of a {item} — add {missing} to complete it.",
+  "donateNameLabel": "Name",
+  "donateEmailLabel": "Email",
+  "optional": "optional",
+  "donatePay": "Donate {amount} securely",
+  "donateRedirecting": "Redirecting to secure checkout…",
+  "donateErrAmount": "Please choose an amount between {min} and {max}.",
+  "donateErrEmail": "That email address doesn’t look right.",
+  "donateErrGeneric": "We couldn’t open the payment page. Please try again or choose another method.",
+  "donateSecureNote": "Payment is processed by Chargily Pay — your card details never pass through our site.",
+  "donateQrAlt": "QR code to donate with BaridiMob",
+  "donateQrPending": "The official QR code will be published soon",
+  "baridiSteps": [
+    "Open the BaridiMob app.",
+    "Choose “Transfer”, then scan the QR code or paste the RIP.",
+    "Enter “Insaf” as the reference and confirm."
+  ],
+  "ccpSteps": [
+    "Go to any post office, or use BaridiMob.",
+    "Fill in a deposit slip (versement) in the name of Association Insaf Sétif.",
+    "Keep your deposit receipt."
+  ],
+  "ccpAccountLabel": "Account no.",
+  "ccpKeyLabel": "Key (clé)",
+  "donatePending": "Coming soon",
+  "donateCopy": "Copy",
+  "donateCopied": "Copied",
+  "intlHolder": "Account holder",
+  "intlBank": "Bank",
+  "intlSortCode": "Sort code",
+  "donateNote": "Please include your name and “Insaf Setif” in the transfer reference.",
+  "donateTrustRegistered": "Civil association — Sétif, since 2014",
+  "donateTrustSecure": "Encrypted payment via Chargily Pay",
+  "donateTrustReceipt": "Need a receipt or have a question? Contact us",
+  "donateTrustLink": "How we handle your donation",
+  "childRightsPageLabel": "Children’s rights",
+  "childRightsPageTitle": "Children’s rights: know them, protect them",
+  "childRightsPageLead": "The principles of the UN Convention on the Rights of the Child, Algeria’s legal framework, the free child-protection helplines, and what Insaf does for the children of Sétif.",
+  "trustPageLabel": "Trust & transparency",
+  "trustPageTitle": "Your gift is a trust we keep",
+  "trustPageLead": "Where donations go, who runs the association, how we protect children, and how to check it’s really us.",
+  "footerTrust": "Trust & transparency",
+  "footerHelpline": "Child in danger? Free call",
+  "donateStatus": {
+    "success": {
+      "title": "Thank you! Your donation was received.",
+      "text": "Your generosity will reach the children. Thank you for being part of Insaf’s impact."
+    },
+    "failure": {
+      "title": "The payment wasn’t completed.",
+      "text": "No money was charged. You can try again or choose another method below."
+    }
+  }
+}

@@ -1,0 +1,166 @@
+@import "tailwindcss";
+@import "@fontsource-variable/plus-jakarta-sans";
+@import "@fontsource-variable/cairo";
+
+/* RTL-aware variant: `rtl:` / `ltr:` follow the <html dir> attribute. */
+@custom-variant rtl (&:where([dir="rtl"], [dir="rtl"] *));
+@custom-variant ltr (&:where([dir="ltr"], [dir="ltr"] *));
+
+/* ==========================================================================
+   INSAF design tokens — from the Stitch "Dignified Solidarity" DESIGN.md
+   (adopted 2026-10-09). Contrast checked against WCAG AA:
+   white on emerald 12.8:1 · body ink on cream 16.8:1 · meta on cream 7.1:1 ·
+   white on donate amber #B45309 5.0:1 (the spec's #D97706 fails at 3.2:1).
+   ========================================================================== */
+@theme {
+  /* Brand */
+  --color-emerald-950: #002318;
+  --color-emerald-900: #0f392b; /* primary: headers, brand blocks */
+  --color-emerald-800: #1b4d3e; /* hover / secondary surfaces */
+  --color-emerald-700: #376757;
+  --color-emerald-100: #c0ecd7;
+  --color-emerald-50: #e6f4ea;  /* verified / governance tint */
+
+  --color-donate: #b45309;       /* donate actions only */
+  --color-donate-hover: #92400e;
+  --color-amber-accent: #f59e0b; /* non-text highlights, progress */
+  --color-amber-tint: #fff7e6;
+
+  /* Neutrals */
+  --color-cream: #f9f8f5;
+  --color-cream-dim: #efeeeb;
+  --color-sand: #e2e0d8;
+  --color-ink: #0f172a;
+  --color-muted: #475569;
+
+  /* Flag of Algeria */
+  --color-flag-green: #006233;
+  --color-flag-red: #d21034;
+
+  /* Typography */
+  --font-sans: "Plus Jakarta Sans Variable", "Cairo Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: "Cairo Variable", "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+
+  /* Shape & depth */
+  --radius-sm: 0.25rem;
+  --radius: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --shadow-float: 0 10px 25px -5px rgb(15 57 43 / 0.05), 0 8px 10px -6px rgb(15 57 43 / 0.03);
+  --shadow-lift: 0 20px 40px -12px rgb(15 57 43 / 0.18);
+
+  --container-site: 80rem; /* 1280px max content width */
+}
+
+/* shadcn/ui semantic variables, mapped onto the INSAF palette so library
+   components (shadcn, 21st.dev) inherit the brand without per-component edits. */
+:root {
+  --background: #f9f8f5;
+  --foreground: #1a1c1a;
+  --card: #ffffff;
+  --card-foreground: #1a1c1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1c1a;
+  --primary: #0f392b;
+  --primary-foreground: #ffffff;
+  --secondary: #e6f4ea;
+  --secondary-foreground: #0f392b;
+  --muted: #efeeeb;
+  --muted-foreground: #475569;
+  --accent: #e6f4ea;
+  --accent-foreground: #0f392b;
+  --destructive: #ba1a1a;
+  --border: #e2e0d8;
+  --input: #e2e0d8;
+  --ring: #0f392b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted-surface: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-cream text-ink font-sans antialiased;
+    line-height: 1.6;
+  }
+
+  /* Arabic: Cairo first and ~12% more leading so diacritics never clip. */
+  :lang(ar) body,
+  [lang="ar"] {
+    font-family: var(--font-arabic);
+    line-height: 1.8;
+  }
+
+  h1, h2, h3, h4 {
+    @apply text-emerald-900 font-bold;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  :lang(ar) :is(h1, h2, h3, h4) {
+    letter-spacing: 0;
+    line-height: 1.35;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-emerald-900);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Numbers, DZD amounts and phone numbers stay legible in tables and cards. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Zellige-inspired 8-point star (khatam) motif — a quiet nod to Algerian craft. */
+  .bg-zellige {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%230f392b' stroke-opacity='0.07' stroke-width='1'%3E%3Crect x='16' y='16' width='24' height='24'/%3E%3Crect x='16' y='16' width='24' height='24' transform='rotate(45 28 28)'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  .bg-zellige-light {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.07' stroke-width='1'%3E%3Crect x='16' y='16' width='24' height='24'/%3E%3Crect x='16' y='16' width='24' height='24' transform='rotate(45 28 28)'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Green | white | red band in the flag's own order (never mirrored in RTL). */
+  .flag-band {
+    background: linear-gradient(90deg, var(--color-flag-green) 0 33.333%, #ffffff 33.333% 66.666%, var(--color-flag-red) 66.666% 100%);
+  }
+
+  .container-site {
+    @apply mx-auto w-full max-w-(--container-site) px-5 md:px-8 lg:px-12;
+  }
+}
