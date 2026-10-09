@@ -1,9 +1,12 @@
 ---
 // Root of the site: send visitors to their language, Arabic by default.
-import { href } from '@/i18n';
+// Legacy hash links (#/donate, #/news …) from the old SPA — including the Chargily
+// return URL "?donation=success#/donate" — are mapped to the same page in the new site.
+import { href, ROUTES } from '@/i18n';
 const ar = href('ar');
 const fr = href('fr');
 const en = href('en');
+const slugs = Object.values(ROUTES).filter(Boolean).map((s) => s.replace(/\/$/, ''));
 ---
 
 <!doctype html>
@@ -14,11 +17,23 @@ const en = href('en');
     <title>INSAF — جمعية إنصاف لولاية سطيف</title>
     <meta name="robots" content="noindex" />
     <link rel="canonical" href={new URL(ar, Astro.site).href} />
-    <meta http-equiv="refresh" content={`2;url=${ar}`} />
-    <script is:inline define:vars={{ ar, fr, en }}>
+    <noscript><meta http-equiv="refresh" content={`0;url=${ar}`} /></noscript>
+    <script is:inline define:vars={{ ar, fr, en, slugs }}>
+      const homes = { ar, fr, en };
       const pref = (navigator.languages || [navigator.language || '']).map((l) => l.slice(0, 2).toLowerCase());
-      const pick = pref.find((l) => l === 'ar' || l === 'fr' || l === 'en') || 'ar';
-      location.replace({ ar, fr, en }[pick] + location.search + location.hash);
+      const lang = pref.find((l) => l in homes) || 'ar';
+      // "#/donate?campaign=school" → slug "donate", query "campaign=school"
+      const m = location.hash.match(/^#\/([a-z-]*)\/?(?:\?(.*))?$/);
+      const slug = m && slugs.includes(m[1]) ? m[1] + '/' : '';
+      const query = new URLSearchParams(location.search);
+      if (m && m[2]) new URLSearchParams(m[2]).forEach((v, k) => query.set(k, v));
+      // the old site called the designation "campaign"
+      if (query.has('campaign') && !query.has('designation')) {
+        query.set('designation', query.get('campaign'));
+        query.delete('campaign');
+      }
+      const qs = query.toString();
+      location.replace(homes[lang] + slug + (qs ? '?' + qs : ''));
     </script>
   </head>
   <body>
