@@ -24,6 +24,21 @@ export interface NewsItem {
   category: NewsCategory;
   url: string;
   image: ImageMetadata | null;
+  /** Every local photo of the post, in order (remote Facebook CDN links are dropped). */
+  images: ImageMetadata[];
+}
+
+/** Hashtags are often part of the sentence: keep their words, drop the # and underscores. */
+export function readable(text: string) {
+  return text.replace(/#([\p{L}\p{N}_]+)/gu, (_, w: string) => w.replace(/_/g, ' '));
+}
+
+/** Post body as paragraphs. */
+export function paragraphs(text: string) {
+  return readable(text)
+    .split(/\n+/)
+    .map((l) => l.replace(/[ \t]+/g, ' ').trim())
+    .filter(Boolean);
 }
 
 /** First meaningful line of a Facebook post. Hashtags are often part of the sentence,
@@ -31,21 +46,24 @@ export interface NewsItem {
 function headlineOf(text: string) {
   const line = text
     .split('\n')
-    .map((l) => l.replace(/#([\p{L}\p{N}_]+)/gu, (_, w: string) => w.replace(/_/g, ' ')).replace(/[\p{Extended_Pictographic}‍️]/gu, '').replace(/\s+/g, ' ').trim())
+    .map((l) => readable(l).replace(/[\p{Extended_Pictographic}‍️]/gu, '').replace(/\s+/g, ' ').trim())
     .find((l) => l.length > 12) ?? '';
   return line.length > 110 ? `${line.slice(0, 108).trim()}…` : line;
 }
 
-function firstLocalImage(p: { image?: string; images?: string[] }) {
+function localImages(p: { image?: string; images?: string[] }) {
+  const out: ImageMetadata[] = [];
   for (const path of [p.image, ...(p.images ?? [])]) {
     const img = photo(path);
-    if (img) return img;
+    if (img && !out.includes(img)) out.push(img);
   }
-  return null;
+  return out;
 }
 
 export const NEWS: NewsItem[] = news.newsPosts
-  .map((p) => ({
+  .map((p) => {
+    const images = localImages(p);
+    return {
     id: String(p.id),
     date: p.date,
     text: p.text ?? '',
@@ -53,7 +71,11 @@ export const NEWS: NewsItem[] = news.newsPosts
     textLang: /[؀-ۿ]/.test(p.text ?? '') ? ('ar' as const) : ('fr' as const),
     category: p.category as NewsCategory,
     url: p.url,
-    image: firstLocalImage(p),
-  }))
+    image: images[0] ?? null,
+    images,
+    };
+  })
   .filter((p) => p.headline)
   .sort((a, b) => b.date.localeCompare(a.date));
+
+export const CATEGORIES = Object.keys(CATEGORY_LABELS) as NewsCategory[];

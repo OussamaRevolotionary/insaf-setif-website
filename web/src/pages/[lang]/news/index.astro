@@ -1,0 +1,118 @@
+---
+import { Search } from 'lucide-react';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/PageHero.astro';
+import NewsCard from '@/components/NewsCard.astro';
+import { NEWS, CATEGORIES, CATEGORY_LABELS, readable } from '@/lib/news';
+import { langPaths, pick, useT, type Lang } from '@/i18n';
+
+export const getStaticPaths = langPaths;
+
+const lang = Astro.params.lang as Lang;
+const t = useT(lang);
+const counts = Object.fromEntries(CATEGORIES.map((c) => [c, NEWS.filter((n) => n.category === c).length]));
+const ogImage = NEWS.find((n) => n.image)?.image ?? undefined;
+// Search runs on the headline plus the start of the post, lowercased once at build time.
+const haystack = (text: string) => readable(text).slice(0, 400).toLowerCase().replace(/\s+/g, ' ');
+---
+
+<BaseLayout lang={lang} slug="news/" title={t.seo.news.title} description={t.seo.news.description} ogImage={ogImage}>
+  <PageHero kicker={t.news.kicker} title={t.news.title} lead={t.news.lead} />
+
+  <section class="py-10 lg:py-14">
+    <div class="container-site">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex flex-wrap gap-2" role="group" aria-label={t.news.filterLabel}>
+          <button type="button" data-cat="" aria-pressed="true" class="chip">{t.home.logFilterAll} <span class="tabular opacity-70">{NEWS.length}</span></button>
+          {CATEGORIES.map((c) => (
+            <button type="button" data-cat={c} aria-pressed="false" class="chip">
+              {pick(lang, CATEGORY_LABELS[c])} <span class="tabular opacity-70">{counts[c]}</span>
+            </button>
+          ))}
+        </div>
+        <label class="relative block w-full lg:max-w-xs">
+          <span class="sr-only">{t.news.search}</span>
+          <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden="true" />
+          <input
+            type="search"
+            data-news-search
+            placeholder={t.news.search}
+            class="w-full rounded-lg border border-sand bg-white py-2.5 pe-3 ps-9 outline-none focus:ring-2 focus:ring-emerald-900"
+          />
+        </label>
+      </div>
+
+      <p class="mt-6 text-sm text-muted" aria-live="polite" data-news-count data-template={t.news.count}>
+        {t.news.count.replace('{n}', String(NEWS.length))}
+      </p>
+
+      <ul class="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-news-list>
+        {NEWS.map((item) => (
+          <li data-cat={item.category} data-text={haystack(item.text)}>
+            <NewsCard item={item} lang={lang} headingLevel="h2" />
+          </li>
+        ))}
+      </ul>
+      <p class="hidden py-16 text-center text-muted" data-news-empty>{t.news.empty}</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-sand);
+    background: #fff;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    transition: background-color 0.15s, color 0.15s;
+  }
+  .chip:hover {
+    background: var(--color-emerald-50);
+  }
+  .chip[aria-pressed='true'] {
+    border-color: var(--color-emerald-900);
+    background: var(--color-emerald-900);
+    color: #fff;
+  }
+</style>
+
+<script>
+  const items = [...document.querySelectorAll<HTMLLIElement>('[data-news-list] > li')];
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('button[data-cat]')];
+  const search = document.querySelector<HTMLInputElement>('[data-news-search]');
+  const count = document.querySelector<HTMLElement>('[data-news-count]');
+  const empty = document.querySelector<HTMLElement>('[data-news-empty]');
+  let cat = new URLSearchParams(location.search).get('category') ?? '';
+
+  const apply = () => {
+    const q = (search?.value ?? '').trim().toLowerCase();
+    let shown = 0;
+    for (const li of items) {
+      const ok = (!cat || li.dataset.cat === cat) && (!q || (li.dataset.text ?? '').includes(q));
+      li.hidden = !ok;
+      if (ok) shown++;
+    }
+    chips.forEach((c) => c.setAttribute('aria-pressed', String((c.dataset.cat ?? '') === cat)));
+    if (count) count.textContent = (count.dataset.template ?? '{n}').replace('{n}', String(shown));
+    empty?.classList.toggle('hidden', shown > 0);
+  };
+
+  chips.forEach((c) =>
+    c.addEventListener('click', () => {
+      cat = c.dataset.cat ?? '';
+      const url = new URL(location.href);
+      if (cat) url.searchParams.set('category', cat);
+      else url.searchParams.delete('category');
+      history.replaceState(null, '', url);
+      apply();
+    }),
+  );
+  search?.addEventListener('input', apply);
+  if (cat) apply();
+</script>

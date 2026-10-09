@@ -1,0 +1,115 @@
+---
+import { Picture } from 'astro:assets';
+import { ArrowLeft, ArrowRight, CalendarDays, ExternalLink } from 'lucide-react';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { NEWS, CATEGORY_LABELS, paragraphs, type NewsItem } from '@/lib/news';
+import { LOCALES, LANG_META, formatDate, href, pick, useT, type Lang } from '@/i18n';
+
+export function getStaticPaths() {
+  return LOCALES.flatMap((lang) => NEWS.map((item, i) => ({
+    params: { lang, id: item.id },
+    props: { item, newer: NEWS[i - 1], older: NEWS[i + 1] },
+  })));
+}
+
+interface Props {
+  item: NewsItem;
+  newer?: NewsItem;
+  older?: NewsItem;
+}
+
+const lang = Astro.params.lang as Lang;
+const { item, newer, older } = Astro.props;
+const t = useT(lang);
+const rtl = LANG_META[lang].dir === 'rtl';
+const Back = rtl ? ArrowRight : ArrowLeft;
+const Fwd = rtl ? ArrowLeft : ArrowRight;
+const textDir = item.textLang === 'ar' ? 'rtl' : 'ltr';
+const all = paragraphs(item.text);
+// The headline is the post's first line; don't print it twice.
+const strip = (x: string) => x.replace(/[\p{P}\p{S}\s]/gu, '');
+const body = all.length > 1 && strip(all[0]).startsWith(strip(item.headline).replace(/…$/, '').slice(0, 40)) ? all.slice(1) : all;
+const description = all.join(' ').slice(0, 155);
+const category = pick(lang, CATEGORY_LABELS[item.category]);
+
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  headline: item.headline.slice(0, 110),
+  inLanguage: item.textLang,
+  datePublished: item.date,
+  articleSection: category,
+  publisher: { '@id': new URL(`${import.meta.env.BASE_URL}#org`, Astro.site).href },
+  isBasedOn: item.url,
+};
+---
+
+<BaseLayout lang={lang} slug={`news/${item.id}/`} title={`${item.headline.slice(0, 60)} — INSAF`} description={description} ogImage={item.image ?? undefined}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(articleLd)} />
+
+  <article class="py-10 lg:py-14">
+    <div class="container-site max-w-4xl">
+      <a href={href(lang, 'news')} class="inline-flex items-center gap-2 text-sm font-bold text-emerald-900 hover:underline">
+        <Back className="size-4" aria-hidden="true" />
+        {t.news.back}
+      </a>
+
+      <div class="mt-6 flex flex-wrap items-center gap-3 text-sm">
+        <a href={href(lang, 'news', `?category=${encodeURIComponent(item.category)}`)} class="rounded-full bg-emerald-50 px-3 py-1 font-bold text-emerald-900 hover:bg-emerald-100">{category}</a>
+        <span class="flex items-center gap-1.5 text-muted">
+          <CalendarDays className="size-4" aria-hidden="true" />
+          <time datetime={item.date.slice(0, 10)}>{formatDate(item.date, lang, 'long')}</time>
+        </span>
+      </div>
+
+      <h1 class="mt-4 text-3xl sm:text-4xl" lang={item.textLang} dir={textDir}>{item.headline}</h1>
+
+      {item.images.length > 0 && (
+        <section class="mt-8" aria-label={t.news.photos}>
+          <ul class:list={['grid gap-3', item.images.length > 1 && 'sm:grid-cols-2']}>
+            {item.images.map((img, i) => (
+              <li class:list={[i === 0 && item.images.length > 2 && 'sm:col-span-2']}>
+                <Picture
+                  src={img}
+                  formats={['avif', 'webp']}
+                  widths={[480, 800, 1200]}
+                  sizes="(min-width: 896px) 896px, 100vw"
+                  alt=""
+                  class="w-full rounded-xl object-cover shadow-float"
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <div class="mt-8 space-y-4 text-lg leading-loose text-ink" lang={item.textLang} dir={textDir}>
+        {body.map((p) => <p>{p}</p>)}
+      </div>
+
+      <div class="mt-10 flex flex-col gap-3 rounded-xl border border-sand bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-sm text-muted">{t.news.sourceNote}</p>
+        <a href={item.url} target="_blank" rel="noopener" class="inline-flex shrink-0 items-center gap-2 font-bold text-emerald-900 hover:underline">
+          {t.news.original}
+          <ExternalLink className="size-4" aria-hidden="true" />
+        </a>
+      </div>
+
+      <nav class="mt-10 grid gap-4 sm:grid-cols-2" aria-label={t.news.title}>
+        {newer ? (
+          <a href={href(lang, `news/${newer.id}/`)} class="group rounded-xl border border-sand bg-white p-5 hover:border-emerald-700">
+            <span class="flex items-center gap-1.5 text-xs font-bold uppercase text-muted"><Back className="size-3.5" aria-hidden="true" />{t.news.newer}</span>
+            <span class="mt-2 line-clamp-2 block font-semibold text-emerald-900 group-hover:underline" lang={newer.textLang} dir={newer.textLang === 'ar' ? 'rtl' : 'ltr'}>{newer.headline}</span>
+          </a>
+        ) : <span />}
+        {older && (
+          <a href={href(lang, `news/${older.id}/`)} class="group rounded-xl border border-sand bg-white p-5 text-end hover:border-emerald-700">
+            <span class="flex items-center justify-end gap-1.5 text-xs font-bold uppercase text-muted">{t.news.older}<Fwd className="size-3.5" aria-hidden="true" /></span>
+            <span class="mt-2 line-clamp-2 block font-semibold text-emerald-900 group-hover:underline" lang={older.textLang} dir={older.textLang === 'ar' ? 'rtl' : 'ltr'}>{older.headline}</span>
+          </a>
+        )}
+      </nav>
+    </div>
+  </article>
+</BaseLayout>
