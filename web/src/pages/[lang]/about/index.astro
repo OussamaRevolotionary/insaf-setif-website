@@ -1,0 +1,82 @@
+---
+import { Picture } from 'astro:assets';
+import { CheckCircle2 } from 'lucide-react';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/PageHero.astro';
+import Embed3D from '@/components/Embed3D.astro';
+import { photoByName } from '@/lib/photos';
+import { CONTACT, PARTNERS } from '@/data/site';
+import { langPaths, pick, useT, type Lang } from '@/i18n';
+
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const t = useT(lang);
+const a = t.pages.about;
+// Outdoor activity with children, June 2026.
+const portrait = photoByName('999625755794497.jpg');
+---
+
+<BaseLayout lang={lang} slug="about/" title={t.seo.about.title} description={t.seo.about.description} ogImage={portrait}>
+  <PageHero kicker={a.kicker} title={t.brandFull} lead={a.lead} />
+
+  <section class="py-14 lg:py-20">
+    <div class="container-site grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-start">
+      <div class="space-y-8">
+        <div>
+          <h2 class="text-2xl sm:text-3xl">{t.missionTitle}</h2>
+          <p class="mt-3 text-lg leading-relaxed text-muted">{t.missionText}</p>
+        </div>
+        <div>
+          <h2 class="text-2xl sm:text-3xl">{t.visionTitle}</h2>
+          <p class="mt-3 text-lg leading-relaxed text-muted">{t.visionText}</p>
+        </div>
+      </div>
+      <figure class="overflow-hidden rounded-xl border border-sand bg-white shadow-float">
+        <Picture src={portrait} formats={['avif', 'webp']} widths={[480, 800]} sizes="(min-width: 1024px) 480px, 100vw" alt="" class="aspect-[4/3] w-full object-cover" />
+        <figcaption class="p-5">
+          <p class="font-bold text-emerald-900">{a.factsTitle}</p>
+          <dl class="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+            <dt class="text-muted">{a.facts.founded}</dt><dd class="font-semibold">{a.facts.foundedValue}</dd>
+            <dt class="text-muted">{a.facts.base}</dt><dd class="font-semibold">{pick(lang, CONTACT.city)}</dd>
+            <dt class="text-muted">{a.facts.focus}</dt><dd class="font-semibold">{a.facts.focusValue}</dd>
+          </dl>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="border-y border-sand bg-white py-14 lg:py-20" aria-labelledby="values-title">
+    <div class="container-site">
+      <h2 id="values-title" class="text-2xl sm:text-3xl">{t.valuesTitle}</h2>
+      <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {t.valuesItems.map((v) => (
+          <li class="flex items-center gap-3 rounded-lg border border-sand bg-cream p-4 font-semibold text-emerald-900">
+            <CheckCircle2 className="size-5 shrink-0 text-emerald-700" aria-hidden="true" />
+            {v}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="py-14 lg:py-20" aria-labelledby="partners-title">
+    <div class="container-site">
+      <h2 id="partners-title" class="text-2xl sm:text-3xl">{t.partnersTitle}</h2>
+      <p class="mt-3 text-muted">{t.partnersLead}</p>
+      <ul class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {PARTNERS.map((p) => (
+          <li class="rounded-lg border border-sand bg-white p-4">
+            <span class="block text-xs font-bold uppercase tracking-wide text-donate" dir="ltr">{p.short}</span>
+            <span class="mt-1 block text-sm font-semibold text-ink">{pick(lang, p)}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="pb-16 lg:pb-24">
+    <div class="container-site">
+      <Embed3D lang={lang} file="timeline_of_progress.html" title={a.timelineTitle} sub={a.timelineSub} />
+    </div>
+  </section>
+</BaseLayout>

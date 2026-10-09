@@ -1,0 +1,56 @@
+---
+import { Picture } from 'astro:assets';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/PageHero.astro';
+import { ACHIEVEMENTS } from '@/data/content';
+import { ICONS } from '@/lib/icons';
+import { photoByName } from '@/lib/photos';
+import { LANG_META, formatDate, href, langPaths, pick, useT, type Lang } from '@/i18n';
+
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const t = useT(lang);
+const a = t.pages.achievements;
+const Arrow = LANG_META[lang].dir === 'rtl' ? ArrowLeft : ArrowRight;
+const items = [...ACHIEVEMENTS].sort((x, y) => y.date.localeCompare(x.date));
+const ogImage = photoByName(items.find((i) => i.photo)!.photo!);
+---
+
+<BaseLayout lang={lang} slug="achievements/" title={t.seo.achievements.title} description={t.seo.achievements.description} ogImage={ogImage}>
+  <PageHero kicker={a.kicker} title={t.nav.achievements} lead={a.lead} />
+
+  <section class="py-14 lg:py-20">
+    <ul class="container-site grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {items.map((item) => {
+        const Icon = ICONS[item.icon];
+        const link = item.post ? href(lang, `news/${item.post}/`) : item.category ? href(lang, 'news', `?category=${item.category}`) : null;
+        return (
+          <li class="flex flex-col overflow-hidden rounded-xl border border-sand bg-white shadow-float">
+            {item.photo ? (
+              <Picture src={photoByName(item.photo)} formats={['avif', 'webp']} widths={[400, 640, 800]} sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" alt="" class="aspect-[16/10] w-full object-cover" />
+            ) : (
+              <div class="bg-zellige-light flex aspect-[16/10] items-center justify-center bg-emerald-900" aria-hidden="true">
+                <Icon className="size-12 text-amber-accent" />
+              </div>
+            )}
+            <div class="flex flex-1 flex-col p-5">
+              <p class="flex items-center gap-2 text-xs font-bold text-donate">
+                <Icon className="size-4" aria-hidden="true" />
+                <time datetime={item.date}>{item.id === 'ach4' ? t.pages.about.facts.foundedValue : formatDate(item.date, lang)}</time>
+              </p>
+              <h2 class="mt-2 text-lg">{pick(lang, item.title)}</h2>
+              <p class="mt-2 flex-1 text-sm leading-relaxed text-muted">{pick(lang, item.text)}</p>
+              {link && (
+                <a href={link} class="mt-4 inline-flex items-center gap-2 text-sm font-bold text-emerald-900 hover:underline">
+                  {item.post ? a.source : a.related}
+                  <Arrow className="size-4" aria-hidden="true" />
+                </a>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  </section>
+</BaseLayout>

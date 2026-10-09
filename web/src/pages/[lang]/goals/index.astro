@@ -1,0 +1,41 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/PageHero.astro';
+import Embed3D from '@/components/Embed3D.astro';
+import { GOALS } from '@/data/content';
+import { ICONS } from '@/lib/icons';
+import { langPaths, pick, useT, type Lang } from '@/i18n';
+
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const t = useT(lang);
+const g = t.pages.goals;
+---
+
+<BaseLayout lang={lang} slug="goals/" title={t.seo.goals.title} description={t.seo.goals.description}>
+  <PageHero kicker={g.kicker} title={t.nav.goals} lead={g.lead} />
+
+  <section class="py-14 lg:py-20">
+    <ol class="container-site grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {GOALS.map((goal, i) => {
+        const Icon = ICONS[goal.icon];
+        return (
+          <li class="relative rounded-xl border border-sand bg-white p-6 shadow-float">
+            <span class="tabular absolute end-5 top-4 font-sans text-4xl font-extrabold text-emerald-50" aria-hidden="true">0{i + 1}</span>
+            <span class="flex size-11 items-center justify-center rounded-lg bg-emerald-900 text-white">
+              <Icon className="size-5" aria-hidden="true" />
+            </span>
+            <h2 class="mt-4 text-xl">{pick(lang, goal.title)}</h2>
+            <p class="mt-2 leading-relaxed text-muted">{pick(lang, goal.text)}</p>
+          </li>
+        );
+      })}
+    </ol>
+  </section>
+
+  <section class="pb-16 lg:pb-24">
+    <div class="container-site">
+      <Embed3D lang={lang} file="ecosystem_of_empowerment.html" title={g.ecoTitle} sub={g.ecoSub} />
+    </div>
+  </section>
+</BaseLayout>

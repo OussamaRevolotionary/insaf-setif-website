@@ -1,0 +1,60 @@
+---
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/PageHero.astro';
+import NewsCard from '@/components/NewsCard.astro';
+import { PROGRAMS } from '@/data/content';
+import { ICONS } from '@/lib/icons';
+import { NEWS } from '@/lib/news';
+import { isGraphic } from '@/lib/photos';
+import { LANG_META, href, langPaths, pick, useT, type Lang } from '@/i18n';
+
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const t = useT(lang);
+const p = t.pages.programs;
+const Arrow = LANG_META[lang].dir === 'rtl' ? ArrowLeft : ArrowRight;
+// Latest field photo for each area of work.
+const latest = (category: string) => NEWS.find((n) => n.category === category && n.image && !isGraphic(n.image));
+---
+
+<BaseLayout lang={lang} slug="programs/" title={t.seo.programs.title} description={t.seo.programs.description}>
+  <PageHero kicker={p.kicker} title={t.nav.programs} lead={p.lead} />
+
+  <section class="py-14 lg:py-20">
+    <div class="container-site space-y-14">
+      {PROGRAMS.map((prog, i) => {
+        const Icon = ICONS[prog.icon];
+        const item = latest(prog.category);
+        return (
+          <article class="grid items-center gap-8 lg:grid-cols-2" id={prog.id}>
+            <div class:list={[i % 2 === 1 && 'lg:order-2']}>
+              <span class="flex size-12 items-center justify-center rounded-xl bg-emerald-900 text-white">
+                <Icon className="size-6" aria-hidden="true" />
+              </span>
+              <h2 class="mt-4 text-2xl sm:text-3xl">{pick(lang, prog.title)}</h2>
+              <p class="mt-3 text-lg leading-relaxed text-muted">{pick(lang, prog.text)}</p>
+              <a href={href(lang, 'news', `?category=${encodeURIComponent(prog.category)}`)} class="mt-5 inline-flex items-center gap-2 font-bold text-emerald-900 hover:underline">
+                {p.seeNews}
+                <Arrow className="size-4" aria-hidden="true" />
+              </a>
+            </div>
+            {item && <div class="max-w-md lg:max-w-none"><NewsCard item={item} lang={lang} /></div>}
+          </article>
+        );
+      })}
+    </div>
+  </section>
+
+  <section class="bg-emerald-900 text-white">
+    <div class="bg-zellige-light">
+      <div class="container-site flex flex-col items-start gap-6 py-12 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 class="text-2xl text-white sm:text-3xl">{p.partnerTitle}</h2>
+          <p class="mt-2 text-emerald-50/85">{p.partnerSub}</p>
+        </div>
+        <a href={href(lang, 'contact', '?topic=partnership')} class="shrink-0 rounded-lg bg-white px-6 py-3.5 font-bold text-emerald-900 hover:bg-emerald-50">{p.partnerCta}</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
