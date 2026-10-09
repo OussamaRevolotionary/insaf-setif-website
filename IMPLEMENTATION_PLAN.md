@@ -300,7 +300,7 @@ The benchmark crawl (90 pages) is used as internal design inspiration, not as a 
 **Repository privacy cleanup:**
 - Done locally with git-filter-repo: the scraper datasets (47 third-party commenters' data), 624 unused photos, the private analysis notes and `.claude/launch.json` are gone from **all** history. Root duplicates were removed and `.gitignore` hardened.
 - Tracked size went from 145.7 MB to 38 MB.
-- Copies are kept locally in `_private/` and in the raw photo folder; full pre-cleanup backup: `../INSAF_git_backup_2026-10-09.bundle`.
+- Copies are kept locally in `_private/` and in the raw photo folder; full pre-cleanup backup: `../INSAFe_git_backup_2026-10-09.bundle`.
 - ⚠️ **Pending owner action:** the force-push to GitHub (blocked for the assistant by safety rules):
   ```
   git remote add origin https://github.com/OussamaRevolotionary/insaf-setif-website.git
