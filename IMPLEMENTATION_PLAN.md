@@ -266,7 +266,7 @@ The benchmark crawl (90 pages) is used as internal design inspiration, not as a 
 | 2 | Fonts | **Plus Jakarta Sans + Cairo** |
 | 3 | Stack | **Astro (static, `/ar/ /fr/ /en/`) + React islands + Tailwind v4 (DESIGN.md tokens) + shadcn/ui + TypeScript**, still hosted on GitHub Pages |
 | 4 | Imagery | **Real association photos first** (owner confirms all current photos are official). Vector line art I draw (stacked hands, giving hand, zellige) in the brand palette. Painterly raster art like the reference image only if supplied, and always labelled as illustration |
-| 5 | Faith content | Pending association approval. Default: Quran 99:7 and 2:261 in Arabic only, in Ramadan/Zakat contexts |
+| 5 | Faith content | **Approved (2026-10-09):** Quranic verses are used for the **Zakat and Ramadan** sections only (99:7, 2:261, in Arabic) |
 | 6 | Monthly giving | Owner wants automatic billing. **Chargily V2 has no subscriptions, saved cards or recurring charges** (checked against the API index on 2026-10-09). Closest equivalent: a **monthly pledge**. n8n sends a pre-filled one-click Chargily link each month, and the payment webhook marks the pledge as paid |
 | 7 | Receipts | **Automatic HTML e-receipt** from n8n on every paid card checkout (done, see below). BaridiMob/CCP: a transfer declaration form (no image upload), treasurer approval, then the same receipt. A PDF can be added later via the PDF.co gateway |
 | 8 | 21st.dev | Pick per component. Free tier = **2 retrievals/day**, so retrieve in priority order |
@@ -285,6 +285,38 @@ The benchmark crawl (90 pages) is used as internal design inspiration, not as a 
   - set `CHARGILY_TEST_MODE = false`;
   - rename the Chargily app to "INSAF";
   - paste the webhook URL in Chargily (live **and** test mode).
+
+### Phase 0 — status (2026-10-09)
+**Payments are LIVE:**
+- The checkout bridge `BKjVi4aLws3dLXyS` uses the live Chargily URL and key (owner kept the existing key; the app is renamed "INSAF" in Chargily).
+- Every checkout carries `webhook_endpoint` → the payment webhook.
+- Smoke test: one live 1,000 DA checkout was created, **not paid**, and expired through the API. Chargily's live `checkout.expired` event passed live signature verification and was written to the ledger (row 3).
+- Site: test-mode banner off; manual BaridiMob/CCP tabs hidden (owner: all payments go through Chargily, which settles to the association's RIP); Edahabia labelled as the CCP/BaridiMob card. Deployed as `6583981`.
+
+**BaridiMob answer:**
+- Chargily V2 accepts exactly `edahabia`, `cib` and `chargily_app`; there is no separate "BaridiMob" method.
+- BaridiMob users pay with the **Edahabia card** of the same CCP account. The bridge also accepts `chargily_app`; exposing it in the UI is planned for Phase 2.
+
+**Repository privacy cleanup:**
+- Done locally with git-filter-repo: the scraper datasets (47 third-party commenters' data), 624 unused photos, the private analysis notes and `.claude/launch.json` are gone from **all** history. Root duplicates were removed and `.gitignore` hardened.
+- Tracked size went from 145.7 MB to 38 MB.
+- Copies are kept locally in `_private/` and in the raw photo folder; full pre-cleanup backup: `../INSAF_git_backup_2026-10-09.bundle`.
+- ⚠️ **Pending owner action:** the force-push to GitHub (blocked for the assistant by safety rules):
+  ```
+  git remote add origin https://github.com/OussamaRevolotionary/insaf-setif-website.git
+  git push --force-with-lease=main:6583981 origin main
+  ```
+  Afterwards, ask GitHub Support to purge cached views of the old commits ("Removing sensitive data from a repository").
+
+**Content facts:**
+- Partnership agreement **INSAF × جمعية الأنيس لتنشيط الشباب**, signed 28/03/2026 at مركز الترفيه العلمي (photo supplied by the owner) → add to partners / news in Phase 1.
+
+**Data still needed from the association:**
+- board members' **names and roles as text** (the supplied photo shows the signing but no names);
+- agrément number and date;
+- sourced statistics.
+
+**Known data bug for Phase 1:** two news photos (`1032367222520350.jpg`, `1034715162285556.jpg`) are referenced but never existed.
 
 ### Roadmap
 | Phase | Focus | Key deliverables | Risk |
