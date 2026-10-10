@@ -33,3 +33,6 @@ export const HELPLINES = [
   { id: 'onppe', number: '1111' },
   { id: 'nada', number: '3033' },
 ] as const;
+
+/** n8n webhook behind the contact form (same endpoint as the legacy site). */
+export const CONTACT_WEBHOOK = 'https://oussama19.app.n8n.cloud/webhook/insaf-contact';

@@ -1,0 +1,70 @@
+---
+import { BadgeCheck, Lock, ReceiptText, ShieldCheck } from 'lucide-react';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/PageHero.astro';
+import DonationBox, { type DonationCopy } from '@/components/DonationBox';
+import { href, langPaths, useT, type Lang } from '@/i18n';
+
+export const getStaticPaths = langPaths;
+const lang = Astro.params.lang as Lang;
+const t = useT(lang);
+
+// Only the copy the island needs is serialised into the page.
+const copy: DonationCopy = {
+  donateBoxTitle: t.donateBoxTitle,
+  donateBoxSub: t.donateBoxSub,
+  donateTestMode: t.donateTestMode,
+  donateMethodsLabel: t.donateMethodsLabel,
+  donateTabs: { card: t.donateTabs.card, international: t.donateTabs.international },
+  donateAmountLegend: t.donateAmountLegend,
+  donateCustomLabel: t.donateCustomLabel,
+  donateCustomPlaceholder: t.donateCustomPlaceholder,
+  donateDesignationLabel: t.donateDesignationLabel,
+  designations: t.designations,
+  donateCardLegend: t.donateCardLegend,
+  donateMethods: t.donateMethods,
+  donateYourGift: t.donateYourGift,
+  donateEnterAmount: t.donateEnterAmount,
+  impactGeneral: t.impactGeneral,
+  impactCovers: t.impactCovers,
+  impactTopUp: t.impactTopUp,
+  donateNameLabel: t.donateNameLabel,
+  donateEmailLabel: t.donateEmailLabel,
+  optional: t.optional,
+  donatePay: t.donatePay,
+  donateRedirecting: t.donateRedirecting,
+  donateErrAmount: t.donateErrAmount,
+  donateErrEmail: t.donateErrEmail,
+  donateErrGeneric: t.donateErrGeneric,
+  donateSecureNote: t.donateSecureNote,
+  donateCopy: t.donateCopy,
+  donateCopied: t.donateCopied,
+  intlHolder: t.intlHolder,
+  intlBank: t.intlBank,
+  intlSortCode: t.intlSortCode,
+  donateNote: t.donateNote,
+  donateStatus: t.donateStatus,
+  receiptHint: t.donatePage.receiptHint,
+};
+---
+
+<BaseLayout lang={lang} slug="donate/" title={t.seo.donate.title} description={t.seo.donate.description}>
+  <PageHero kicker={t.donatePageLabel} title={t.donatePageTitle} lead={t.donatePage.lead} />
+
+  <section class="py-10 lg:py-14">
+    <div class="container-site max-w-5xl">
+      <DonationBox client:load lang={lang} t={copy} />
+
+      <ul class="mt-6 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+        <li class="flex items-center gap-2 rounded-lg bg-white p-3 ring-1 ring-sand"><BadgeCheck className="size-4 shrink-0 text-emerald-700" aria-hidden="true" /> {t.donateTrustRegistered}</li>
+        <li class="flex items-center gap-2 rounded-lg bg-white p-3 ring-1 ring-sand"><Lock className="size-4 shrink-0 text-emerald-700" aria-hidden="true" /> {t.donateTrustSecure}</li>
+        <li class="flex items-center gap-2 rounded-lg bg-white p-3 ring-1 ring-sand"><ReceiptText className="size-4 shrink-0 text-emerald-700" aria-hidden="true" /> {t.donatePage.receipt}</li>
+        <li>
+          <a href={href(lang, 'trust')} class="flex h-full items-center gap-2 rounded-lg bg-emerald-50 p-3 font-bold text-emerald-900 ring-1 ring-emerald-100 hover:underline">
+            <ShieldCheck className="size-4 shrink-0" aria-hidden="true" /> {t.donateTrustLink}
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>

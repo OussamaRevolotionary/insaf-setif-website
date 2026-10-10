@@ -17,7 +17,8 @@ export default defineConfig({
   i18n: {
     locales: ['ar', 'fr', 'en'],
     defaultLocale: 'ar',
-    routing: { prefixDefaultLocale: true, redirectToDefaultLocale: true },
+    // src/pages/index.astro does the root redirect itself (language choice + legacy #/ links).
+    routing: { prefixDefaultLocale: true, redirectToDefaultLocale: false },
   },
   integrations: [
     react(),

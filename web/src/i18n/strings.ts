@@ -103,6 +103,19 @@ const ar = {
     view3dNote: 'عرض تفاعلي ثقيل نسبيًا — يُحمَّل عند الطلب.',
     fullscreen: 'فتح في صفحة كاملة',
   },
+  contactPage: {
+    kicker: 'اتصل بنا',
+    lead: 'راسلنا لأي سؤال، شراكة، تطوّع أو طلب حذف صورة. نرد عبر البريد الإلكتروني.',
+    formTitle: 'أرسل رسالة',
+    topicLabel: 'الموضوع',
+    topics: { general: 'سؤال عام', volunteer: 'التطوّع', partnership: 'شراكة', club: 'تسجيل طفل في نادي سفراء حقوق الطفل', photo: 'طلب حذف صورة', donation: 'تبرّع أو وصل' },
+    sending: 'جارٍ الإرسال…',
+  },
+  donatePage: {
+    lead: 'ادفع بأمان ببطاقة الذهبية (حساب CCP / بريدي موب) أو بطاقة CIB عبر Chargily، أو بتحويل دولي من خارج الجزائر.',
+    receipt: 'وصل إلكتروني تلقائي إذا كتبت بريدك',
+    receiptHint: 'اكتب بريدك لتستلم وصلك الإلكتروني فور تأكيد الدفع.',
+  },
   footer: {
     about: 'جمعية إنصاف لولاية سطيف، جمعية مدنية معتمدة تعمل منذ جوان 2014 لحماية الطفولة، إدماج الشباب والتضامن المجتمعي.',
     explore: 'استكشف',
@@ -217,6 +230,19 @@ const fr: Strings = {
     view3dNote: 'Vue interactive assez lourde — chargée à la demande.',
     fullscreen: 'Ouvrir en plein écran',
   },
+  contactPage: {
+    kicker: 'Contact',
+    lead: 'Écrivez-nous pour une question, un partenariat, du bénévolat ou une demande de retrait de photo. Nous répondons par e-mail.',
+    formTitle: 'Envoyer un message',
+    topicLabel: 'Sujet',
+    topics: { general: 'Question générale', volunteer: 'Bénévolat', partnership: 'Partenariat', club: 'Inscrire un enfant au club des ambassadeurs des droits de l’enfant', photo: 'Demande de retrait de photo', donation: 'Don ou reçu' },
+    sending: 'Envoi…',
+  },
+  donatePage: {
+    lead: 'Payez en toute sécurité par carte Edahabia (compte CCP / BaridiMob) ou CIB via Chargily, ou par virement international depuis l’étranger.',
+    receipt: 'Reçu électronique automatique si vous indiquez votre e-mail',
+    receiptHint: 'Indiquez votre e-mail pour recevoir votre reçu électronique dès la confirmation du paiement.',
+  },
   footer: {
     about: 'L’association INSAF de Sétif est une association civile agréée, active depuis juin 2014 pour la protection de l’enfance, l’insertion des jeunes et la solidarité.',
     explore: 'Explorer',
@@ -328,6 +354,19 @@ const en: Strings = {
     view3d: 'Start the 3D view',
     view3dNote: 'A fairly heavy interactive view — loaded on request.',
     fullscreen: 'Open full screen',
+  },
+  contactPage: {
+    kicker: 'Contact',
+    lead: 'Write to us with a question, a partnership, volunteering or a photo-removal request. We reply by email.',
+    formTitle: 'Send a message',
+    topicLabel: 'Topic',
+    topics: { general: 'General question', volunteer: 'Volunteering', partnership: 'Partnership', club: 'Enrol a child in the Children’s Rights Ambassadors club', photo: 'Photo removal request', donation: 'Donation or receipt' },
+    sending: 'Sending…',
+  },
+  donatePage: {
+    lead: 'Pay securely with an Edahabia card (CCP / BaridiMob account) or a CIB card via Chargily, or by international transfer from abroad.',
+    receipt: 'Automatic e-receipt if you give your email',
+    receiptHint: 'Add your email to receive your electronic receipt as soon as the payment is confirmed.',
   },
   footer: {
     about: 'INSAF Association of Sétif is a registered civil association, active since June 2014 for child protection, youth inclusion and community solidarity.',
