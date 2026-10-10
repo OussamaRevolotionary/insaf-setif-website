@@ -50,7 +50,7 @@ const jsonLd = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script is:inline>document.documentElement.classList.add('js')</script>
+    <script is:inline>if (document.visibilityState === 'visible' && 'IntersectionObserver' in window) document.documentElement.classList.add('js')</script>
     <title>{title}</title>
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex" />}
@@ -102,19 +102,33 @@ const jsonLd = {
         };
         requestAnimationFrame(tick);
       };
-      const io = new IntersectionObserver(
-        (entries) => {
-          for (const e of entries) {
-            if (!e.isIntersecting) continue;
-            const el = e.target as HTMLElement;
-            el.classList.add('is-in');
-            if (el.dataset.count) countUp(el);
-            io.unobserve(el);
-          }
-        },
-        { rootMargin: '0px 0px -8% 0px', threshold: 0.12 },
-      );
-      document.querySelectorAll<HTMLElement>('[data-reveal], [data-count]').forEach((el) => io.observe(el));
+      const pending = new Set(document.querySelectorAll<HTMLElement>('[data-reveal], [data-count]'));
+      const show = (el: HTMLElement) => {
+        if (!pending.delete(el)) return;
+        el.classList.add('is-in');
+        if (el.dataset.count) countUp(el);
+      };
+      // Reveals are only armed (html.js) when the page loads visible with IntersectionObserver;
+      // otherwise everything is shown as-is. The scroll check is a second safety net.
+      const io = 'IntersectionObserver' in window
+        ? new IntersectionObserver(
+            (entries) => entries.forEach((e) => e.isIntersecting && (show(e.target as HTMLElement), io?.unobserve(e.target))),
+            { rootMargin: '0px 0px -8% 0px', threshold: 0.12 },
+          )
+        : null;
+      pending.forEach((el) => io?.observe(el));
+      let queued = false;
+      const check = () => {
+        queued = false;
+        const limit = (window.innerHeight || document.documentElement.clientHeight) * 0.92;
+        pending.forEach((el) => el.getBoundingClientRect().top < limit && show(el));
+        if (!pending.size) removeEventListener('scroll', onScroll);
+      };
+      const onScroll = () => { if (!queued) { queued = true; setTimeout(check, 60); } };
+      addEventListener('scroll', onScroll, { passive: true });
+      setTimeout(check, 400);
+      if (!io) pending.forEach(show);
+      addEventListener('beforeprint', () => pending.forEach(show));
     </script>
   </body>
 </html>
