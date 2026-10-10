@@ -7,8 +7,10 @@ interface Props {
   lead?: string;
   /** Optional illustrative photo shown beside the title. */
   image?: ImageMetadata;
+  /** Also show the photo on phones (below the text). Off by default to keep forms near the top. */
+  imageOnMobile?: boolean;
 }
-const { kicker, title, lead, image } = Astro.props;
+const { kicker, title, lead, image, imageOnMobile = false } = Astro.props;
 ---
 
 <section class="bg-zellige relative overflow-hidden border-b border-sand">
@@ -20,7 +22,7 @@ const { kicker, title, lead, image } = Astro.props;
       <slot />
     </div>
     {image && (
-      <div class="relative hidden lg:block" aria-hidden="true">
+      <div class:list={['relative', !imageOnMobile && 'hidden lg:block']} aria-hidden="true">
         <span class="flag-band-live absolute -bottom-3 start-8 end-8 h-1.5 rounded-full"></span>
         <Image src={image} alt="" widths={[480, 800]} sizes="36rem" class="rise-word aspect-[4/3] w-full rounded-2xl object-cover shadow-lift" style="--i:2" />
       </div>

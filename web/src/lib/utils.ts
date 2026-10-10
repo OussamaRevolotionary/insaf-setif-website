@@ -5,3 +5,8 @@ import { twMerge } from 'tailwind-merge';
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+/** JSON for an inline <script type="application/ld+json">: escapes "<" so data can never close the tag. */
+export function jsonLd(data: unknown) {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}

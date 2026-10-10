@@ -3,6 +3,7 @@
 // Legacy hash links (#/donate, #/news …) from the old SPA — including the Chargily
 // return URL "?donation=success#/donate" — are mapped to the same page in the new site.
 import { href, ROUTES } from '@/i18n';
+import { CONTENT_SECURITY_POLICY } from '@/data/site';
 const ar = href('ar');
 const fr = href('fr');
 const en = href('en');
@@ -14,6 +15,8 @@ const slugs = Object.values(ROUTES).filter(Boolean).map((s) => s.replace(/\/$/, 
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {import.meta.env.PROD && <meta http-equiv="Content-Security-Policy" content={CONTENT_SECURITY_POLICY} />}
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <title>INSAF — جمعية إنصاف لولاية سطيف</title>
     <meta name="robots" content="noindex" />
     <link rel="canonical" href={new URL(ar, Astro.site).href} />

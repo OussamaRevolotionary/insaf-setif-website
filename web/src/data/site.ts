@@ -36,3 +36,22 @@ export const HELPLINES = [
 
 /** n8n webhook behind the contact form (same endpoint as the legacy site). */
 export const CONTACT_WEBHOOK = 'https://oussama19.app.n8n.cloud/webhook/insaf-contact';
+
+/**
+ * Security policy sent as <meta> (GitHub Pages can't set response headers).
+ * Only this site and the n8n webhooks may be contacted; no third-party scripts, frames or plugins.
+ * 'unsafe-inline' is needed for Astro's inline island/bootstrap scripts.
+ */
+export const CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "font-src 'self' data:",
+  "connect-src 'self' https://oussama19.app.n8n.cloud",
+  "frame-src 'none'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  'upgrade-insecure-requests',
+].join('; ');

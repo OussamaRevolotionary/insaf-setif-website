@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHero from '@/components/PageHero.astro';
+import childrenGifts from '@/assets/stock/children-gifts.jpg';
 import { childRights, RIGHT_IDS, HELPLINES, EMERGENCY_NUMBERS, RIGHTS_SOURCES } from '@/data/childRights';
 import { href, langPaths, useT, type Lang } from '@/i18n';
 
@@ -26,7 +27,7 @@ const RIGHT_META = {
 ---
 
 <BaseLayout lang={lang} slug="children-rights/" title={t.seo.rights.title} description={t.seo.rights.description}>
-  <PageHero kicker={c.badge} title={c.title} lead={c.lead} />
+  <PageHero kicker={c.badge} title={c.title} lead={c.lead} image={childrenGifts} imageOnMobile />
 
   <!-- Four principles -->
   <section class="py-14 lg:py-20" aria-labelledby="principles-title">

@@ -30,3 +30,6 @@ Thumbs.db
 /*.jpg
 !/LOGO.jpg
 /Algeria Flag/
+
+# Personal downloads folder (private documents) - never publish
+/Téléchargements/

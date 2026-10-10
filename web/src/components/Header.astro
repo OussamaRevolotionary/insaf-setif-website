@@ -1,8 +1,8 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import { Heart, Menu, X } from 'lucide-react';
-import FlagPennant from './FlagPennant.astro';
-import logo from '@/assets/brand/logo.jpg';
+import logoMark from '@/assets/brand/logo-mark.png';
+import flagSilk from '@/assets/flag/flag-silk.jpg';
 import { LOCALES, LANG_META, href, useT, type Lang, type RouteKey } from '@/i18n';
 
 interface Props {
@@ -17,19 +17,22 @@ const t = useT(lang);
 const PRIMARY: RouteKey[] = ['about', 'rights', 'programs', 'achievements', 'news', 'contact'];
 const DRAWER: RouteKey[] = ['home', 'about', 'rights', 'goals', 'programs', 'achievements', 'news', 'trust', 'contact'];
 
+// Silk flag behind the header (option A, chosen 2026-10-10): one small WebP, CSS-only motion.
+const silk = await getImage({ src: flagSilk, width: 900, format: 'webp', quality: 60 });
+
 const current = Astro.url.pathname;
 const isActive = (r: RouteKey) => (r === 'home' ? current === href(lang) : current.startsWith(href(lang, r)));
 ---
 
-<header class="sticky top-0 z-40 border-b border-sand/70 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/80">
-  <div class="container-site flex h-16 items-center justify-between gap-4 lg:h-20">
+<header class="sticky top-0 z-40 isolate overflow-hidden border-b border-sand/70 bg-white">
+  <div class="header-silk" style={`--silk:url(${silk.src})`} aria-hidden="true"></div>
+  <div class="container-site relative flex h-16 items-center justify-between gap-4 lg:h-20">
     <a href={href(lang)} class="flex min-w-0 items-center gap-2.5 rounded-md" aria-label={`${t.brandName} — ${t.brandFull}`}>
-      <Image src={logo} alt="" width={44} height={44} class="size-10 shrink-0 rounded-full ring-1 ring-sand lg:size-11" loading="eager" />
+      <Image src={logoMark} alt="" width={96} height={96} class="size-10 shrink-0 object-contain drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)] lg:size-12" loading="eager" />
       <span class="flex min-w-0 flex-col leading-tight">
         <span class="font-sans text-xl font-extrabold tracking-tight text-emerald-900" dir="ltr">{t.brandName}</span>
         <span class="hidden truncate text-xs text-muted sm:block">{t.brandFull}</span>
       </span>
-      <FlagPennant />
     </a>
 
     <nav class="hidden xl:block" aria-label={t.menu}>
@@ -86,6 +89,36 @@ const isActive = (r: RouteKey) => (r === 'home' ? current === href(lang) : curre
   </div>
   <span class="flag-band-live absolute inset-x-0 -bottom-px h-1" aria-hidden="true"></span>
 </header>
+
+<style>
+  /* The flag sits at the brand end of the header and fades out toward the nav,
+     like fabric behind the logo. It is never mirrored: in RTL it moves to the
+     right-hand (start) side but keeps green at the hoist. */
+  .header-silk {
+    position: absolute;
+    inset-block: -30%;
+    inset-inline-start: -4%;
+    width: min(58rem, 72%);
+    z-index: -1;
+    background: var(--silk) center / cover no-repeat;
+    opacity: 0.22;
+    -webkit-mask-image: linear-gradient(90deg, #000 25%, transparent 92%);
+    mask-image: linear-gradient(90deg, #000 25%, transparent 92%);
+    animation: silk-drift 14s ease-in-out infinite;
+    will-change: transform;
+  }
+  :global([dir='rtl']) .header-silk {
+    -webkit-mask-image: linear-gradient(270deg, #000 25%, transparent 92%);
+    mask-image: linear-gradient(270deg, #000 25%, transparent 92%);
+  }
+  @keyframes silk-drift {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1.04); }
+    50% { transform: translate3d(-1.5%, 3%, 0) scale(1.08); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .header-silk { animation: none; }
+  }
+</style>
 
 <div id="site-drawer" class="fixed inset-0 z-50 hidden xl:hidden" data-drawer>
   <div class="absolute inset-0 bg-emerald-950/50" data-drawer-close></div>

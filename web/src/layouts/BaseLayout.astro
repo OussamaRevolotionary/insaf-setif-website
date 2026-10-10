@@ -1,10 +1,11 @@
 ---
+import { jsonLd as toJsonLd } from '@/lib/utils';
 import '@/styles/global.css';
 import { getImage } from 'astro:assets';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
 import logo from '@/assets/brand/logo.jpg';
-import { CONTACT, FOUNDED } from '@/data/site';
+import { CONTACT, CONTENT_SECURITY_POLICY, FOUNDED } from '@/data/site';
 import { LOCALES, LANG_META, href, useT, type Lang } from '@/i18n';
 
 interface Props {
@@ -26,7 +27,8 @@ const site = Astro.site!;
 const abs = (path: string) => new URL(path, site).href;
 const canonical = abs(href(lang, slug));
 const og = await getImage({ src: ogImage ?? logo, width: 1200, format: 'jpg' });
-const logoAbs = abs((await getImage({ src: logo, width: 512, format: 'png' })).src);
+const logoPng = (await getImage({ src: logo, width: 512, format: 'png' })).src;
+const logoAbs = abs(logoPng);
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -50,6 +52,8 @@ const jsonLd = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {import.meta.env.PROD && <meta http-equiv="Content-Security-Policy" content={CONTENT_SECURITY_POLICY} />}
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <script is:inline>if (document.visibilityState === 'visible' && 'IntersectionObserver' in window) document.documentElement.classList.add('js')</script>
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -57,7 +61,7 @@ const jsonLd = {
     <link rel="canonical" href={canonical} />
     {LOCALES.map((l) => <link rel="alternate" hreflang={l} href={abs(href(l, slug))} />)}
     <link rel="alternate" hreflang="x-default" href={abs(href('ar', slug))} />
-    <link rel="icon" href={logoAbs} type="image/png" />
+    <link rel="icon" href={logoPng} type="image/png" />
     <link rel="sitemap" href={abs(`${import.meta.env.BASE_URL}sitemap-index.xml`)} />
     <meta name="theme-color" content="#0f392b" />
 
@@ -71,7 +75,7 @@ const jsonLd = {
     {LOCALES.filter((l) => l !== lang).map((l) => <meta property="og:locale:alternate" content={LANG_META[l].og} />)}
     <meta name="twitter:card" content="summary_large_image" />
 
-    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <script type="application/ld+json" set:html={toJsonLd(jsonLd)} />
     <slot name="head" />
   </head>
   <body class="flex min-h-dvh flex-col">

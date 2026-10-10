@@ -1,4 +1,5 @@
 ---
+import { jsonLd } from '@/lib/utils';
 import { Picture } from 'astro:assets';
 import { ArrowLeft, ArrowRight, CalendarDays, ExternalLink } from 'lucide-react';
 import BaseLayout from '@/layouts/BaseLayout.astro';
@@ -45,7 +46,7 @@ const articleLd = {
 ---
 
 <BaseLayout lang={lang} slug={`news/${item.id}/`} title={`${item.headline.slice(0, 60)} — INSAF`} description={description} ogImage={item.image ?? undefined}>
-  <script slot="head" type="application/ld+json" set:html={JSON.stringify(articleLd)} />
+  <script slot="head" type="application/ld+json" set:html={jsonLd(articleLd)} />
 
   <article class="py-10 lg:py-14">
     <div class="container-site max-w-4xl">
