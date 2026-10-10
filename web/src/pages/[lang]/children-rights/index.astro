@@ -35,7 +35,7 @@ const RIGHT_META = {
       <p class="mt-2 text-muted">{c.principlesLead}</p>
       <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {c.principles.map((p) => (
-          <article class="rounded-xl border border-sand bg-white p-6 shadow-float">
+          <article data-reveal class="rounded-xl border border-sand bg-white p-6 shadow-float">
             <p class="text-xs font-bold uppercase text-muted">{c.articleLabel} <span class="tabular font-sans text-2xl font-extrabold text-donate" dir="ltr">{p.article}</span></p>
             <h3 class="mt-3 text-lg">{p.title}</h3>
             <p class="mt-2 text-sm leading-relaxed text-muted">{p.text}</p>
@@ -178,7 +178,7 @@ const RIGHT_META = {
       </h2>
       <div class="mt-8 grid gap-5 md:grid-cols-3">
         {c.dates.map((d) => (
-          <article class="flex gap-4 rounded-xl border border-sand bg-white p-5">
+          <article data-reveal class="flex gap-4 rounded-xl border border-sand bg-white p-5">
             <div class="flex w-16 shrink-0 flex-col overflow-hidden rounded-lg text-center ring-1 ring-sand" aria-hidden="true">
               <span class="bg-emerald-900 py-0.5 text-xs font-bold text-white">{d.month}</span>
               <span class="tabular py-1.5 font-sans text-2xl font-extrabold text-emerald-900">{d.day}</span>

@@ -27,7 +27,7 @@ const latest = (category: string) => NEWS.find((n) => n.category === category &&
         const Icon = ICONS[prog.icon];
         const item = latest(prog.category);
         return (
-          <article class="grid items-center gap-8 lg:grid-cols-2" id={prog.id}>
+          <article data-reveal class="grid items-center gap-8 lg:grid-cols-2" id={prog.id}>
             <div class:list={[i % 2 === 1 && 'lg:order-2']}>
               <span class="flex size-12 items-center justify-center rounded-xl bg-emerald-900 text-white">
                 <Icon className="size-6" aria-hidden="true" />

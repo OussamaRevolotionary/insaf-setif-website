@@ -25,3 +25,8 @@ _private/
 .DS_Store
 Thumbs.db
 *.log
+
+# Raw reference pictures dropped in by the owner (curated copies live in web/src/assets)
+/*.jpg
+!/LOGO.jpg
+/Algeria Flag/

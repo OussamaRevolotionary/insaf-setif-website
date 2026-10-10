@@ -31,7 +31,7 @@ const FUND_ICONS = { general: Heart, school: GraduationCap, health: HeartPulse, 
         {c.promises.map((p) => {
           const Icon = PROMISE_ICONS[p.id as keyof typeof PROMISE_ICONS];
           return (
-            <article class="rounded-xl border border-sand bg-white p-6 shadow-float">
+            <article data-reveal class="rounded-xl border border-sand bg-white p-6 shadow-float">
               <span class="flex size-11 items-center justify-center rounded-lg bg-emerald-50 text-emerald-900"><Icon className="size-5" aria-hidden="true" /></span>
               <h3 class="mt-4 text-lg">{p.title}</h3>
               <p class="mt-2 text-sm leading-relaxed text-muted">{p.text}</p>
@@ -52,7 +52,7 @@ const FUND_ICONS = { general: Heart, school: GraduationCap, health: HeartPulse, 
           const Icon = FUND_ICONS[id];
           const fund = c.funds[id];
           return (
-            <article class="flex gap-4 rounded-xl border border-sand bg-cream p-5">
+            <article data-reveal class="flex gap-4 rounded-xl border border-sand bg-cream p-5">
               <span class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white text-donate shadow-float"><Icon className="size-5" aria-hidden="true" /></span>
               <div class="flex flex-col">
                 <h3 class="text-base">{fund.title}</h3>

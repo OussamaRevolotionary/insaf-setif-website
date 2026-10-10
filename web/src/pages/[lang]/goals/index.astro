@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHero from '@/components/PageHero.astro';
-import Embed3D from '@/components/Embed3D.astro';
 import { GOALS } from '@/data/content';
 import { ICONS } from '@/lib/icons';
 import { langPaths, pick, useT, type Lang } from '@/i18n';
@@ -20,7 +19,7 @@ const g = t.pages.goals;
       {GOALS.map((goal, i) => {
         const Icon = ICONS[goal.icon];
         return (
-          <li class="relative rounded-xl border border-sand bg-white p-6 shadow-float">
+          <li data-reveal style={`--d:${i % 3}`} class="relative rounded-xl border border-sand bg-white p-6 shadow-float">
             <span class="tabular absolute end-5 top-4 font-sans text-4xl font-extrabold text-emerald-50" aria-hidden="true">0{i + 1}</span>
             <span class="flex size-11 items-center justify-center rounded-lg bg-emerald-900 text-white">
               <Icon className="size-5" aria-hidden="true" />
@@ -33,9 +32,4 @@ const g = t.pages.goals;
     </ol>
   </section>
 
-  <section class="pb-16 lg:pb-24">
-    <div class="container-site">
-      <Embed3D lang={lang} file="ecosystem_of_empowerment.html" title={g.ecoTitle} sub={g.ecoSub} />
-    </div>
-  </section>
 </BaseLayout>

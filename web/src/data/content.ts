@@ -183,3 +183,13 @@ export const ACHIEVEMENTS: { id: string; date: string; icon: IconKey; photo?: st
     },
   },
 ];
+
+/** Home-page gallery: INSAF's own field photos, each linked to the post it comes from. */
+export const FIELD_STORIES: { photo: string; post: string; date: string; title: T3 }[] = [
+  { photo: '1014529634304109.jpg', post: '1014533114303761', date: '2026-06-24', title: { ar: 'ورشات حقوق الطفل', fr: 'Ateliers droits de l’enfant', en: 'Children’s rights workshops' } },
+  { photo: '999625755794497.jpg', post: '999618955795177', date: '2026-06-06', title: { ar: 'اليوم العالمي للطفولة', fr: 'Journée mondiale de l’enfance', en: 'World Children’s Day' } },
+  { photo: '1016300244127048.jpg', post: '1016302180793521', date: '2026-06-26', title: { ar: 'صالون الطفولة الصغيرة', fr: 'Salon de la petite enfance', en: 'Early-childhood fair' } },
+  { photo: '1019493577141048.jpg', post: '1019495113807561', date: '2026-06-30', title: { ar: 'مسابقة التهجئة', fr: 'Concours Spelling Bee', en: 'Spelling Bee' } },
+  { photo: '1027232283033844.jpg', post: '1027233993033673', date: '2026-07-09', title: { ar: 'مشاريع الشباب', fr: 'Projets jeunesse', en: 'Youth projects' } },
+  { photo: '996870622736677.jpg', post: '996871096069963', date: '2026-06-03', title: { ar: 'معًا من أجل الطفولة', fr: 'Ensemble pour l’enfance', en: 'Together for children' } },
+];

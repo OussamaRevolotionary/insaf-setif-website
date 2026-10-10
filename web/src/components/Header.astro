@@ -33,13 +33,13 @@ const isActive = (r: RouteKey) => (r === 'home' ? current === href(lang) : curre
     </a>
 
     <nav class="hidden xl:block" aria-label={t.menu}>
-      <ul class="flex items-center gap-1">
+      <ul class="flex items-center gap-0.5">
         {PRIMARY.map((r) => (
           <li>
             <a
               href={href(lang, r)}
               aria-current={isActive(r) ? 'page' : undefined}
-              class="rounded-md px-3 py-2 text-sm font-semibold text-muted transition-colors hover:bg-emerald-50 hover:text-emerald-900 aria-[current=page]:text-emerald-900 aria-[current=page]:underline aria-[current=page]:decoration-amber-accent aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8"
+              class="whitespace-nowrap rounded-md px-2.5 py-2 text-sm font-semibold text-muted transition-colors 2xl:px-3 hover:bg-emerald-50 hover:text-emerald-900 aria-[current=page]:text-emerald-900 aria-[current=page]:underline aria-[current=page]:decoration-amber-accent aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8"
             >
               {t.nav[r]}
             </a>
@@ -84,7 +84,7 @@ const isActive = (r: RouteKey) => (r === 'home' ? current === href(lang) : curre
       </button>
     </div>
   </div>
-  <span class="flag-band absolute inset-x-0 -bottom-px h-1" aria-hidden="true"></span>
+  <span class="flag-band-live absolute inset-x-0 -bottom-px h-1" aria-hidden="true"></span>
 </header>
 
 <div id="site-drawer" class="fixed inset-0 z-50 hidden xl:hidden" data-drawer>

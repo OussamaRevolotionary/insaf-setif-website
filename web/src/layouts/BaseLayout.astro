@@ -50,6 +50,7 @@ const jsonLd = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>document.documentElement.classList.add('js')</script>
     <title>{title}</title>
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex" />}
@@ -85,5 +86,35 @@ const jsonLd = {
       <slot />
     </main>
     <Footer lang={lang} />
+    <script>
+      // Scroll reveals and count-up numbers, one observer for both.
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const countUp = (el: HTMLElement) => {
+        const target = Number(el.dataset.count);
+        const fmt = (n: number) => new Intl.NumberFormat('fr-FR').format(n).replace(/ | /g, ' ');
+        if (reduce || !Number.isFinite(target)) return;
+        const start = performance.now();
+        const dur = 1600;
+        const tick = (now: number) => {
+          const p = Math.min((now - start) / dur, 1);
+          el.textContent = el.dataset.plain ? String(Math.round(target * (1 - Math.pow(1 - p, 3)))) : fmt(Math.round(target * (1 - Math.pow(1 - p, 3))));
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      };
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (!e.isIntersecting) continue;
+            const el = e.target as HTMLElement;
+            el.classList.add('is-in');
+            if (el.dataset.count) countUp(el);
+            io.unobserve(el);
+          }
+        },
+        { rootMargin: '0px 0px -8% 0px', threshold: 0.12 },
+      );
+      document.querySelectorAll<HTMLElement>('[data-reveal], [data-count]').forEach((el) => io.observe(el));
+    </script>
   </body>
 </html>

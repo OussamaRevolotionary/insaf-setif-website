@@ -3,7 +3,6 @@ import { Picture } from 'astro:assets';
 import { CheckCircle2 } from 'lucide-react';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHero from '@/components/PageHero.astro';
-import Embed3D from '@/components/Embed3D.astro';
 import { photoByName } from '@/lib/photos';
 import { CONTACT, PARTNERS } from '@/data/site';
 import { langPaths, pick, useT, type Lang } from '@/i18n';
@@ -50,7 +49,7 @@ const portrait = photoByName('999625755794497.jpg');
       <h2 id="values-title" class="text-2xl sm:text-3xl">{t.valuesTitle}</h2>
       <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {t.valuesItems.map((v) => (
-          <li class="flex items-center gap-3 rounded-lg border border-sand bg-cream p-4 font-semibold text-emerald-900">
+          <li data-reveal class="flex items-center gap-3 rounded-lg border border-sand bg-cream p-4 font-semibold text-emerald-900">
             <CheckCircle2 className="size-5 shrink-0 text-emerald-700" aria-hidden="true" />
             {v}
           </li>
@@ -74,9 +73,4 @@ const portrait = photoByName('999625755794497.jpg');
     </div>
   </section>
 
-  <section class="pb-16 lg:pb-24">
-    <div class="container-site">
-      <Embed3D lang={lang} file="timeline_of_progress.html" title={a.timelineTitle} sub={a.timelineSub} />
-    </div>
-  </section>
 </BaseLayout>

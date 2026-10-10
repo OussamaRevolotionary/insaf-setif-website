@@ -3,6 +3,7 @@ import { BadgeCheck, Lock, ReceiptText, ShieldCheck } from 'lucide-react';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHero from '@/components/PageHero.astro';
 import DonationBox, { type DonationCopy } from '@/components/DonationBox';
+import aidBoxes from '@/assets/stock/aid-boxes.jpg';
 import { href, langPaths, useT, type Lang } from '@/i18n';
 
 export const getStaticPaths = langPaths;
@@ -49,7 +50,7 @@ const copy: DonationCopy = {
 ---
 
 <BaseLayout lang={lang} slug="donate/" title={t.seo.donate.title} description={t.seo.donate.description}>
-  <PageHero kicker={t.donatePageLabel} title={t.donatePageTitle} lead={t.donatePage.lead} />
+  <PageHero kicker={t.donatePageLabel} title={t.donatePageTitle} lead={t.donatePage.lead} image={aidBoxes} />
 
   <section class="py-10 lg:py-14">
     <div class="container-site max-w-5xl">

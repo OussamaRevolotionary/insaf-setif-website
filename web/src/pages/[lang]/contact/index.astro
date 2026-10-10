@@ -2,6 +2,7 @@
 import { Mail, MapPin, Phone, ShieldCheck } from 'lucide-react';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHero from '@/components/PageHero.astro';
+import childrenPlanting from '@/assets/stock/children-planting.jpg';
 import { CONTACT, CONTACT_WEBHOOK, HELPLINES } from '@/data/site';
 import { langPaths, pick, useT, type Lang } from '@/i18n';
 
@@ -13,7 +14,7 @@ const field = 'w-full rounded-lg border border-sand bg-white px-3 py-2.5 outline
 ---
 
 <BaseLayout lang={lang} slug="contact/" title={t.seo.contact.title} description={t.seo.contact.description}>
-  <PageHero kicker={c.kicker} title={t.nav.contact} lead={c.lead} />
+  <PageHero kicker={c.kicker} title={t.nav.contact} lead={c.lead} image={childrenPlanting} />
 
   <section class="py-14 lg:py-20">
     <div class="container-site grid gap-8 lg:grid-cols-[1fr_1.4fr]">

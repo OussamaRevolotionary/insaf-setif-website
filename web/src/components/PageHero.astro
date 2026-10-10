@@ -1,17 +1,29 @@
 ---
+import { Image } from 'astro:assets';
+
 interface Props {
   kicker?: string;
   title: string;
   lead?: string;
+  /** Optional illustrative photo shown beside the title. */
+  image?: ImageMetadata;
 }
-const { kicker, title, lead } = Astro.props;
+const { kicker, title, lead, image } = Astro.props;
 ---
 
-<section class="bg-zellige border-b border-sand">
-  <div class="container-site py-12 md:py-16">
-    {kicker && <p class="text-sm font-bold uppercase tracking-wide text-donate">{kicker}</p>}
-    <h1 class="mt-2 max-w-3xl text-4xl sm:text-5xl">{title}</h1>
-    {lead && <p class="mt-4 max-w-2xl text-lg leading-relaxed text-muted">{lead}</p>}
-    <slot />
+<section class="bg-zellige relative overflow-hidden border-b border-sand">
+  <div class:list={['container-site py-12 md:py-16', image && 'grid items-center gap-10 lg:grid-cols-[1.2fr_1fr]']}>
+    <div>
+      {kicker && <p class="rise-word text-sm font-bold uppercase tracking-wide text-donate">{kicker}</p>}
+      <h1 class="rise-word mt-2 max-w-3xl text-4xl sm:text-5xl lg:text-6xl" style="--i:1">{title}</h1>
+      {lead && <p class="rise-word mt-4 max-w-2xl text-lg leading-relaxed text-muted" style="--i:2">{lead}</p>}
+      <slot />
+    </div>
+    {image && (
+      <div class="relative hidden lg:block" aria-hidden="true">
+        <span class="flag-band-live absolute -bottom-3 start-8 end-8 h-1.5 rounded-full"></span>
+        <Image src={image} alt="" widths={[480, 800]} sizes="36rem" class="rise-word aspect-[4/3] w-full rounded-2xl object-cover shadow-lift" style="--i:2" />
+      </div>
+    )}
   </div>
 </section>

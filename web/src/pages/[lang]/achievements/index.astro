@@ -26,7 +26,7 @@ const ogImage = photoByName(items.find((i) => i.photo)!.photo!);
         const Icon = ICONS[item.icon];
         const link = item.post ? href(lang, `news/${item.post}/`) : item.category ? href(lang, 'news', `?category=${item.category}`) : null;
         return (
-          <li class="flex flex-col overflow-hidden rounded-xl border border-sand bg-white shadow-float">
+          <li data-reveal class="flex flex-col overflow-hidden rounded-xl border border-sand bg-white shadow-float">
             {item.photo ? (
               <Picture src={photoByName(item.photo)} formats={['avif', 'webp']} widths={[400, 640, 800]} sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" alt="" class="aspect-[16/10] w-full object-cover" />
             ) : (

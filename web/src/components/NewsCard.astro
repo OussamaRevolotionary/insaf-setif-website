@@ -12,7 +12,7 @@ interface Props {
 const { item, lang, headingLevel: H = 'h3' } = Astro.props;
 ---
 
-<article class="group relative flex h-full flex-col overflow-hidden rounded-xl border border-sand bg-white shadow-float transition-shadow hover:shadow-lift">
+<article data-reveal class="group relative flex h-full flex-col overflow-hidden rounded-xl border border-sand bg-white shadow-float transition-shadow hover:shadow-lift">
   {item.image ? (
     <Picture
       src={item.image}

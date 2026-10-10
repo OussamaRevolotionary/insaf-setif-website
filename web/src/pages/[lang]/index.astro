@@ -1,12 +1,18 @@
 ---
-import { Picture } from 'astro:assets';
-import { ArrowLeft, ArrowRight, BadgeCheck, HandHeart, Lock, Mail, ReceiptText, CreditCard, Users } from 'lucide-react';
+import { Image, Picture, getImage } from 'astro:assets';
+import { ArrowLeft, ArrowRight, BadgeCheck, ChevronDown, CreditCard, HandHeart, Lock, Mail, ReceiptText, Users } from 'lucide-react';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import NewsCard from '@/components/NewsCard.astro';
+import HoverExpandGallery from '@/components/HoverExpandGallery';
 import { NEWS } from '@/lib/news';
 import { HERO_PHOTO, isGraphic, photoByName } from '@/lib/photos';
+import { FIELD_STORIES } from '@/data/content';
 import { FACEBOOK_FOLLOWERS, FOUNDED, PARTNERS } from '@/data/site';
 import { formatDA, formatDate, href, langPaths, LANG_META, pick, useT, type Lang } from '@/i18n';
+import flagSilk from '@/assets/flag/flag-silk.jpg';
+import flagChildren from '@/assets/flag/flag-children.jpg';
+import flagCity from '@/assets/flag/flag-city.jpg';
+import volunteers from '@/assets/stock/volunteers-planting.jpg';
 
 export const getStaticPaths = langPaths;
 
@@ -14,21 +20,18 @@ const lang = Astro.params.lang as Lang;
 const t = useT(lang);
 const rtl = LANG_META[lang].dir === 'rtl';
 const Arrow = rtl ? ArrowLeft : ArrowRight;
-const num = (n: number) => new Intl.NumberFormat('fr-FR').format(n).replace(/ | /g, ' ');
 
-const withPhoto = NEWS.filter((n) => n.image && !isGraphic(n.image));
 const heroImage = photoByName(HERO_PHOTO);
-const featured = withPhoto.find((n) => n.image === heroImage) ?? withPhoto[0];
-const log = withPhoto.filter((n) => n !== featured).slice(0, 6);
+const latest = NEWS.filter((n) => n.image && !isGraphic(n.image)).slice(0, 3);
 
 const STATS = [
-  { value: String(FOUNDED.year), label: t.home.stats.founded },
-  { value: num(FACEBOOK_FOLLOWERS), label: t.home.stats.followers },
-  { value: num(NEWS.length), label: t.home.stats.activities },
-  { value: num(PARTNERS.length), label: t.home.stats.partners },
+  { value: FOUNDED.year, label: t.home.stats.founded, plain: true },
+  { value: FACEBOOK_FOLLOWERS, label: t.home.stats.followers },
+  { value: NEWS.length, label: t.home.stats.activities },
+  { value: PARTNERS.length, label: t.home.stats.partners },
 ];
 
-// Unit costs come from the approved donation config (legacy src/config/donation.js).
+// Unit costs come from the approved donation config.
 const TIERS = [
   { id: 'winter', amount: 3500, ...t.childTiers.winter },
   { id: 'school', amount: 5000, suggested: true, ...t.childTiers.school },
@@ -36,110 +39,139 @@ const TIERS = [
 ] as const;
 
 const TRUST_ICONS = [Lock, ReceiptText, CreditCard];
+
+const gallery = await Promise.all(
+  FIELD_STORIES.map(async (s) => {
+    const img = await getImage({ src: photoByName(s.photo), widths: [480, 960], format: 'webp' });
+    return {
+      title: pick(lang, s.title),
+      meta: formatDate(s.date, lang),
+      src: img.src,
+      srcSet: img.srcSet.attribute,
+      href: href(lang, `news/${s.post}/`),
+      linkLabel: t.home.galleryOpen,
+    };
+  }),
+);
+
+const words = (text: string) => text.split(' ');
 ---
 
-<BaseLayout lang={lang} slug="" title={t.seo.home.title} description={t.seo.home.description} ogImage={featured?.image ?? undefined}>
+<BaseLayout lang={lang} slug="" title={t.seo.home.title} description={t.seo.home.description} ogImage={heroImage}>
   <!-- Hero -->
-  <section class="bg-zellige relative overflow-hidden">
-    <div class="container-site grid items-center gap-10 py-12 md:py-16 lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:py-24">
-      <div>
-        <p class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-900 sm:text-sm">
-          <BadgeCheck className="size-4 shrink-0" aria-hidden="true" />
-          {t.home.kicker}
-        </p>
-        <h1 class="mt-5 text-4xl sm:text-5xl lg:text-6xl">
-          {t.home.titleLead}
-          <span class="block text-donate">{t.home.titleAccent}</span>
-        </h1>
-        <p class="mt-5 max-w-xl text-lg leading-relaxed text-muted">{t.home.sub}</p>
-        <div class="mt-8 flex flex-wrap gap-3">
-          <a href={href(lang, 'donate')} class="inline-flex items-center gap-2 rounded-lg bg-donate px-6 py-3.5 font-bold text-white shadow-float transition-colors hover:bg-donate-hover">
-            <HandHeart className="size-5" aria-hidden="true" />
-            {t.home.donate}
-          </a>
-          <a href={href(lang, 'trust')} class="inline-flex items-center gap-2 rounded-lg border-2 border-emerald-900 px-6 py-3 font-bold text-emerald-900 transition-colors hover:bg-emerald-900 hover:text-white">
-            {t.home.transparency}
-            <Arrow className="size-4" aria-hidden="true" />
-          </a>
-        </div>
-        <ul class="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-muted">
-          {t.home.trust.map((item, i) => {
-            const Icon = TRUST_ICONS[i];
-            return (
-              <li class="flex items-center gap-2">
-                <Icon className="size-4 shrink-0 text-emerald-700" aria-hidden="true" />
-                {item}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+  <section class="relative isolate flex min-h-[calc(100svh-4rem)] items-end overflow-hidden bg-emerald-950 text-white lg:min-h-[calc(100svh-5rem)]">
+    <Picture
+      src={heroImage}
+      formats={['avif', 'webp']}
+      widths={[640, 1024, 1600, 2000]}
+      sizes="100vw"
+      alt=""
+      class="ken-burns absolute inset-0 -z-20 h-full w-full object-cover"
+      loading="eager"
+      fetchpriority="high"
+    />
+    <div class="absolute inset-0 -z-10 bg-gradient-to-t from-emerald-950 via-emerald-950/70 to-emerald-950/20"></div>
+    <div class="absolute inset-0 -z-10 bg-gradient-to-r from-emerald-950/60 to-transparent rtl:bg-gradient-to-l"></div>
 
-      {featured?.image && (
-        <figure class="relative">
-          <Picture
-            src={featured.image}
-            formats={['avif', 'webp']}
-            widths={[480, 720, 960, 1200]}
-            sizes="(min-width: 1024px) 560px, 100vw"
-            alt={featured.headline}
-            class="aspect-[4/3] w-full rounded-xl object-cover shadow-lift"
-            loading="eager"
-            fetchpriority="high"
-          />
-          <figcaption class="absolute inset-x-3 bottom-3 rounded-lg bg-white/95 p-4 shadow-float backdrop-blur sm:inset-x-5 sm:bottom-5">
-            <span class="text-xs font-bold uppercase tracking-wide text-donate">{t.home.featuredLabel} · {formatDate(featured.date, lang)}</span>
-            <a href={href(lang, `news/${featured.id}/`)} lang={featured.textLang} dir={featured.textLang === 'ar' ? 'rtl' : 'ltr'} class="mt-1 line-clamp-2 block font-semibold text-emerald-900 hover:underline">{featured.headline}</a>
-          </figcaption>
-        </figure>
-      )}
+    <div class="container-site pb-16 pt-24 sm:pb-20 lg:pb-24">
+      <p class="rise-word inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold ring-1 ring-white/20 backdrop-blur sm:text-sm">
+        <BadgeCheck className="size-4 shrink-0 text-amber-accent" aria-hidden="true" />
+        {t.home.kicker}
+      </p>
+      <h1 class="mt-5 max-w-4xl text-5xl text-white sm:text-6xl lg:text-7xl">
+        <span class="block">
+          {words(t.home.titleLead).map((w, i) => <><span class="rise-word" style={`--i:${i}`}>{w}</span>{' '}</>)}
+        </span>
+        <span class="block text-amber-accent">
+          {words(t.home.titleAccent).map((w, i) => <><span class="rise-word" style={`--i:${i + 3}`}>{w}</span>{' '}</>)}
+        </span>
+      </h1>
+      <p class="rise-word mt-5 max-w-xl text-lg text-emerald-50/90 sm:text-xl" style="--i:6">{t.home.sub}</p>
+      <div class="rise-word mt-8 flex flex-wrap gap-3" style="--i:7">
+        <a href={href(lang, 'donate')} class="group inline-flex items-center gap-2 rounded-xl bg-donate px-7 py-4 text-lg font-bold text-white shadow-lift transition hover:-translate-y-0.5 hover:bg-donate-hover">
+          <HandHeart className="size-5 transition-transform group-hover:scale-110" aria-hidden="true" />
+          {t.home.donate}
+        </a>
+        <a href={href(lang, 'trust')} class="inline-flex items-center gap-2 rounded-xl bg-white/10 px-6 py-4 font-bold text-white ring-1 ring-white/30 backdrop-blur transition hover:bg-white/20">
+          {t.home.transparency}
+          <Arrow className="size-4" aria-hidden="true" />
+        </a>
+      </div>
+      <ul class="rise-word mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold text-emerald-50/80" style="--i:8">
+        {t.home.trust.map((item, i) => {
+          const Icon = TRUST_ICONS[i];
+          return <li class="flex items-center gap-2"><Icon className="size-4 shrink-0 text-amber-accent" aria-hidden="true" />{item}</li>;
+        })}
+      </ul>
     </div>
+    <a href="#stats" class="absolute bottom-5 start-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 text-xs font-semibold text-white/70 hover:text-white rtl:translate-x-1/2 md:flex" aria-label={t.home.scroll}>
+      <ChevronDown className="size-5 animate-bounce" aria-hidden="true" />
+    </a>
   </section>
 
   <!-- Stats -->
-  <section class="bg-emerald-900 text-white" aria-labelledby="stats-title">
-    <div class="container-site py-10">
-      <h2 id="stats-title" class="sr-only">{t.home.statsTitle}</h2>
-      <dl class="grid grid-cols-2 gap-6 text-center lg:grid-cols-4">
-        {STATS.map((s) => (
-          <div class="flex flex-col-reverse gap-1">
-            <dt class="text-sm text-emerald-100">{s.label}</dt>
-            <dd class="tabular font-sans text-3xl font-extrabold text-white sm:text-4xl" dir="ltr">{s.value}</dd>
-          </div>
-        ))}
-      </dl>
+  <section id="stats" class="relative bg-emerald-900 text-white" aria-label={t.home.statsTitle}>
+    <span class="flag-band-live absolute inset-x-0 top-0 h-1" aria-hidden="true"></span>
+    <dl class="container-site grid grid-cols-2 gap-8 py-12 text-center lg:grid-cols-4">
+      {STATS.map((s, i) => (
+        <div class="flex flex-col-reverse gap-1" data-reveal style={`--d:${i}`}>
+          <dt class="text-sm text-emerald-100">{s.label}</dt>
+          <dd class="tabular font-sans text-4xl font-extrabold sm:text-5xl" dir="ltr" data-count={s.value} data-plain={s.plain ? '1' : undefined}>
+            {s.plain ? s.value : new Intl.NumberFormat('fr-FR').format(s.value).replace(/ | /g, ' ')}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <!-- Field gallery (21st.dev Hover Expand Gallery) -->
+  <section class="bg-emerald-950 py-16 text-white lg:py-24" aria-labelledby="gallery-title">
+    <div class="container-site">
+      <div class="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between" data-reveal>
+        <div>
+          <p class="text-sm font-bold uppercase tracking-wide text-amber-accent">{t.home.galleryKicker}</p>
+          <h2 id="gallery-title" class="mt-2 text-3xl text-white sm:text-5xl">{t.home.galleryTitle}</h2>
+        </div>
+        <a href={href(lang, 'news')} class="inline-flex shrink-0 items-center gap-2 font-bold text-emerald-100 hover:text-white">
+          {t.home.logAll}
+          <Arrow className="size-4" aria-hidden="true" />
+        </a>
+      </div>
+      <div data-reveal>
+        <HoverExpandGallery client:visible items={gallery} />
+      </div>
     </div>
   </section>
 
   <!-- Giving tiers -->
-  <section class="py-16 lg:py-24" aria-labelledby="tiers-title">
+  <section class="bg-zellige py-16 lg:py-24" aria-labelledby="tiers-title">
     <div class="container-site">
-      <div class="mx-auto max-w-2xl text-center">
+      <div class="mx-auto max-w-2xl text-center" data-reveal>
         <p class="text-sm font-bold uppercase tracking-wide text-donate">{t.home.tiersKicker}</p>
-        <h2 id="tiers-title" class="mt-2 text-3xl sm:text-4xl">{t.home.tiersTitle}</h2>
-        <p class="mt-3 text-muted">{t.home.tiersSub}</p>
+        <h2 id="tiers-title" class="mt-2 text-3xl sm:text-5xl">{t.home.tiersTitle}</h2>
       </div>
 
-      <ul class="mt-10 grid gap-5 md:grid-cols-3">
-        {TIERS.map((tier) => (
+      <ul class="mt-12 grid gap-5 md:grid-cols-3">
+        {TIERS.map((tier, i) => (
           <li
+            data-reveal
+            style={`--d:${i}`}
             class:list={[
-              'relative flex flex-col rounded-xl border bg-white p-6 shadow-float',
-              'suggested' in tier ? 'border-donate ring-1 ring-donate' : 'border-sand',
+              'group relative flex flex-col rounded-2xl border bg-white p-7 shadow-float transition duration-300 hover:-translate-y-1 hover:shadow-lift',
+              'suggested' in tier ? 'border-donate ring-2 ring-donate md:-translate-y-2' : 'border-sand',
             ]}
           >
             {'suggested' in tier && (
-              <span class="absolute -top-3 start-6 rounded-full bg-donate px-3 py-0.5 text-xs font-bold text-white">{t.home.tierSuggested}</span>
+              <span class="absolute -top-3 start-7 rounded-full bg-donate px-3 py-0.5 text-xs font-bold text-white">{t.home.tierSuggested}</span>
             )}
-            <p class="tabular font-sans text-3xl font-extrabold text-emerald-900">{formatDA(tier.amount, lang)}</p>
-            <h3 class="mt-3 text-lg">{tier.title}</h3>
-            <p class="mt-2 flex-1 text-sm leading-relaxed text-muted">{tier.desc}</p>
-            <p class="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-900">{tier.impact}</p>
+            <p class="tabular font-sans text-4xl font-extrabold text-emerald-900">{formatDA(tier.amount, lang)}</p>
+            <h3 class="mt-3 text-xl">{tier.title}</h3>
+            <p class="mt-2 flex-1 text-sm leading-relaxed text-muted">{tier.impact}</p>
             <a
               href={href(lang, 'donate', `?amount=${tier.amount}&designation=${tier.id}`)}
               class:list={[
-                'mt-5 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 font-bold transition-colors',
-                'suggested' in tier ? 'bg-donate text-white hover:bg-donate-hover' : 'border-2 border-emerald-900 text-emerald-900 hover:bg-emerald-900 hover:text-white',
+                'mt-6 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3.5 font-bold transition-colors',
+                'suggested' in tier ? 'bg-donate text-white hover:bg-donate-hover' : 'bg-emerald-50 text-emerald-900 group-hover:bg-emerald-900 group-hover:text-white',
               ]}
             >
               {t.home.tierChoose}
@@ -149,94 +181,84 @@ const TRUST_ICONS = [Lock, ReceiptText, CreditCard];
         ))}
       </ul>
 
-      <form action={href(lang, 'donate')} method="get" class="mx-auto mt-8 flex max-w-xl flex-col gap-3 rounded-xl border border-sand bg-cream-dim p-5 sm:flex-row sm:items-end">
-        <label class="flex-1">
-          <span class="text-sm font-bold text-emerald-900">{t.home.customTitle}</span>
-          <span class="mt-2 flex items-center rounded-lg border border-sand bg-white focus-within:ring-2 focus-within:ring-emerald-900">
-            <input
-              name="amount"
-              type="number"
-              inputmode="numeric"
-              min="100"
-              max="500000"
-              step="50"
-              required
-              placeholder={t.donateCustomPlaceholder}
-              class="tabular w-full min-w-0 bg-transparent px-3 py-3 outline-none"
-            />
-            <span class="px-3 text-sm font-bold text-muted">{lang === 'ar' ? 'دج' : 'DA'}</span>
-          </span>
+      <form action={href(lang, 'donate')} method="get" class="mx-auto mt-10 flex max-w-xl flex-col gap-3 rounded-2xl bg-white p-4 shadow-float ring-1 ring-sand sm:flex-row sm:items-center" data-reveal>
+        <label class="flex flex-1 items-center rounded-xl bg-cream focus-within:ring-2 focus-within:ring-emerald-900">
+          <span class="sr-only">{t.home.customTitle}</span>
+          <input name="amount" type="number" inputmode="numeric" min="100" max="500000" step="50" required placeholder={t.home.customTitle} class="tabular w-full min-w-0 bg-transparent px-4 py-3.5 outline-none" />
+          <span class="px-4 text-sm font-bold text-muted">{lang === 'ar' ? 'دج' : 'DA'}</span>
         </label>
-        <button type="submit" class="rounded-lg bg-donate px-5 py-3 font-bold text-white transition-colors hover:bg-donate-hover">{t.home.customCta}</button>
+        <button type="submit" class="rounded-xl bg-emerald-900 px-6 py-3.5 font-bold text-white transition-colors hover:bg-emerald-800">{t.home.customCta}</button>
       </form>
     </div>
   </section>
 
-  <!-- Field activity log -->
-  <section class="border-y border-sand bg-white py-16 lg:py-24" aria-labelledby="log-title">
+  <!-- Algeria -->
+  <section class="relative isolate overflow-hidden bg-emerald-950 text-white" aria-labelledby="flag-title">
+    <Image src={flagSilk} alt="" widths={[640, 1280]} sizes="100vw" class="absolute inset-0 -z-20 h-full w-full object-cover opacity-60" />
+    <div class="absolute inset-0 -z-10 bg-gradient-to-r from-emerald-950 via-emerald-950/80 to-emerald-950/10 rtl:bg-gradient-to-l"></div>
+    <div class="container-site grid items-center gap-10 py-20 lg:grid-cols-2 lg:py-28">
+      <div data-reveal>
+        <p class="text-sm font-bold uppercase tracking-wide text-amber-accent">{t.home.flagKicker}</p>
+        <h2 id="flag-title" class="mt-2 text-4xl text-white sm:text-6xl">{t.home.flagTitle}</h2>
+        <p class="mt-4 max-w-md text-lg text-emerald-50/90">{t.home.flagSub}</p>
+        <span class="flag-band-live mt-8 block h-1.5 w-40 rounded-full" aria-hidden="true"></span>
+      </div>
+      <div class="relative mx-auto h-80 w-full max-w-md sm:h-96" aria-hidden="true">
+        <Image src={flagChildren} alt="" width={236} height={354} class="absolute start-0 top-0 h-72 w-48 rounded-2xl object-cover shadow-lift ring-4 ring-white/10 sm:h-80 sm:w-56" data-reveal />
+        <Image src={flagCity} alt="" widths={[320, 640]} sizes="18rem" class="absolute bottom-0 end-0 h-64 w-48 rounded-2xl object-cover shadow-lift ring-4 ring-white/10 sm:h-72 sm:w-56" data-reveal style="--d:2" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Latest news -->
+  <section class="py-16 lg:py-24" aria-labelledby="log-title">
     <div class="container-site">
-      <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div class="max-w-2xl">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between" data-reveal>
+        <div>
           <p class="text-sm font-bold uppercase tracking-wide text-donate">{t.home.logKicker}</p>
-          <h2 id="log-title" class="mt-2 text-3xl sm:text-4xl">{t.home.logTitle}</h2>
-          <p class="mt-3 text-muted">{t.home.logSub}</p>
+          <h2 id="log-title" class="mt-2 text-3xl sm:text-5xl">{t.home.logTitle}</h2>
         </div>
         <a href={href(lang, 'news')} class="inline-flex shrink-0 items-center gap-2 font-bold text-emerald-900 hover:underline">
           {t.home.logAll}
           <Arrow className="size-4" aria-hidden="true" />
         </a>
       </div>
-
       <ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {log.map((item) => (
-          <li><NewsCard item={item} lang={lang} /></li>
+        {latest.map((item, i) => <li data-reveal style={`--d:${i}`}><NewsCard item={item} lang={lang} /></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Partners marquee -->
+  <section class="overflow-hidden border-y border-sand bg-white py-8" aria-label={t.partnersTitle}>
+    <div dir="ltr" class="[mask-image:linear-gradient(90deg,transparent,#000_10%,#000_90%,transparent)]">
+      <ul class="marquee gap-4 pr-4">
+        {[...PARTNERS, ...PARTNERS].map((p, i) => (
+          <li class="flex shrink-0 items-center gap-2 rounded-full border border-sand bg-cream px-5 py-2.5 text-sm font-semibold text-emerald-900" dir={rtl ? 'rtl' : 'ltr'} aria-hidden={i >= PARTNERS.length ? 'true' : undefined}>
+            <BadgeCheck className="size-4 shrink-0 text-emerald-700" aria-hidden="true" />
+            {pick(lang, p)}
+          </li>
         ))}
       </ul>
     </div>
   </section>
 
-  <!-- Governance & partners -->
-  <section class="py-16 lg:py-24" aria-labelledby="gov-title">
-    <div class="container-site grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:items-start">
-      <div>
-        <h2 id="gov-title" class="text-3xl sm:text-4xl">{t.home.transparencyTitle}</h2>
-        <p class="mt-3 text-muted">{t.home.transparencySub}</p>
-        <a href={href(lang, 'trust')} class="mt-6 inline-flex items-center gap-2 rounded-lg bg-emerald-900 px-5 py-3 font-bold text-white transition-colors hover:bg-emerald-800">
-          {t.nav.trust}
-          <Arrow className="size-4" aria-hidden="true" />
-        </a>
-      </div>
-      <div>
-        <h3 class="text-lg">{t.partnersTitle}</h3>
-        <ul class="mt-4 grid gap-3 sm:grid-cols-2">
-          {PARTNERS.map((p) => (
-            <li class="flex items-start gap-3 rounded-lg border border-sand bg-white p-4">
-              <BadgeCheck className="mt-0.5 size-5 shrink-0 text-emerald-700" aria-hidden="true" />
-              <span class="text-sm font-semibold text-ink">{pick(lang, p)}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  </section>
-
   <!-- Volunteer -->
-  <section class="bg-emerald-900 text-white" aria-labelledby="vol-title">
-    <div class="bg-zellige-light">
-      <div class="container-site flex flex-col items-start gap-6 py-14 md:flex-row md:items-center md:justify-between">
-        <div class="max-w-2xl">
-          <p class="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-amber-accent">
-            <Users className="size-4" aria-hidden="true" />
-            {t.home.volunteerKicker}
-          </p>
-          <h2 id="vol-title" class="mt-2 text-3xl text-white sm:text-4xl">{t.home.volunteerTitle}</h2>
-          <p class="mt-3 text-emerald-50/85">{t.home.volunteerSub}</p>
-        </div>
-        <a href={href(lang, 'contact', '?topic=volunteer')} class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-white px-6 py-3.5 font-bold text-emerald-900 transition-colors hover:bg-emerald-50">
-          <Mail className="size-5" aria-hidden="true" />
-          {t.home.volunteerCta}
-        </a>
+  <section class="relative isolate overflow-hidden bg-emerald-900 text-white" aria-labelledby="vol-title">
+    <Image src={volunteers} alt="" widths={[640, 1200]} sizes="100vw" class="absolute inset-0 -z-20 h-full w-full object-cover" />
+    <div class="absolute inset-0 -z-10 bg-emerald-950/75"></div>
+    <div class="container-site flex flex-col items-start gap-6 py-20 md:flex-row md:items-center md:justify-between lg:py-28" data-reveal>
+      <div class="max-w-2xl">
+        <p class="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-amber-accent">
+          <Users className="size-4" aria-hidden="true" />
+          {t.home.volunteerKicker}
+        </p>
+        <h2 id="vol-title" class="mt-2 text-4xl text-white sm:text-5xl">{t.home.volunteerTitle}</h2>
       </div>
+      <a href={href(lang, 'contact', '?topic=volunteer')} class="inline-flex shrink-0 items-center gap-2 rounded-xl bg-white px-7 py-4 font-bold text-emerald-900 shadow-lift transition hover:-translate-y-0.5 hover:bg-emerald-50">
+        <Mail className="size-5" aria-hidden="true" />
+        {t.home.volunteerCta}
+      </a>
     </div>
   </section>
 </BaseLayout>
