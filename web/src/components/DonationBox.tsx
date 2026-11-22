@@ -2,8 +2,9 @@ import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent 
 import { Check, CircleAlert, CircleCheck, Copy, CreditCard, Globe, HandHeart, LoaderCircle, Lock, ShieldCheck } from 'lucide-react';
 import {
   CHARGILY_CHECKOUT_WEBHOOK, CHARGILY_HOST_PATTERN, CHARGILY_TEST_MODE, DESIGNATIONS, DONATION_LIMITS,
-  INTERNATIONAL_BANK, PRESET_AMOUNTS, type DesignationId,
+  PRESET_AMOUNTS, type DesignationId,
 } from '@/data/donation';
+import { CONTACT } from '@/data/site';
 import { cn } from '@/lib/utils';
 
 // All Algerian payments go through Chargily (it settles to the association's RIP), so the
@@ -203,13 +204,7 @@ export default function DonationBox({ lang, t }: Props) {
 
   const tabId = (k: TabId) => `${uid}-tab-${k}`;
   const panelId = (k: TabId) => `${uid}-panel-${k}`;
-  const bankRows: [string, string, string][] = [
-    [t.intlHolder, INTERNATIONAL_BANK.holder, 'holder'],
-    ['IBAN', INTERNATIONAL_BANK.iban, 'iban'],
-    ['SWIFT / BIC', INTERNATIONAL_BANK.swift, 'swift'],
-    [t.intlBank, INTERNATIONAL_BANK.bank, 'bank'],
-    [t.intlSortCode, INTERNATIONAL_BANK.sortCode, 'sort'],
-  ];
+  const intlMsg = { ar: 'للتبرع من خارج الجزائر، يُرجى التواصل مع الجمعية لترتيب تحويل مصرفي:', fr: "Pour un don depuis l'étranger, merci de contacter l'association afin d'organiser un virement :", en: 'To donate from abroad, please contact the association to arrange a bank transfer:' }[lang];
 
   return (
     <section className="overflow-hidden rounded-2xl border border-sand bg-white shadow-lift" aria-labelledby={`${uid}-title`}>
@@ -405,27 +400,12 @@ export default function DonationBox({ lang, t }: Props) {
       {/* International transfer */}
       <div role="tabpanel" id={panelId('international')} aria-labelledby={tabId('international')} hidden={tab !== 'international'} className="p-5 sm:p-6">
         <h3 className="text-lg">{t.donateTabs.international.title}</h3>
-        <dl className="mt-4 divide-y divide-sand rounded-xl border border-sand">
-          {bankRows.map(([label, value, key]) => (
-            <div key={key} className="flex flex-wrap items-center gap-x-3 gap-y-1 p-3">
-              <dt className="w-32 shrink-0 text-xs font-semibold text-muted">{label}</dt>
-              <dd className="tabular min-w-0 flex-1 break-all font-semibold" dir="ltr">{value}</dd>
-              <button
-                type="button"
-                onClick={() => copy(value, key)}
-                aria-label={`${t.donateCopy}: ${label}`}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-bold transition-colors',
-                  copied === key ? 'border-emerald-700 bg-emerald-50 text-emerald-900' : 'border-sand hover:bg-cream',
-                )}
-              >
-                {copied === key ? <Check className="size-3.5" aria-hidden="true" /> : <Copy className="size-3.5" aria-hidden="true" />}
-                {copied === key ? t.donateCopied : t.donateCopy}
-              </button>
-            </div>
-          ))}
-        </dl>
-        <p className="mt-4 text-sm text-muted">{t.donateNote}</p>
+        <p className="mt-4 text-sm leading-relaxed">{intlMsg}</p>
+        <p className="mt-3 text-sm font-semibold" dir="ltr">
+          <a className="underline" href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
+          {' · '}
+          <a className="underline" href={`tel:${CONTACT.phone}`}>{CONTACT.phoneDisplay}</a>
+        </p>
       </div>
     </section>
   );

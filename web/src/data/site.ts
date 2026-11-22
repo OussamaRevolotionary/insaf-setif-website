@@ -1,5 +1,5 @@
 // Verified association facts. Every entry here has a source; anything pending stays
-// out (see IMPLEMENTATION_PLAN.md · Phase 0 · "Data still needed from the association").
+// out.
 import news from './news.json';
 
 export const CONTACT = {

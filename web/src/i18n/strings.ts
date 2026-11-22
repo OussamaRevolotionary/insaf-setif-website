@@ -1,5 +1,5 @@
 // Copy added for the Astro rebuild (Stitch structure). Facts only — anything the
-// association has not confirmed stays out (see IMPLEMENTATION_PLAN.md, Phase 0).
+// association has not confirmed stays out.
 
 const ar = {
   brandName: 'INSAF',

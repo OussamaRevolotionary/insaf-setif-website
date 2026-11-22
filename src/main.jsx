@@ -34,7 +34,7 @@ import './styles.css';
    ============================================================ */
 const contact = { ...pageInfo.contact, address: 'Sétif, Algérie' };
 
-/* n8n automation endpoints (see IMPLEMENTATION_PLAN.md · Phase C) */
+/* n8n automation endpoints */
 const N8N_BASE = 'https://oussama19.app.n8n.cloud/webhook';
 const CHAT_WEBHOOK = `${N8N_BASE}/insaf-chat`;
 const CONTACT_WEBHOOK = `${N8N_BASE}/insaf-contact`;

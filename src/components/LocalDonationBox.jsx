@@ -9,7 +9,7 @@ import { formatDA } from '../lib/format.js';
 import { withBase } from '../lib/assets.js';
 import {
   CHARGILY_CHECKOUT_WEBHOOK, CHARGILY_HOST_PATTERN, CHARGILY_TEST_MODE, DESIGNATIONS,
-  DONATION_LIMITS, INTERNATIONAL_BANK, LOCAL_RAILS, PRESET_AMOUNTS,
+  DONATION_LIMITS, LOCAL_RAILS, PRESET_AMOUNTS,
 } from '../config/donation.js';
 import styles from './LocalDonationBox.module.css';
 
@@ -404,14 +404,8 @@ export default function LocalDonationBox({ id, initialAmount, initialDesignation
         <div role="tabpanel" id={panelId('international')} aria-labelledby={tabId('international')} hidden={tab !== 'international'} className={styles.panel}>
           <div className={styles.railText}>
             <h3>{t.donateTabs.international.title}</h3>
-            <div className={styles.rows}>
-              <CopyRow label={t.intlHolder} value={INTERNATIONAL_BANK.holder} copyKey="holder" copied={copied} onCopy={copy} t={t} />
-              <CopyRow label="IBAN" value={INTERNATIONAL_BANK.iban} copyKey="iban" copied={copied} onCopy={copy} t={t} />
-              <CopyRow label="SWIFT / BIC" value={INTERNATIONAL_BANK.swift} copyKey="swift" copied={copied} onCopy={copy} t={t} />
-              <CopyRow label={t.intlBank} value={INTERNATIONAL_BANK.bank} copyKey="bank" copied={copied} onCopy={copy} t={t} />
-              <CopyRow label={t.intlSortCode} value={INTERNATIONAL_BANK.sortCode} copyKey="sort" copied={copied} onCopy={copy} t={t} />
-            </div>
-            <p className={styles.note}>{t.donateNote}</p>
+            <p className={styles.note}>{{'ar': 'للتبرع من خارج الجزائر، يُرجى التواصل مع الجمعية لترتيب تحويل مصرفي:', 'fr': "Pour un don depuis l'étranger, merci de contacter l'association afin d'organiser un virement :", 'en': 'To donate from abroad, please contact the association to arrange a bank transfer:'}[lang] || {'ar': 'للتبرع من خارج الجزائر، يُرجى التواصل مع الجمعية لترتيب تحويل مصرفي:', 'fr': "Pour un don depuis l'étranger, merci de contacter l'association afin d'organiser un virement :", 'en': 'To donate from abroad, please contact the association to arrange a bank transfer:'}['en']}</p>
+            <p className={styles.note} dir="ltr"><a href="mailto:insafsetif@hotmail.com">insafsetif@hotmail.com</a> · <a href="tel:+213661048401">0661 04 84 01</a></p>
           </div>
         </div>
 

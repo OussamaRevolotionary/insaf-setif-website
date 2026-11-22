@@ -40,14 +40,3 @@ export const LOCAL_RAILS = {
   },
 };
 
-// Moved here unchanged from main.jsx. This is a personal account (not the association's)
-// and should be replaced with Insaf's official account before public fundraising.
-export const INTERNATIONAL_BANK = {
-  holder:   'Oussama Abdi',
-  account:  '42649160',
-  bank:     'Clear Junction Limited',
-  iban:     'GB16CLJU04130742649160',
-  sortCode: '041307',
-  swift:    'CLJUGB21XXX',
-  address:  '4th Floor Imperial House, 15 Kingsway, London, UK, WC2B 6UN',
-};
